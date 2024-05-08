@@ -4,6 +4,9 @@ package auth;
 
 service AuthService {
     rpc Signin (SigninDto) returns (Token) {}
+    rpc Signup (SignupDto) returns (Token) {}
+    rpc Validate (ValidateDto) returns (User) {}
+    // rpc Validate (ValidateDto) returns () {}
 }
 
 message Token {
@@ -11,7 +14,23 @@ message Token {
     string refreshToken = 2;
 }
 
+message User {
+    optional string username = 1;
+    optional string userId = 2;
+}
+
 message SigninDto {
+    string username = 1;
+    string password = 2;
+}
+
+message SignupDto {
+    string username = 1;
+    string password = 2;
+    string email = 3;
+}
+
+message ValidateDto {
     string username = 1;
     string password = 2;
 }
