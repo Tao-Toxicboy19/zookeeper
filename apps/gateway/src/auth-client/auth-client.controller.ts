@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Logger, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthClientService } from './auth-client.service';
-import { SignupDto, UserType, SigninDto } from '@app/common';
+import { User } from '@app/common';
 import { LocalAuthGuard } from './local-auto.guard';
+import { Request, Response } from 'express';
+import { SignupDto } from './dto';
 
 @Controller('auth-client')
 export class AuthClientController {
@@ -11,7 +13,8 @@ export class AuthClientController {
 
   @Post('signup/local')
   signupLocal(
-    @Body() dto: SignupDto
+    @Body() dto: SignupDto,
+    @Res({ passthrough: true }) res: Response
   ) {
     return this.authClientService.signup(dto)
   }
@@ -19,14 +22,15 @@ export class AuthClientController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('signin/local')
-  signinLocal(
-    @Req() req: { user: UserType },
+  async signinLocal(
+    @Req() req: { user: User },
     @Res({ passthrough: true }) res: Response,
-    @Body() dto: SigninDto
   ) {
-    // this.logger.debug(req.user.username)
-    // console.log(req.user)
-    return this.authClientService.signin(dto)
+    res.cookie('user_id', req.user.userId, {
+      httpOnly: true,
+    })
+    this.authClientService.signin({ username: req.user.username, userId: req.user.userId })
+    return { message: 'ok' }
   }
 
 

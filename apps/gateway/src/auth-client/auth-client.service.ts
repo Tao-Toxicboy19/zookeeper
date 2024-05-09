@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME, AuthServiceClient, SigninDto, SignupDto, User, ValidateDto } from '@app/common';
+import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME, AuthServiceClient, SigninDto, SignupDto, User, UserResponse, ValidateDto } from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Observable } from 'rxjs';
 
@@ -16,14 +16,18 @@ export class AuthClientService {
   }
 
   signup(dto: SignupDto) {
-    return this.authServiceClient.signup(dto)
+    try {
+      return this.authServiceClient.signup(dto)
+    } catch (error) {
+      throw error
+    }
   }
 
   signin(dto: SigninDto) {
     return this.authServiceClient.signin(dto)
   }
 
-  validate(dto: ValidateDto): Observable<User> {
+  validate(dto: ValidateDto): Observable<UserResponse> {
     return this.authServiceClient.validate(dto)
   }
 }

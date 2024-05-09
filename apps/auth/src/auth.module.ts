@@ -4,28 +4,28 @@ import { AuthService } from './auth.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
-import { UserEntity } from './entities/user. entity';
+import { ProducerModule } from './producer/producer.module';
+import { Users } from './entities/user.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mongodb',
-      host: 'localhost',
-      port: 27017,
-      username: 'zookeeper', // เปลี่ยนเป็นชื่อผู้ใช้ที่ถูกกำหนดในไฟล์ docker-compose.yml
-      password: '123456', // เปลี่ยนเป็นรหัสผ่านที่ถูกกำหนดในไฟล์ docker-compose.yml
-      database: 'zookeeper',
+      url: `mongodb://root:example@localhost:27017/zookeeper?authSource=admin`,
       synchronize: true,
-      entities: [UserEntity],
+      entities: [Users],
       useUnifiedTopology: true,
       useNewUrlParser: true,
+      logging: true
     }),
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([Users]),
     JwtModule.register({}),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-    }),],
+    }),
+    ProducerModule,
+  ],
   controllers: [AuthController],
   providers: [AuthService],
 })

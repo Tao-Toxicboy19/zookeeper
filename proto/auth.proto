@@ -3,25 +3,38 @@ syntax = "proto3";
 package auth;
 
 service AuthService {
-    rpc Signin (SigninDto) returns (Token) {}
-    rpc Signup (SignupDto) returns (Token) {}
-    rpc Validate (ValidateDto) returns (User) {}
-    // rpc Validate (ValidateDto) returns () {}
+    rpc Signin (SigninDto) returns (TokenResponse) {}
+    rpc Signup (SignupDto) returns (TokenResponse) {}
+    rpc Validate (ValidateDto) returns (UserResponse) {}
+}
+
+message TokenResponse {
+    oneof response {
+        Token token = 1;
+        ErrorMessage error = 2;
+    }
+}
+
+message UserResponse {
+    oneof response {
+        User user = 1;
+        ErrorMessage error = 2;
+    }
 }
 
 message Token {
-    string accessToken = 1;
-    string refreshToken = 2;
+    optional string accessToken = 1;
+    optional string refreshToken = 2;
 }
 
 message User {
     optional string username = 1;
-    optional string userId = 2;
+    optional string user_id = 2;
 }
 
 message SigninDto {
     string username = 1;
-    string password = 2;
+    string user_id = 2;
 }
 
 message SignupDto {
@@ -33,4 +46,10 @@ message SignupDto {
 message ValidateDto {
     string username = 1;
     string password = 2;
+}
+
+message ErrorMessage {
+    string message = 1;
+    string error = 2;
+    int32 statusCode = 3;
 }

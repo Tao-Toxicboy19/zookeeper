@@ -1,65 +1,111 @@
-import { JwtPayload, SigninDto, SignupDto, Token, User, ValidateDto } from '@app/common';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { UserEntity } from './entities/user. entity';
+import { JwtPayload, SigninDto, SignupDto, Token, ValidateDto } from '@app/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { InjectRepository } from '@nestjs/typeorm'
+import { DataSource, Repository } from 'typeorm'
+import { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
+import { ProducerService } from './producer/producer.service'
+import { randomUUID } from 'crypto'
+import { TokenResponse, UserResponse } from '@app/common/types/auth'
+import * as bcrypt from 'bcrypt'
+import { Users } from './entities/user.entity'
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name)
 
   constructor(
-    @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(Users)
+    private readonly userRepository: Repository<Users>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly dataSource: DataSource,
+    private readonly producerService: ProducerService,
   ) { }
 
   onModuleInit() { }
 
-  async validateUser(dto: ValidateDto): Promise<User> {
-    this.logger.debug(dto)
+  async validateUser(dto: ValidateDto): Promise<UserResponse> {
     const user = await this.userRepository.findOne({ where: { username: dto.username } })
-    if (user) {
+    if (user && await bcrypt.compare(dto.password, user.password)) {
       return {
-        username: user.username,
-        userId: user.password,
+        user: {
+          username: user.username,
+          userId: user._id,
+        }
       }
     }
-    return {}
+    return {
+      error: {
+        message: 'Unauthorized',
+        error: 'User not found',
+        statusCode: 401
+      }
+    }
   }
 
-  async signup(dto: SignupDto): Promise<Token> {
+  async signup(dto: SignupDto): Promise<TokenResponse> {
     try {
-      const existng = await this.userRepository.findOne({ where: { username: dto.username } })
-      if (existng) {
-        this.logger.debug(existng)
-        console.log(existng)
+      const [existUser, existEmail] = await Promise.all([
+        this.userRepository.findOne({ where: { username: dto.username } }),
+        this.userRepository.findOne({ where: { email: dto.email } })
+      ])
+
+      if (existUser || existEmail) {
         return {
-          accessToken: `${existng.created_at}`,
-          refreshToken: `${existng.updated_at}`
+          error: {
+            message: `${existUser ? 'Username' : 'Email'} already exists`,
+            error: 'User existng.',
+            statusCode: 409
+          }
         }
       }
 
-      await this.userRepository.save(dto)
+      const hash = await bcrypt.hash(dto.password, 12)
+
+      const user = new Users()
+
+      user._id = randomUUID()
+      user.username = dto.username
+      user.password = hash
+      user.email = dto.email
+
+      await this.producerService.sendMessage(JSON.stringify(user))
+
+      const tokens = await this.getTokens(user._id, user.username)
 
       return {
-        accessToken: '123',
-        refreshToken: '1123'
+        token: {
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken
+        }
       }
     } catch (error) {
       throw error
     }
   }
 
-  async signin(dto: SigninDto): Promise<Token> {
-    const tokens = await this.getTokens('123', dto.username)
+  async signin(dto: SigninDto): Promise<TokenResponse> {
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction()
 
-    return {
-      accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken
+    try {
+      await queryRunner.manager.update(Users, dto.userId, { login: true })
+
+      const tokens = await this.getTokens(dto.userId, dto.username)
+
+      await queryRunner.commitTransaction()
+
+      return {
+        token: {
+          accessToken: 'tokens.accessToken',
+          refreshToken: 'tokens.refreshToken'
+        }
+      }
+    } catch (error) {
+      await queryRunner.rollbackTransaction()
+      throw error
     }
   }
 
@@ -71,11 +117,11 @@ export class AuthService implements OnModuleInit {
 
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
-        secret: process.env.AT_SECRET,
+        secret: this.configService.get<string>('AT_SECRET'),
         expiresIn: '15m',
       }),
       this.jwtService.signAsync(jwtPayload, {
-        secret: process.env.RT_SECRET,
+        secret: this.configService.get<string>('RT_SECRET'),
         expiresIn: '1d',
       }),
     ])

@@ -1,16 +1,25 @@
+version: '3.8'
+
 services:
-  database:
-    image: mongo:4.4
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
     ports:
-      - 27017:27017
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root_zookeeper
-      - MONGO_INITDB_ROOT_PASSWORD=123456
-      - MONGO_INITDB_DATABASE=zookeeper
-      - MONGO_INITDB_USERNAME=zookeeper
-      - MONGO_INITDB_PASSWORD=123456
-
+      - "27017:27017"
     volumes:
-      - ./init-mongo.sh:/docker-entrypoint-initdb.d/init-mongo.sh
-      - ./db:/data/db
+      - ./mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
 
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    tty: true
+    environment:
+      RABBITMQ_DEFAULT_USER: mikelopster
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - 15672:15672
+      - 5672:5672
+    restart: always

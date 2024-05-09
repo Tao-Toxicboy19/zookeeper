@@ -1,5 +1,0 @@
-var rootUser = 'root_zookeeper';
-var rootPassword = '123456';
-var admin = db.getSiblingDB('admin');
-var user = 'zookeeper';
-var passwd = '123456';

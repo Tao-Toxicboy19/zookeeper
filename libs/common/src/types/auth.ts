@@ -10,9 +10,19 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "auth";
 
+export interface TokenResponse {
+  token?: Token | undefined;
+  error?: ErrorMessage | undefined;
+}
+
+export interface UserResponse {
+  user?: User | undefined;
+  error?: ErrorMessage | undefined;
+}
+
 export interface Token {
-  accessToken: string;
-  refreshToken: string;
+  accessToken?: string | undefined;
+  refreshToken?: string | undefined;
 }
 
 export interface User {
@@ -22,7 +32,7 @@ export interface User {
 
 export interface SigninDto {
   username: string;
-  password: string;
+  userId: string;
 }
 
 export interface SignupDto {
@@ -36,22 +46,28 @@ export interface ValidateDto {
   password: string;
 }
 
+export interface ErrorMessage {
+  message: string;
+  error: string;
+  statusCode: number;
+}
+
 export const AUTH_PACKAGE_NAME = "auth";
 
 export interface AuthServiceClient {
-  signin(request: SigninDto): Observable<Token>;
+  signin(request: SigninDto): Observable<TokenResponse>;
 
-  signup(request: SignupDto): Observable<Token>;
+  signup(request: SignupDto): Observable<TokenResponse>;
 
-  validate(request: ValidateDto): Observable<User>;
+  validate(request: ValidateDto): Observable<UserResponse>;
 }
 
 export interface AuthServiceController {
-  signin(request: SigninDto): Promise<Token> | Observable<Token> | Token;
+  signin(request: SigninDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 
-  signup(request: SignupDto): Promise<Token> | Observable<Token> | Token;
+  signup(request: SignupDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 
-  validate(request: ValidateDto): Promise<User> | Observable<User> | User;
+  validate(request: ValidateDto): Promise<UserResponse> | Observable<UserResponse> | UserResponse;
 }
 
 export function AuthServiceControllerMethods() {
