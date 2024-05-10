@@ -1,9 +1,12 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res } from '@nestjs/common';
 import { AuthClientService } from './auth-client.service';
-import { User } from '@app/common';
 import { LocalAuthGuard } from './local-auto.guard';
 import { Request, Response } from 'express';
 import { SignupDto } from './dto';
+import { User } from '@app/common';
+import { OtpDto } from './dto/otp.dto';
+import { randomUUID } from 'crypto';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('auth-client')
 export class AuthClientController {
@@ -16,7 +19,11 @@ export class AuthClientController {
     @Body() dto: SignupDto,
     @Res({ passthrough: true }) res: Response
   ) {
-    return this.authClientService.signup(dto)
+    const id = randomUUID()
+    res.cookie('user_id', id, {
+      httpOnly: true,
+    })
+    return this.authClientService.signup({ ...dto, uuid: id })
   }
 
   @UseGuards(LocalAuthGuard)
@@ -29,17 +36,34 @@ export class AuthClientController {
     res.cookie('user_id', req.user.userId, {
       httpOnly: true,
     })
-    this.authClientService.signin({ username: req.user.username, userId: req.user.userId })
-    return { message: 'ok' }
+    return this.authClientService.signin({ username: req.user.username, userId: req.user.userId })
   }
 
-
-  @Post('validate')
-  validate() {
-    const dto = {
-      username: 'test',
-      password: 'test'
+  @HttpCode(HttpStatus.OK)
+  @Post('confirm/otp')
+  async confirmOtp(
+    @Body() dto: OtpDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken, statusCode, message } = await firstValueFrom(this.authClientService.confrimOtp({ otp: dto.otp, userId: req.cookies.user_id }))
+    if (statusCode) {
+      return {
+        statusCode,
+        message
+      }
     }
-    return this.authClientService.validate(dto)
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      maxAge: 15 * 60 * 1000 // 15m
+    })
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      maxAge: 3 * 24 * 60 * 60 * 1000 // 3d
+    })
+    return {
+      message: 'OK',
+      statusCode: 200
+    }
   }
 }

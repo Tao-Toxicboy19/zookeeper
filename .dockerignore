@@ -1,0 +1,14 @@
+
+.vscode
+node_modules
+
+docker-compose.yml
+test
+
+.git
+.gitignore
+.eslintrc.js
+.dockerignore
+.prettierrc
+README.md
+readme.txt

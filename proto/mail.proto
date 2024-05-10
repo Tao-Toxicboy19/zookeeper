@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package mail;
+
+service MailService {
+    rpc SendMail (SendMailDto) returns (google.protobuf.Empty) {}   
+}
+
+message SendMailDto {
+    string mail = 1;
+    optional string message = 2;
+}

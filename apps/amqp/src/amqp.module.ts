@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ConsumerService } from './consumer.service';
-import { CoreModule } from '@app/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Users } from './entities/user.entity';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { MAIL_PACKAGE_NAME } from '@app/common';
+import { join } from 'path';
+import { PrismaService } from './prisma/prisma.service';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -11,21 +13,23 @@ import { Users } from './entities/user.entity';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot({
-      name: 'mongodb',
-      type: 'mongodb',
-      url: `mongodb://root:example@localhost:27017/zookeeper?authSource=admin`,
-      synchronize: true,
-      entities: [Users],
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-      logging: true
-    }),
-    TypeOrmModule.forFeature([Users], 'mongodb'),
+    ClientsModule.register([
+      {
+        name: MAIL_PACKAGE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          package: MAIL_PACKAGE_NAME,
+          protoPath: join(__dirname, '../mail.proto'),
+          url: 'localhost:5001'
+        }
+      },
+    ]),
+    RedisModule,
   ],
   controllers: [],
   providers: [
-    ConsumerService
+    ConsumerService,
+    PrismaService,
   ],
 })
 export class AmqpModule { }

@@ -3,33 +3,42 @@ syntax = "proto3";
 package auth;
 
 service AuthService {
-    rpc Signin (SigninDto) returns (TokenResponse) {}
-    rpc Signup (SignupDto) returns (TokenResponse) {}
+    rpc Signin (SigninDto) returns (EmailResponse) {}
+    rpc Signup (SignupDto) returns (EmailResponse) {}
     rpc Validate (ValidateDto) returns (UserResponse) {}
+    rpc ConfrimOTP (ConfrimOTPDto) returns (TokenResponse) {}
+}
+
+message ConfrimOTPDto {
+    optional string message = 1;
+    optional int32 statusCode = 2;
+    optional int32 otp = 3;
+    optional string user_id = 4;
+}
+
+message EmailResponse {
+    optional string email = 1;
+    optional int32 statusCode = 2;
+    optional string message = 3;
 }
 
 message TokenResponse {
-    oneof response {
-        Token token = 1;
-        ErrorMessage error = 2;
-    }
+    optional string accessToken = 1;
+    optional string refreshToken = 2;
+    optional string message = 3;
+    optional int32 statusCode = 4;
 }
 
 message UserResponse {
-    oneof response {
-        User user = 1;
-        ErrorMessage error = 2;
-    }
-}
-
-message Token {
-    optional string accessToken = 1;
-    optional string refreshToken = 2;
+    optional string username = 1;
+    optional string user_id = 2;
+    optional string message = 3;
+    optional int32 statusCode = 4;
 }
 
 message User {
-    optional string username = 1;
-    optional string user_id = 2;
+    string user_id = 1;
+    string username = 2;
 }
 
 message SigninDto {
@@ -38,18 +47,13 @@ message SigninDto {
 }
 
 message SignupDto {
-    string username = 1;
-    string password = 2;
-    string email = 3;
+    string uuid = 1;
+    string username = 2;
+    string password = 3;
+    string email = 4;
 }
 
 message ValidateDto {
     string username = 1;
     string password = 2;
-}
-
-message ErrorMessage {
-    string message = 1;
-    string error = 2;
-    int32 statusCode = 3;
 }

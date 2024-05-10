@@ -10,24 +10,36 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "auth";
 
+export interface ConfrimOTPDto {
+  message?: string | undefined;
+  statusCode?: number | undefined;
+  otp?: number | undefined;
+  userId?: string | undefined;
+}
+
+export interface EmailResponse {
+  email?: string | undefined;
+  statusCode?: number | undefined;
+  message?: string | undefined;
+}
+
 export interface TokenResponse {
-  token?: Token | undefined;
-  error?: ErrorMessage | undefined;
+  accessToken?: string | undefined;
+  refreshToken?: string | undefined;
+  message?: string | undefined;
+  statusCode?: number | undefined;
 }
 
 export interface UserResponse {
-  user?: User | undefined;
-  error?: ErrorMessage | undefined;
-}
-
-export interface Token {
-  accessToken?: string | undefined;
-  refreshToken?: string | undefined;
+  username?: string | undefined;
+  userId?: string | undefined;
+  message?: string | undefined;
+  statusCode?: number | undefined;
 }
 
 export interface User {
-  username?: string | undefined;
-  userId?: string | undefined;
+  userId: string;
+  username: string;
 }
 
 export interface SigninDto {
@@ -36,6 +48,7 @@ export interface SigninDto {
 }
 
 export interface SignupDto {
+  uuid: string;
   username: string;
   password: string;
   email: string;
@@ -46,33 +59,31 @@ export interface ValidateDto {
   password: string;
 }
 
-export interface ErrorMessage {
-  message: string;
-  error: string;
-  statusCode: number;
-}
-
 export const AUTH_PACKAGE_NAME = "auth";
 
 export interface AuthServiceClient {
-  signin(request: SigninDto): Observable<TokenResponse>;
+  signin(request: SigninDto): Observable<EmailResponse>;
 
-  signup(request: SignupDto): Observable<TokenResponse>;
+  signup(request: SignupDto): Observable<EmailResponse>;
 
   validate(request: ValidateDto): Observable<UserResponse>;
+
+  confrimOtp(request: ConfrimOTPDto): Observable<TokenResponse>;
 }
 
 export interface AuthServiceController {
-  signin(request: SigninDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
+  signin(request: SigninDto): Promise<EmailResponse> | Observable<EmailResponse> | EmailResponse;
 
-  signup(request: SignupDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
+  signup(request: SignupDto): Promise<EmailResponse> | Observable<EmailResponse> | EmailResponse;
 
   validate(request: ValidateDto): Promise<UserResponse> | Observable<UserResponse> | UserResponse;
+
+  confrimOtp(request: ConfrimOTPDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["signin", "signup", "validate"];
+    const grpcMethods: string[] = ["signin", "signup", "validate", "confrimOtp"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);
