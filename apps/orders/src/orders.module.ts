@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaService } from './prisma/prisma.service';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { KEY_PACKAGE_NAME, PrismaService } from '@app/common';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -10,6 +12,17 @@ import { PrismaService } from './prisma/prisma.service';
       isGlobal: true,
       envFilePath: './apps/orders/.env',
     }),
+    ClientsModule.register([
+      {
+        name: KEY_PACKAGE_NAME,
+        transport: Transport.GRPC,
+        options: {
+          package: KEY_PACKAGE_NAME,
+          protoPath: join(__dirname, '../key.proto'),
+          url: 'localhost:5005'
+        }
+      },
+    ]),
   ],
   controllers: [OrdersController],
   providers: [

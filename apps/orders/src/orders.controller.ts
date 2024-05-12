@@ -8,7 +8,7 @@ import { OrdersDto, OrdersServiceControllerMethods } from '@app/common/types/ord
 export class OrdersController implements OrdersServiceController {
   constructor(private readonly ordersService: OrdersService) { }
 
-  createOrder(request: OrdersDto): void {
+  createOrder(request: OrdersDto) {
     return this.ordersService.create(request)
   }
 }

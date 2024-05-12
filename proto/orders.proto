@@ -5,7 +5,6 @@ import "google/protobuf/empty.proto";
 package orders;
 
 service OrdersService {
-    // rpc SendMail (SendMailDto) returns (google.protobuf.Empty) {}  
     rpc CreateOrder (OrdersDto) returns (google.protobuf.Empty) {} 
 }
 

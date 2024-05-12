@@ -24,7 +24,9 @@ export {
 } from './mail'
 
 export {
-    createExchangeDto,
+    CreateExchangeDto,
+    ValidateKeyDto,
+    ExchangeResponse,
     EXCHANGE_PACKAGE_NAME,
     EXCHANGE_SERVICE_NAME,
     ExchangeServiceClient,
@@ -40,6 +42,17 @@ export {
     OrdersServiceControllerMethods,
     ORDERS_SERVICE_NAME,
 } from './orders'
+
+export {
+    CreateKeyDto,
+    KeyResponse,
+    KeyUserId,
+    KEY_PACKAGE_NAME,
+    KEY_SERVICE_NAME,
+    KeyServiceClient,
+    KeyServiceController,
+    KeyServiceControllerMethods,
+} from './key'
 
 export * from './jew-payload.type'
 export * from './token.type'

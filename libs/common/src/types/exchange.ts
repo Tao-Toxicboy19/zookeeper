@@ -11,24 +11,42 @@ import { Empty } from "../../../../google/protobuf/empty";
 
 export const protobufPackage = "exchange";
 
-export interface createExchangeDto {
-  apiKey: string;
-  secretKey: string;
+export interface Key {
+  apiKey?: string | undefined;
+  secretKey?: string | undefined;
+  statusCode?: number | undefined;
+  message?: string | undefined;
+}
+
+export interface CreateExchangeDto {
+  key: Key | undefined;
+}
+
+export interface ValidateKeyDto {
+  key: Key | undefined;
+}
+
+export interface ExchangeResponse {
+  key: Key | undefined;
 }
 
 export const EXCHANGE_PACKAGE_NAME = "exchange";
 
 export interface ExchangeServiceClient {
-  createExchange(request: createExchangeDto): Observable<Empty>;
+  createExchange(request: CreateExchangeDto): Observable<Empty>;
+
+  validateKey(request: ValidateKeyDto): Observable<ExchangeResponse>;
 }
 
 export interface ExchangeServiceController {
-  createExchange(request: createExchangeDto): void;
+  createExchange(request: CreateExchangeDto): void;
+
+  validateKey(request: ValidateKeyDto): Promise<ExchangeResponse> | Observable<ExchangeResponse> | ExchangeResponse;
 }
 
 export function ExchangeServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createExchange"];
+    const grpcMethods: string[] = ["createExchange", "validateKey"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ExchangeService", method)(constructor.prototype[method], method, descriptor);

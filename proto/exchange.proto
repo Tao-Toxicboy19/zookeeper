@@ -6,9 +6,24 @@ package exchange;
 
 service ExchangeService {
     rpc CreateExchange (CreateExchangeDto) returns (google.protobuf.Empty);
+    rpc ValidateKey (ValidateKeyDto) returns (ExchangeResponse) {}
+}
+
+message Key {
+    optional string api_key = 1;
+    optional string secret_key = 2;
+    optional int32 statusCode = 3;
+    optional string message = 4;
 }
 
 message CreateExchangeDto {
-    string api_key = 1;
-    string secret_key = 2;
+    Key key = 1;
+}
+
+message ValidateKeyDto {
+    Key key = 1;
+}
+
+message ExchangeResponse {
+    Key key = 1;
 }

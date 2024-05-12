@@ -4,8 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { ProducerModule } from './producer/producer.module';
-import { RedisModule } from 'apps/amqp/src/redis/redis.module';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService, RedisModule } from '@app/common';
 
 @Module({
   imports: [

@@ -1,7 +1,6 @@
-import { SendMailDto } from '@app/common';
+import { RedisService, SendMailDto } from '@app/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RedisService } from './redis/redis.service';
 
 type User = {
   id: string

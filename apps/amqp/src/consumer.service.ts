@@ -2,10 +2,9 @@ import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import amqp, { ChannelWrapper } from "amqp-connection-manager";
 import { ConfirmChannel, ConsumeMessage } from "amqplib"
-import { MAIL_PACKAGE_NAME, MAIL_SERVICE_NAME, MailServiceClient } from "@app/common";
+import { MAIL_PACKAGE_NAME, MAIL_SERVICE_NAME, MailServiceClient, PrismaService } from "@app/common";
 import { ClientGrpc } from "@nestjs/microservices";
 import { firstValueFrom } from "rxjs";
-import { PrismaService } from "./prisma/prisma.service";
 import { User } from "./connect.type";
 
 @Injectable()
@@ -47,7 +46,7 @@ export class ConsumerService implements OnModuleInit {
                             username: content.username,
                             password: content.password,
                             email: content.email,
-                            updated_at: new Date()
+                            updatedAt: new Date()
                         }
                     })
                     channel.ack(msg)

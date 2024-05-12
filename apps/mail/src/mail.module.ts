@@ -3,7 +3,7 @@ import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
 import { MailerModule } from '@nestjs-modules/mailer'
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RedisModule } from './redis/redis.module';
+import { RedisModule } from '@app/common';
 
 @Module({
   imports: [

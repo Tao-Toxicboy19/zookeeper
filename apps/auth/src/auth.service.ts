@@ -1,11 +1,9 @@
-import { ConfirmOTPDto, EmailResponse, JwtPayload, SigninDto, SignupDto, TokenResponse, Tokens, UserResponse, ValidateDto } from '@app/common'
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { ConfirmOTPDto, EmailResponse, JwtPayload, PrismaService, RedisService, SigninDto, SignupDto, TokenResponse, Tokens, UserResponse, ValidateDto } from '@app/common'
+import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { ProducerService } from './producer/producer.service'
 import * as bcrypt from 'bcrypt'
-import { RedisService } from 'apps/amqp/src/redis/redis.service'
-import { PrismaService } from './prisma/prisma.service'
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -31,7 +29,7 @@ export class AuthService implements OnModuleInit {
     }
     return {
       message: 'Unauthorized',
-      statusCode: 401
+      statusCode: HttpStatus.UNAUTHORIZED
     }
   }
 
@@ -45,12 +43,12 @@ export class AuthService implements OnModuleInit {
       if (existUser || existEmail) {
         if (existEmail && existUser) {
           return {
-            statusCode: 409,
+            statusCode: HttpStatus.CONFLICT,
             message: `User and email already exists`
           }
         }
         return {
-          statusCode: 409,
+          statusCode: HttpStatus.CONFLICT,
           message: `${existEmail ? 'Email' + existEmail.email : 'User' + existUser.username} already exists`
         }
       }
@@ -91,13 +89,13 @@ export class AuthService implements OnModuleInit {
       const user = JSON.parse(value)
       if (!value) {
         return {
-          statusCode: 400,
+          statusCode: HttpStatus.BAD_REQUEST,
           message: `don't have otp`
         }
       }
       if (dto.otp !== user.otp) {
         return {
-          statusCode: 400,
+          statusCode: HttpStatus.BAD_REQUEST,
           message: 'otp invalid'
         }
       }
@@ -120,7 +118,7 @@ export class AuthService implements OnModuleInit {
     const [at, rt] = await Promise.all([
       this.jwtService.signAsync(jwtPayload, {
         secret: this.configService.get<string>('AT_SECRET'),
-        expiresIn: '15m',
+        expiresIn: '1d',
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret: this.configService.get<string>('RT_SECRET'),

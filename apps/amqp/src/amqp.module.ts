@@ -2,10 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ConsumerService } from './consumer.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { MAIL_PACKAGE_NAME } from '@app/common';
+import { MAIL_PACKAGE_NAME, PrismaService, RedisModule } from '@app/common';
 import { join } from 'path';
-import { PrismaService } from './prisma/prisma.service';
-import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
