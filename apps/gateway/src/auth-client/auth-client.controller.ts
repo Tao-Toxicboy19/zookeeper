@@ -34,11 +34,13 @@ export class AuthClientController {
   ) {
     res.cookie('user_id', req.user.sub, {
       httpOnly: true,
+      maxAge: 5 * 60 * 1000 // 5m
     })
     return this.authClientService.signin({ username: req.user.username, userId: req.user.sub })
   }
 
   @UseGuards(RefreshJwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
   @Post('refresh/local')
   async refreshToken(
     @Req() req: { user: JwtPayload },
@@ -51,7 +53,7 @@ export class AuthClientController {
       userId: req.user.sub,
       username: req.user.username
     }))
-    
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       maxAge: 15 * 60 * 1000 // 15m
@@ -81,6 +83,10 @@ export class AuthClientController {
         message
       }
     }
+    res.cookie('user_id', req.cookies.user_id, {
+      httpOnly: true,
+    })
+
     res.cookie('access_token', accessToken, {
       httpOnly: true,
       // maxAge: 15 * 60 * 1000 // 15m

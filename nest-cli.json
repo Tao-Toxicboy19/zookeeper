@@ -95,6 +95,28 @@
         "assets": ["proto/*.proto"],
         "watchAssets": true
       }
+    },
+    "signal": {
+      "type": "application",
+      "root": "apps/signal",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/signal/tsconfig.app.json",
+        "assets": ["proto/*.proto"],
+        "watchAssets": true
+      }
+    },
+    "indicators": {
+      "type": "application",
+      "root": "apps/indicators",
+      "entryFile": "src/main",
+      "sourceRoot": "./",
+      "compilerOptions": {
+        "tsConfigPath": "apps/indicators/tsconfig.app.json",
+        "assets": ["proto/*.proto"],
+        "watchAssets": true
+      }
     }
   }
 }

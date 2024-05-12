@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../../../libs/common/src/guards/jwt-auth.guard'
 import { OrderDto } from './dto';
 import { JwtPayload } from '@app/common';
 
-@Controller('orders-client')
+@Controller('orders')
 export class OrdersClientController {
   private readonly logger = new Logger(OrdersClientController.name)
 

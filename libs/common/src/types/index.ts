@@ -1,3 +1,20 @@
+export * from './jew-payload.type'
+export * from './token.type'
+export * from './indicator.type'
+
+export {
+    FetchPriceDto,
+    FetchPriceResponse,
+    CandleResponse,
+    CalulateEMADto,
+    EMAResponse,
+    INDICATOR_PACKAGE_NAME,
+    INDICATOR_SERVICE_NAME,
+    IndicatorServiceClient,
+    IndicatorServiceController,
+    IndicatorServiceControllerMethods,
+} from './indicator'
+
 export {
     TokenResponse,
     UserResponse,
@@ -53,6 +70,3 @@ export {
     KeyServiceController,
     KeyServiceControllerMethods,
 } from './key'
-
-export * from './jew-payload.type'
-export * from './token.type'
