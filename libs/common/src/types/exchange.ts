@@ -7,46 +7,42 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Empty } from "../../../../google/protobuf/empty";
 
 export const protobufPackage = "exchange";
 
-export interface Key {
-  apiKey?: string | undefined;
-  secretKey?: string | undefined;
-  statusCode?: number | undefined;
-  message?: string | undefined;
-}
-
-export interface CreateExchangeDto {
-  key: Key | undefined;
-}
-
 export interface ValidateKeyDto {
-  key: Key | undefined;
+  apiKey: string;
+  secretKey: string;
 }
 
 export interface ExchangeResponse {
-  key: Key | undefined;
+  statusCode: number;
+  message: string;
+}
+
+export interface BalanceResponse {
+  statusCode?: number | undefined;
+  message?: string | undefined;
+  usdt?: string | undefined;
 }
 
 export const EXCHANGE_PACKAGE_NAME = "exchange";
 
 export interface ExchangeServiceClient {
-  createExchange(request: CreateExchangeDto): Observable<Empty>;
-
   validateKey(request: ValidateKeyDto): Observable<ExchangeResponse>;
+
+  balance(request: ValidateKeyDto): Observable<BalanceResponse>;
 }
 
 export interface ExchangeServiceController {
-  createExchange(request: CreateExchangeDto): void;
-
   validateKey(request: ValidateKeyDto): Promise<ExchangeResponse> | Observable<ExchangeResponse> | ExchangeResponse;
+
+  balance(request: ValidateKeyDto): Promise<BalanceResponse> | Observable<BalanceResponse> | BalanceResponse;
 }
 
 export function ExchangeServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["createExchange", "validateKey"];
+    const grpcMethods: string[] = ["validateKey", "balance"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ExchangeService", method)(constructor.prototype[method], method, descriptor);

@@ -24,7 +24,7 @@ export class AuthService implements OnModuleInit {
     if (user && await bcrypt.compare(dto.password, user.password)) {
       return {
         username: user.username,
-        userId: user.id,
+        sub: user.id,
       }
     }
     return {
@@ -105,7 +105,21 @@ export class AuthService implements OnModuleInit {
         refreshToken: tokens.refreshToken
       }
     } catch (error) {
+      throw error
+    }
+  }
 
+  async refreshToken(user: JwtPayload): Promise<Tokens> {
+    try {
+      const tokens = await this.getTokens(user.sub, user.username)
+
+      return {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken
+      }
+
+    } catch (error) {
+      throw error
     }
   }
 
@@ -122,7 +136,7 @@ export class AuthService implements OnModuleInit {
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret: this.configService.get<string>('RT_SECRET'),
-        expiresIn: '1d',
+        expiresIn: '3d',
       }),
     ])
 

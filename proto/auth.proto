@@ -7,6 +7,7 @@ service AuthService {
     rpc Signup (SignupDto) returns (EmailResponse) {}
     rpc Validate (ValidateDto) returns (UserResponse) {}
     rpc ConfirmOTP (ConfirmOTPDto) returns (TokenResponse) {}
+    rpc RefreshToken (SigninDto) returns (TokenResponse) {}
 }
 
 message ConfirmOTPDto {
@@ -31,14 +32,9 @@ message TokenResponse {
 
 message UserResponse {
     optional string username = 1;
-    optional string user_id = 2;
+    optional string sub = 2;
     optional string message = 3;
     optional int32 statusCode = 4;
-}
-
-message User {
-    string user_id = 1;
-    string username = 2;
 }
 
 message SigninDto {

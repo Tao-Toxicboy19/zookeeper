@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { AuthClientService } from './auth-client.service';
 import { AuthClientController } from './auth-client.controller';
-import { AUTH_PACKAGE_NAME, MAIL_PACKAGE_NAME, ORDERS_PACKAGE_NAME } from '@app/common';
+import { AUTH_PACKAGE_NAME, JwtStrategy, RefreshJwtStrategy } from '@app/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PassportModule } from '@nestjs/passport';
 import { join } from 'path';
-import { LocalStrategy } from './strategies/loca.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { ConfigModule } from '@nestjs/config';
+import { LocalStrategy } from './strategies';
 
 @Module({
   imports: [
@@ -33,6 +32,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthClientService,
     LocalStrategy,
     JwtStrategy,
+    RefreshJwtStrategy,
   ],
 })
 export class AuthClientModule { }

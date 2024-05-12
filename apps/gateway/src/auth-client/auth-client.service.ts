@@ -34,6 +34,10 @@ export class AuthClientService implements OnModuleInit {
     return this.authServiceClient.validate(request)
   }
 
+  refreshToken(request: SigninDto) {
+    return this.authServiceClient.refreshToken(request)
+  }
+
   confirmOtp(request: ConfirmOTPDto) {
     return this.authServiceClient.confirmOtp(request)
   }

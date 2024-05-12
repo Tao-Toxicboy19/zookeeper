@@ -4,7 +4,6 @@ export {
     SigninDto,
     SignupDto,
     ValidateDto,
-    User,
     AuthServiceClient,
     AuthServiceController,
     AuthServiceControllerMethods,
@@ -24,8 +23,8 @@ export {
 } from './mail'
 
 export {
-    CreateExchangeDto,
     ValidateKeyDto,
+    BalanceResponse,
     ExchangeResponse,
     EXCHANGE_PACKAGE_NAME,
     EXCHANGE_SERVICE_NAME,
@@ -36,6 +35,7 @@ export {
 
 export {
     OrdersDto,
+    OrderResponse,
     ORDERS_PACKAGE_NAME,
     OrdersServiceClient,
     OrdersServiceController,

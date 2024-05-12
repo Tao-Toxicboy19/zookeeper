@@ -1,11 +1,9 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-
 package orders;
 
 service OrdersService {
-    rpc CreateOrder (OrdersDto) returns (google.protobuf.Empty) {} 
+    rpc CreateOrder (OrdersDto) returns (OrderResponse) {} 
 }
 
 message OrdersDto {
@@ -16,4 +14,9 @@ message OrdersDto {
     string type = 5;
     optional int32 ema = 6;
     string user_id = 7;
+}
+
+message OrderResponse {
+    int32 statusCode = 1;
+    string message = 2;
 }

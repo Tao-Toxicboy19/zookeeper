@@ -1,7 +1,8 @@
 import { Body, Controller, Logger, Post, Req, UseGuards } from '@nestjs/common';
 import { OrdersClientService } from './orders-client.service';
-import { JwtAuthGuard } from '../auth-client/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../../libs/common/src/guards/jwt-auth.guard';
 import { OrderDto } from './dto';
+import { JwtPayload } from '@app/common';
 
 @Controller('orders-client')
 export class OrdersClientController {
@@ -10,10 +11,10 @@ export class OrdersClientController {
   constructor(private readonly ordersClientService: OrdersClientService) { }
 
   @UseGuards(JwtAuthGuard)
-  @Post()
+  @Post('create')
   createOrder(
     @Body() dto: OrderDto,
-    @Req() req: { user: { sub: string, username: string } }
+    @Req() req: { user: JwtPayload }
   ) {
     return this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
   }

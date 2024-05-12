@@ -1,14 +1,24 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, HttpStatus } from '@nestjs/common';
 import { ExchangeService } from './exchange.service';
-import { ExchangeServiceController, ExchangeServiceControllerMethods, createExchangeDto } from '@app/common';
+import {
+  ExchangeResponse,
+  ExchangeServiceController,
+  ExchangeServiceControllerMethods,
+  ValidateKeyDto
+} from '@app/common';
+import { Observable } from 'rxjs';
 
 @Controller()
 @ExchangeServiceControllerMethods()
 export class ExchangeController implements ExchangeServiceController {
   constructor(private readonly exchangeService: ExchangeService) { }
 
-  createExchange(request: createExchangeDto): void {
-    
+  validateKey(request: ValidateKeyDto) {
+    return this.exchangeService.validateKey(request)
   }
 
+  balance(request: ValidateKeyDto) {
+    return this.exchangeService.balance(request)
+  }
 }
+

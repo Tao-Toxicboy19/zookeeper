@@ -7,7 +7,8 @@ import {
   SignupDto,
   ValidateDto
 } from '@app/common';
-import { ConfirmOTPDto } from '@app/common/types/auth';
+import { ConfirmOTPDto, TokenResponse } from '@app/common/types/auth';
+import { Observable } from 'rxjs';
 
 @Controller()
 @AuthServiceControllerMethods()
@@ -15,7 +16,7 @@ export class AuthController implements AuthServiceController {
   constructor(private readonly authService: AuthService) { }
 
   signup(request: SignupDto) {
-     return this.authService.signup(request)
+    return this.authService.signup(request)
   }
 
   signin(request: SigninDto) {
@@ -26,7 +27,12 @@ export class AuthController implements AuthServiceController {
     return this.authService.validateUser(request)
   }
 
+  refreshToken(request: SigninDto) {
+    return this.authService.refreshToken({ username: request.username, sub: request.userId })
+  }
+
   confirmOtp(request: ConfirmOTPDto) {
     return this.authService.confrimOTP(request)
   }
+
 }

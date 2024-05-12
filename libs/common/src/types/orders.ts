@@ -7,7 +7,6 @@
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
 import { Observable } from "rxjs";
-import { Empty } from "../../../../google/protobuf/empty";
 
 export const protobufPackage = "orders";
 
@@ -21,18 +20,19 @@ export interface OrdersDto {
   userId: string;
 }
 
+export interface OrderResponse {
+  statusCode: number;
+  message: string;
+}
+
 export const ORDERS_PACKAGE_NAME = "orders";
 
 export interface OrdersServiceClient {
-  /** rpc SendMail (SendMailDto) returns (google.protobuf.Empty) {} */
-
-  createOrder(request: OrdersDto): Observable<Empty>;
+  createOrder(request: OrdersDto): Observable<OrderResponse>;
 }
 
 export interface OrdersServiceController {
-  /** rpc SendMail (SendMailDto) returns (google.protobuf.Empty) {} */
-
-  createOrder(request: OrdersDto): void;
+  createOrder(request: OrdersDto): Promise<OrderResponse> | Observable<OrderResponse> | OrderResponse;
 }
 
 export function OrdersServiceControllerMethods() {

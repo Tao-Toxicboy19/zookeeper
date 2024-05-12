@@ -1,29 +1,23 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
-
 package exchange;
 
 service ExchangeService {
-    rpc CreateExchange (CreateExchangeDto) returns (google.protobuf.Empty);
     rpc ValidateKey (ValidateKeyDto) returns (ExchangeResponse) {}
-}
-
-message Key {
-    optional string api_key = 1;
-    optional string secret_key = 2;
-    optional int32 statusCode = 3;
-    optional string message = 4;
-}
-
-message CreateExchangeDto {
-    Key key = 1;
+    rpc Balance (ValidateKeyDto) returns (BalanceResponse) {}
 }
 
 message ValidateKeyDto {
-    Key key = 1;
-}
+    string api_key = 1;
+    string secret_key = 2;}
 
 message ExchangeResponse {
-    Key key = 1;
+    int32 statusCode = 1;
+    string message = 2;
+}
+
+message BalanceResponse {
+    optional int32 statusCode = 1;
+    optional string message = 2;
+    optional string usdt = 3;
 }

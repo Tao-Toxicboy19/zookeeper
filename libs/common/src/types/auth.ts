@@ -32,14 +32,9 @@ export interface TokenResponse {
 
 export interface UserResponse {
   username?: string | undefined;
-  userId?: string | undefined;
+  sub?: string | undefined;
   message?: string | undefined;
   statusCode?: number | undefined;
-}
-
-export interface User {
-  userId: string;
-  username: string;
 }
 
 export interface SigninDto {
@@ -69,6 +64,8 @@ export interface AuthServiceClient {
   validate(request: ValidateDto): Observable<UserResponse>;
 
   confirmOtp(request: ConfirmOTPDto): Observable<TokenResponse>;
+
+  refreshToken(request: SigninDto): Observable<TokenResponse>;
 }
 
 export interface AuthServiceController {
@@ -79,11 +76,13 @@ export interface AuthServiceController {
   validate(request: ValidateDto): Promise<UserResponse> | Observable<UserResponse> | UserResponse;
 
   confirmOtp(request: ConfirmOTPDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
+
+  refreshToken(request: SigninDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["signin", "signup", "validate", "confirmOtp"];
+    const grpcMethods: string[] = ["signin", "signup", "validate", "confirmOtp", "refreshToken"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);
