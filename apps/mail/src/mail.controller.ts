@@ -10,6 +10,7 @@ export class MailController implements MailServiceController {
   constructor(private readonly mailService: MailService) { }
 
   sendMail(dto: SendMailDto): void {
+    console.log('hello world')
     this.mailService.sendMail(dto)
   }
 }

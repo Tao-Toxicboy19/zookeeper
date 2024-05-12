@@ -14,7 +14,10 @@ export class ProducerService {
         const connection = amqp.connect([this.configService.get<string>('RABBIT_MQ_URL')])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: Channel) => {
-                await channel.assertQueue('signup', { durable: true })
+                Promise.all([
+                    channel.assertQueue('signup', { durable: true }),
+                    channel.assertQueue('mail', { durable: true })
+                ])
             }
         })
 
@@ -27,9 +30,15 @@ export class ProducerService {
         })
     }
 
-    async sendMessage(message: string) {
+    async sendSignup(msg: string) {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
-            return channel.sendToQueue('signup', Buffer.from(message), { persistent: true, })
+            return channel.sendToQueue('signup', Buffer.from(msg), { persistent: true, })
+        })
+    }
+
+    async sendMail(msg: string) {
+        await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
+            return channel.sendToQueue('mail', Buffer.from(msg), { persistent: true, })
         })
     }
 }

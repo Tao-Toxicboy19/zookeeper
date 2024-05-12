@@ -11,7 +11,7 @@ import { RedisModule } from './redis/redis.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: './apps/amqp/.env',
     }),
     ClientsModule.register([
       {

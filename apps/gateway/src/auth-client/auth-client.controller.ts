@@ -8,7 +8,7 @@ import { OtpDto } from './dto/otp.dto';
 import { randomUUID } from 'crypto';
 import { firstValueFrom } from 'rxjs';
 
-@Controller('auth-client')
+@Controller('auth')
 export class AuthClientController {
   private readonly logger = new Logger(AuthClientController.name)
 
@@ -46,7 +46,7 @@ export class AuthClientController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const { accessToken, refreshToken, statusCode, message } = await firstValueFrom(this.authClientService.confrimOtp({ otp: dto.otp, userId: req.cookies.user_id }))
+    const { accessToken, refreshToken, statusCode, message } = await firstValueFrom(this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id }))
     if (statusCode) {
       return {
         statusCode,

@@ -1,9 +1,8 @@
-import { ConfrimOTPDto, EmailResponse, JwtPayload, SigninDto, SignupDto, TokenResponse, Tokens, UserResponse, ValidateDto } from '@app/common'
+import { ConfirmOTPDto, EmailResponse, JwtPayload, SigninDto, SignupDto, TokenResponse, Tokens, UserResponse, ValidateDto } from '@app/common'
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { ProducerService } from './producer/producer.service'
-import { randomUUID } from 'crypto'
 import * as bcrypt from 'bcrypt'
 import { RedisService } from 'apps/amqp/src/redis/redis.service'
 import { PrismaService } from './prisma/prisma.service'
@@ -64,7 +63,7 @@ export class AuthService implements OnModuleInit {
         password: hash
       }
 
-      await this.producerService.sendMessage(JSON.stringify(user))
+      await this.producerService.sendSignup(JSON.stringify(user))
 
       return {
         email: dto.email
@@ -77,7 +76,7 @@ export class AuthService implements OnModuleInit {
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
       const user = await this.prisma.users.update({ where: { id: dto.userId }, data: { login: true } })
-
+      await this.producerService.sendMail(JSON.stringify(user))
       return {
         email: user.email
       }
@@ -86,7 +85,7 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async confrimOTP(dto: ConfrimOTPDto): Promise<TokenResponse> {
+  async confrimOTP(dto: ConfirmOTPDto): Promise<TokenResponse> {
     try {
       const value = await this.redisService.getValue(dto.userId)
       const user = JSON.parse(value)
@@ -135,3 +134,24 @@ export class AuthService implements OnModuleInit {
     }
   }
 }
+
+
+// generator client {
+//   provider    = "prisma-client-js"
+//   dotenv_path = "./apps/auth/.env"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model Users {
+//   id         String   @id
+//   username   String   @unique()
+//   password   String
+//   email      String   @unique()
+//   login      Boolean  @default(false)
+//   created_at DateTime @default(now())
+//   updated_at DateTime @updatedAt
+// }

@@ -7,7 +7,7 @@ import { ConfigModule } from '@nestjs/config';
     imports: [
         ConfigModule.forRoot({
             isGlobal: true,
-            envFilePath: '.env',
+            envFilePath: './apps/auth/.env',
         }),
     ],
     providers: [RedisService],

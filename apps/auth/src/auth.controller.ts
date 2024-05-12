@@ -7,7 +7,7 @@ import {
   SignupDto,
   ValidateDto
 } from '@app/common';
-import { ConfrimOTPDto } from '@app/common/types/auth';
+import { ConfirmOTPDto } from '@app/common/types/auth';
 
 @Controller()
 @AuthServiceControllerMethods()
@@ -26,7 +26,7 @@ export class AuthController implements AuthServiceController {
     return this.authService.validateUser(request)
   }
 
-  confrimOtp(request: ConfrimOTPDto) {
+  confirmOtp(request: ConfirmOTPDto) {
     return this.authService.confrimOTP(request)
   }
 }

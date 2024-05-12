@@ -9,6 +9,7 @@ export class RedisService {
     constructor(
         private readonly configService: ConfigService
     ) {
+        console.log(configService.get<string>('REDIS_PORT'))
         this.client = new Redis({
             host: configService.get<string>('REDIS_URL'),
             port: Number(configService.get<string>('REDIS_PORT')),

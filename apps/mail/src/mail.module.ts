@@ -9,11 +9,9 @@ import { RedisModule } from './redis/redis.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
-      // envFilePath: './apps/auth/.env',
+      envFilePath: './apps/mail/.env',
     }),
     MailerModule.forRootAsync({
-      // imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         transport: {
           host: 'smtp.gmail.com',

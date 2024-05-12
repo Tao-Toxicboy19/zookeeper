@@ -32,7 +32,7 @@ export class MailService implements OnModuleInit {
         this.mailerService.sendMail(mailOptions),
         this.redisService.setKey(user.id, 300, JSON.stringify({ otp, user }))
       ])
-      
+
     } catch (error) {
       throw error
     }

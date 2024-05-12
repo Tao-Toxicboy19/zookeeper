@@ -5,10 +5,10 @@ import { RedisService } from './redis.service';
 @Global()
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: '.env',
-        }),
+        // ConfigModule.forRoot({
+        //     isGlobal: true,
+        //     envFilePath: '.env',
+        // }),
     ],
     providers: [RedisService],
     exports: [RedisService]

@@ -1,11 +1,17 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { AUTH_PACKAGE_NAME, AUTH_SERVICE_NAME, AuthServiceClient, MAIL_PACKAGE_NAME, MAIL_SERVICE_NAME, MailServiceClient, SigninDto, SignupDto, User, UserResponse, ValidateDto } from '@app/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  AUTH_PACKAGE_NAME,
+  AUTH_SERVICE_NAME,
+  AuthServiceClient,
+  ConfirmOTPDto,
+  SigninDto,
+  SignupDto,
+  ValidateDto
+} from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
-import { Observable } from 'rxjs';
-import { ConfrimOTPDto, EmailResponse } from '@app/common/types/auth';
 
 @Injectable()
-export class AuthClientService {
+export class AuthClientService implements OnModuleInit {
   private authServiceClient: AuthServiceClient
 
   constructor(
@@ -13,7 +19,7 @@ export class AuthClientService {
   ) { }
 
   onModuleInit() {
-    this.authServiceClient = this.client.getService<AuthClientService>(AUTH_SERVICE_NAME)
+    this.authServiceClient = this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME)
   }
 
   signup(request: SignupDto) {
@@ -28,7 +34,7 @@ export class AuthClientService {
     return this.authServiceClient.validate(request)
   }
 
-  confrimOtp(request: ConfrimOTPDto) {
-    return this.authServiceClient.confrimOtp(request)
+  confirmOtp(request: ConfirmOTPDto) {
+    return this.authServiceClient.confirmOtp(request)
   }
 }

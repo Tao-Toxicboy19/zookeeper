@@ -6,10 +6,10 @@ service AuthService {
     rpc Signin (SigninDto) returns (EmailResponse) {}
     rpc Signup (SignupDto) returns (EmailResponse) {}
     rpc Validate (ValidateDto) returns (UserResponse) {}
-    rpc ConfrimOTP (ConfrimOTPDto) returns (TokenResponse) {}
+    rpc ConfirmOTP (ConfirmOTPDto) returns (TokenResponse) {}
 }
 
-message ConfrimOTPDto {
+message ConfirmOTPDto {
     optional string message = 1;
     optional int32 statusCode = 2;
     optional int32 otp = 3;

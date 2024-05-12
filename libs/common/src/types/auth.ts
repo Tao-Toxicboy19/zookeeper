@@ -10,7 +10,7 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "auth";
 
-export interface ConfrimOTPDto {
+export interface ConfirmOTPDto {
   message?: string | undefined;
   statusCode?: number | undefined;
   otp?: number | undefined;
@@ -68,7 +68,7 @@ export interface AuthServiceClient {
 
   validate(request: ValidateDto): Observable<UserResponse>;
 
-  confrimOtp(request: ConfrimOTPDto): Observable<TokenResponse>;
+  confirmOtp(request: ConfirmOTPDto): Observable<TokenResponse>;
 }
 
 export interface AuthServiceController {
@@ -78,12 +78,12 @@ export interface AuthServiceController {
 
   validate(request: ValidateDto): Promise<UserResponse> | Observable<UserResponse> | UserResponse;
 
-  confrimOtp(request: ConfrimOTPDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
+  confirmOtp(request: ConfirmOTPDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["signin", "signup", "validate", "confrimOtp"];
+    const grpcMethods: string[] = ["signin", "signup", "validate", "confirmOtp"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

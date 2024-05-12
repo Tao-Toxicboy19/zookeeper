@@ -1,10 +1,11 @@
 generator client {
-  provider = "prisma-client-js"
+  provider    = "prisma-client-js"
+  dotenv_path = "../amqp/.env"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("POSTGRESQL_URL")
 }
 
 model Users {

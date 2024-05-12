@@ -12,7 +12,7 @@ import { PrismaService } from './prisma/prisma.service';
     JwtModule.register({}),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: './apps/auth/.env',
     }),
     ProducerModule,
     RedisModule,

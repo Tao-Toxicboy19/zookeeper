@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package exchange;
+
+service ExchangeService {
+    rpc CreateExchange (CreateExchangeDto) returns (google.protobuf.Empty);
+}
+
+message CreateExchangeDto {
+    string api_key = 1;
+    string secret_key = 2;
+}
