@@ -3,9 +3,18 @@ export * from './token.type'
 export * from './indicator.type'
 
 export {
+    SignalDto,
+    SignalResponse,
+    SignalServiceClient,
+    SignalServiceController,
+    SIGNAL_PACKAGE_NAME,
+    SIGNAL_SERVICE_NAME,
+    SignalServiceControllerMethods,
+} from './signal'
+
+export {
     FetchPriceDto,
     FetchPriceResponse,
-    CandleResponse,
     CalulateEMADto,
     EMAResponse,
     INDICATOR_PACKAGE_NAME,

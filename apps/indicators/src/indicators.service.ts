@@ -1,11 +1,9 @@
 import {
+  CalulateEMADto,
   Candle,
+  EMAResponse,
   FetchPriceDto,
   FetchPriceResponse
-} from '@app/common';
-import {
-  CalulateEMADto,
-  EMAResponse
 } from '@app/common';
 import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios'
@@ -19,22 +17,9 @@ export class IndicatorsService {
     try {
       const limit = ema * 2
       const response = await axios.get<Candle[]>(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${timeframe}&limit=${limit}`)
-
+      
       return {
-        candles: response.data.map((item) => ({
-          timestamp: item[0],
-          open: item[1],
-          high: item[2],
-          low: item[3],
-          close: item[4],
-          volume: item[5],
-          closeTimestamp: item[6],
-          quoteAssetVolume: item[7],
-          numberOfTrades: item[8],
-          takerBuyBaseAssetVolume: item[9],
-          takerBuyQuoteAssetVolume: item[10],
-          ignore: item[11]
-        }))
+        candles: JSON.stringify(response.data)
       }
     } catch (error) {
       throw error

@@ -27,22 +27,7 @@ export interface EMAResponse {
 }
 
 export interface FetchPriceResponse {
-  candles: CandleResponse[];
-}
-
-export interface CandleResponse {
-  timestamp: number;
-  open: string;
-  high: string;
-  low: string;
-  close: string;
-  volume: string;
-  closeTimestamp: number;
-  quoteAssetVolume: string;
-  numberOfTrades: number;
-  takerBuyBaseAssetVolume: string;
-  takerBuyQuoteAssetVolume: string;
-  ignore: string;
+  candles: string;
 }
 
 export const INDICATOR_PACKAGE_NAME = "indicator";

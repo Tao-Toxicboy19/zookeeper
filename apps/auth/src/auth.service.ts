@@ -73,7 +73,7 @@ export class AuthService implements OnModuleInit {
 
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
-      const user = await this.prisma.users.update({ where: { id: dto.userId }, data: { login: true } })
+      const user = await this.prisma.users.findUnique({ where: { id: dto.userId } })
       await this.producerService.sendMail(JSON.stringify(user))
       return {
         email: user.email
@@ -146,24 +146,3 @@ export class AuthService implements OnModuleInit {
     }
   }
 }
-
-
-// generator client {
-//   provider    = "prisma-client-js"
-//   dotenv_path = "./apps/auth/.env"
-// }
-
-// datasource db {
-//   provider = "postgresql"
-//   url      = env("DATABASE_URL")
-// }
-
-// model Users {
-//   id         String   @id
-//   username   String   @unique()
-//   password   String
-//   email      String   @unique()
-//   login      Boolean  @default(false)
-//   created_at DateTime @default(now())
-//   updated_at DateTime @updatedAt
-// }

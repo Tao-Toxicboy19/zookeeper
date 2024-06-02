@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package signal;
+
+service SignalService {
+    rpc EMA (SignalDto) returns (SignalResponse) {}
+    rpc CdcActionZone (SignalDto) returns (SignalResponse) {}
+}
+
+message SignalResponse {
+    repeated Position positions = 1;
+}
+
+message Position {
+    string position = 1;
+}
+
+message SignalDto {
+    int32 ema = 1;
+    string symbol = 2;
+    string timeframe = 3;
+}

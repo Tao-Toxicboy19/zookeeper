@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { OrdersClientService } from './orders-client.service';
-import { OrdersClientController } from './orders-client.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ORDERS_PACKAGE_NAME } from '@app/common';
+import { ORDERS_PACKAGE_NAME, PrismaService } from '@app/common';
 import { join } from 'path';
+import { OrdersClientController } from './orders-client.controller';
 
 @Module({
   imports: [

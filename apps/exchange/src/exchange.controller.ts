@@ -1,12 +1,10 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { ExchangeService } from './exchange.service';
 import {
-  ExchangeResponse,
   ExchangeServiceController,
   ExchangeServiceControllerMethods,
   ValidateKeyDto
 } from '@app/common';
-import { Observable } from 'rxjs';
 
 @Controller()
 @ExchangeServiceControllerMethods()

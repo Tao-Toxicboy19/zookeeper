@@ -12,3 +12,10 @@ test
 .prettierrc
 README.md
 readme.txt
+
+postgres_data
+node_modules
+proto
+.env
+
+docker-compose.yaml

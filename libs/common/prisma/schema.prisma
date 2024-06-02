@@ -15,30 +15,44 @@ model Keys {
   updatedAt DateTime
   userId    String   @unique
   Users     Users    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Orders {
-  id        String   @id
+  id        String    @id
   symbol    String
   quantity  Int
   timeframe String
   type      String
   ema       Int?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   updatedAt DateTime
+  daletedAt DateTime?
   leverage  Int
   userId    String?
-  Users     Users?   @relation(fields: [userId], references: [id])
+  Users     Users?    @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt(sort: Desc)])
 }
 
 model Users {
   username  String   @unique
   password  String
   email     String   @unique
-  login     Boolean  @default(false)
   id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime
   Keys      Keys?
   Orders    Orders[]
+
+  @@index([id])
+}
+
+model Symbols {
+  id     String @id
+  symbol String
+
+  @@unique([symbol])
+  @@index([symbol])
 }

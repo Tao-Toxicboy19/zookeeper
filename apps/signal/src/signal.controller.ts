@@ -1,12 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { SignalService } from './signal.service';
+import {
+  SignalDto,
+  SignalServiceController,
+  SignalServiceControllerMethods
+} from '@app/common';
 
 @Controller()
-export class SignalController {
-  constructor(private readonly signalService: SignalService) {}
+@SignalServiceControllerMethods()
+export class SignalController implements SignalServiceController {
+  constructor(private readonly signalService: SignalService) { }
 
-  @Get()
-  getHello(): string {
-    return this.signalService.getHello();
+  ema(request: SignalDto) {
+    return this.signalService.ema(request)
+  }
+
+  cdcActionZone(request: SignalDto) {
+    return this.signalService.ema(request)
   }
 }
