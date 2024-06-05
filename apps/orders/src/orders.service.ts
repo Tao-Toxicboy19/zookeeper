@@ -2,9 +2,6 @@ import {
   EXCHANGE_PACKAGE_NAME,
   EXCHANGE_SERVICE_NAME,
   ExchangeServiceClient,
-  INDICATOR_PACKAGE_NAME,
-  INDICATOR_SERVICE_NAME,
-  IndicatorServiceClient,
   OrderResponse,
   OrdersDto,
   PrismaService,
@@ -21,20 +18,93 @@ import { firstValueFrom } from 'rxjs';
 export class OrdersService implements OnModuleInit {
   private readonly logger = new Logger(OrdersService.name)
   private exchangeServiceClient: ExchangeServiceClient
-  private indicatorsServiceClient: IndicatorServiceClient
   private signalServiceClient: SignalServiceClient
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject(EXCHANGE_PACKAGE_NAME) private exchangeClient: ClientGrpc,
-    @Inject(INDICATOR_PACKAGE_NAME) private indicatorClient: ClientGrpc,
     @Inject(SIGNAL_PACKAGE_NAME) private signalClient: ClientGrpc,
   ) { }
 
   onModuleInit() {
     this.exchangeServiceClient = this.exchangeClient.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
-    this.indicatorsServiceClient = this.indicatorClient.getService<IndicatorServiceClient>(INDICATOR_SERVICE_NAME)
     this.signalServiceClient = this.signalClient.getService<SignalServiceClient>(SIGNAL_SERVICE_NAME)
+  }
+
+  async queryOrders(symbol: string) {
+    try {
+      return await this.prisma.orders.findMany({
+        where: {
+          symbol: symbol
+        },
+        select: {
+          symbol: true,
+          quantity: true,
+          leverage: true,
+          Users: {
+            select: {
+              Keys: {
+                select: {
+                  apiKey: true,
+                  secretKey: true
+                }
+              }
+            }
+          }
+        },
+      })
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async debug() {
+    try {
+      const orders = await this.prisma.orders.groupBy({
+        by: [
+          'symbol',
+          'ema',
+          'timeframe',
+          'type'
+        ]
+      })
+
+      if (!orders.length) return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: 'not found orders'
+      }
+
+      orders.map(async (item) => {
+        const symbol = {
+          ema: item.ema,
+          symbol: item.symbol,
+          timeframe: item.timeframe
+        }
+        if (item.type === 'EMA') {
+          const value = await firstValueFrom(this.signalServiceClient.ema(symbol))
+          if (value.positions) {
+            const orders = await this.queryOrders(item.symbol)
+            this.logger.debug(orders)
+            /// Open Orders ////
+          }
+        } else if (item.type === 'CDC') {
+          const value = await firstValueFrom(this.signalServiceClient.cdcActionZone(symbol))
+          if (value.positions) {
+            this.logger.debug(item.symbol)
+          }
+        }
+      })
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'OK'
+      }
+    } catch (error: unknown) {
+      return {
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `${error}`
+      }
+    }
   }
 
   async create(dto: OrdersDto): Promise<OrderResponse> {
@@ -44,24 +114,23 @@ export class OrdersService implements OnModuleInit {
         if (!key) {
           throw new Error(`Don't have key`)
         }
-
-        const existSymbol = await tx.symbols.findUnique({ where: { symbol: dto.symbol } })
-        if (!existSymbol) {
-          await tx.symbols.create({
-            data: {
-              id: randomUUID(),
-              symbol: dto.symbol
-            }
-          })
+        const symbol = await tx.orders.findMany({
+          where: {
+            userId: dto.userId,
+            symbol: dto.symbol
+          }
+        })
+        if (symbol.length) {
+          throw new Error(`You've got the symbol.`)
         }
 
-        const { usdt } = await firstValueFrom(
-          this.exchangeServiceClient.balance({ apiKey: key.apiKey, secretKey: key.secretKey })
-        )
+        // const { usdt } = await firstValueFrom(
+        //   this.exchangeServiceClient.balance({ apiKey: key.apiKey, secretKey: key.secretKey })
+        // )
 
-        if (dto.quantity >= +usdt) {
-          throw new Error('Insufficient USDT balance')
-        }
+        // if (dto.quantity >= +usdt) {
+        //   throw new Error('Insufficient USDT balance')
+        // }
 
         await tx.orders.create({
           data: {
@@ -103,7 +172,6 @@ export class OrdersService implements OnModuleInit {
           type: true,
           ema: true,
           createdAt: true,
-          updatedAt: true,
           leverage: true,
         },
       })
@@ -124,3 +192,16 @@ export class OrdersService implements OnModuleInit {
 // }
 // const data = await firstValueFrom(this.signalServiceClient.ema(symbol))
 // this.logger.debug(data)
+
+
+//// ไม่เอาแล้ว
+//   const existSymbol = await tx.symbols.findUnique({ where: { symbol: dto.symbol } })
+//   if (!existSymbol) {
+//     await tx.symbols.create({
+//       data: {
+//         id: randomUUID(),
+//         symbol: dto.symbol
+//       }
+//     })
+//   }
+/////////////////////////

@@ -8,11 +8,7 @@ service SignalService {
 }
 
 message SignalResponse {
-    repeated Position positions = 1;
-}
-
-message Position {
-    string position = 1;
+    string positions = 1;
 }
 
 message SignalDto {

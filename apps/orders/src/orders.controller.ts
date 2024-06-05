@@ -11,6 +11,7 @@ export class OrdersController implements OrdersServiceController {
   constructor(private readonly ordersService: OrdersService) { }
 
   createOrder(request: OrdersDto) {
-    return this.ordersService.create(request)
+    // return this.ordersService.create(request)
+    return this.ordersService.debug()
   }
 }

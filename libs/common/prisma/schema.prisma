@@ -48,11 +48,3 @@ model Users {
 
   @@index([id])
 }
-
-model Symbols {
-  id     String @id
-  symbol String
-
-  @@unique([symbol])
-  @@index([symbol])
-}

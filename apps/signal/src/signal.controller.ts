@@ -16,6 +16,6 @@ export class SignalController implements SignalServiceController {
   }
 
   cdcActionZone(request: SignalDto) {
-    return this.signalService.ema(request)
+    return this.signalService.cdcActionZone(request)
   }
 }

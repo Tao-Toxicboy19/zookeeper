@@ -20,6 +20,6 @@ import { OrdersClientController } from './orders-client.controller';
     ]),
   ],
   controllers: [OrdersClientController],
-  providers: [OrdersClientService],
+  providers: [OrdersClientService, PrismaService],
 })
 export class OrdersClientModule { }

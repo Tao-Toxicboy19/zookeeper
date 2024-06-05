@@ -11,11 +11,7 @@ import { Observable } from "rxjs";
 export const protobufPackage = "signal";
 
 export interface SignalResponse {
-  positions: Position[];
-}
-
-export interface Position {
-  position: string;
+  positions: string;
 }
 
 export interface SignalDto {
