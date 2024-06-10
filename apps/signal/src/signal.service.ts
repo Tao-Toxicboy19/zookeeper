@@ -114,7 +114,6 @@ export class SignalService implements OnModuleInit {
       // Short
       if (ema26.ema > ema12.ema) {
         await this.updatePosition({ symbol: dto.symbol, position: 'Long', type: 'CDC' })
-        // this.logger.debug(posi.position)
         if (posi.position === 'Short' || ema12.ema > ema26.ema) {
           return { positions: 'Short' }
         }
@@ -129,7 +128,7 @@ export class SignalService implements OnModuleInit {
         }
       }
 
-      return { positions: 'Short' }
+      return { positions: null }
 
     } catch (error) {
       throw error

@@ -4,18 +4,27 @@ import { KeyService } from './key.service';
 import { EXCHANGE_PACKAGE_NAME, PrismaService } from '@app/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ClientsModule.register([
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: './apps/key/.env',
+    }),
+    ClientsModule.registerAsync([
       {
         name: EXCHANGE_PACKAGE_NAME,
-        transport: Transport.GRPC,
-        options: {
-          package: EXCHANGE_PACKAGE_NAME,
-          protoPath: join(__dirname, '../exchange.proto'),
-          url: 'localhost:5003'
-        }
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: EXCHANGE_PACKAGE_NAME,
+            protoPath: join(__dirname, '../exchange.proto'),
+            url: configService.get<string>('EXCHANGE_SERVICE_URL'),
+          },
+        }),
+        inject: [ConfigService],
       },
     ]),
   ],

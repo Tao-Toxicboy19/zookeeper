@@ -34,6 +34,7 @@ export class OrdersClientController {
         @Body() dto: OrderDto,
         @Req() req: { user: JwtPayload }
     ) {
+        console.log('hello world')
         // return this.ordersClientService.createOrder({ ...dto, userId: "81a048a1-41af-4d09-a8fd-2031a252c2fc" })
         return this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
     }

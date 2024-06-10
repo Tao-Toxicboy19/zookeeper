@@ -31,16 +31,20 @@ export class OrdersService implements OnModuleInit {
     this.signalServiceClient = this.signalClient.getService<SignalServiceClient>(SIGNAL_SERVICE_NAME)
   }
 
-  async queryOrders(symbol: string) {
+  async queryOrders({ symbol, ema, type }: { symbol: string, ema?: number, type: string }) {
     try {
       return await this.prisma.orders.findMany({
         where: {
-          symbol: symbol
+          symbol: symbol,
+          daletedAt: null,
+          type: type,
+          ema: ema || null
         },
         select: {
           symbol: true,
           quantity: true,
           leverage: true,
+          ema: true,
           Users: {
             select: {
               Keys: {
@@ -83,13 +87,15 @@ export class OrdersService implements OnModuleInit {
         if (item.type === 'EMA') {
           const value = await firstValueFrom(this.signalServiceClient.ema(symbol))
           if (value.positions) {
-            const orders = await this.queryOrders(item.symbol)
+            const orders = await this.queryOrders({ symbol: item.symbol, ema: item.ema, type: item.type })
             this.logger.debug(orders)
             /// Open Orders ////
           }
         } else if (item.type === 'CDC') {
           const value = await firstValueFrom(this.signalServiceClient.cdcActionZone(symbol))
           if (value.positions) {
+            const orders = await this.queryOrders({ symbol: item.symbol, type: item.type })
+            this.logger.debug(orders)
             this.logger.debug(item.symbol)
           }
         }
@@ -117,7 +123,8 @@ export class OrdersService implements OnModuleInit {
         const symbol = await tx.orders.findMany({
           where: {
             userId: dto.userId,
-            symbol: dto.symbol
+            symbol: dto.symbol,
+            daletedAt: null
           }
         })
         if (symbol.length) {
@@ -162,7 +169,10 @@ export class OrdersService implements OnModuleInit {
   async findOrderWhereUserId() {
     try {
       const orders = await this.prisma.orders.findMany({
-        where: { userId: "" },
+        where: {
+          userId: "",
+          daletedAt: null
+        },
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,

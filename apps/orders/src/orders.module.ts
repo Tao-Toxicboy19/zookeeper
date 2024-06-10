@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { EXCHANGE_PACKAGE_NAME, PrismaService, SIGNAL_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
@@ -12,24 +12,32 @@ import { join } from 'path';
       isGlobal: true,
       envFilePath: './apps/orders/.env',
     }),
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
         name: EXCHANGE_PACKAGE_NAME,
-        transport: Transport.GRPC,
-        options: {
-          package: EXCHANGE_PACKAGE_NAME,
-          protoPath: join(__dirname, '../exchange.proto'),
-          url: 'localhost:5003'
-        }
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: EXCHANGE_PACKAGE_NAME,
+            protoPath: join(__dirname, '../exchange.proto'),
+            url: configService.get<string>('EXCHANGE_SERVICE_URL'),
+          },
+        }),
+        inject: [ConfigService],
       },
       {
         name: SIGNAL_PACKAGE_NAME,
-        transport: Transport.GRPC,
-        options: {
-          package: SIGNAL_PACKAGE_NAME,
-          protoPath: join(__dirname, '../signal.proto'),
-          url: 'localhost:5007'
-        }
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: SIGNAL_PACKAGE_NAME,
+            protoPath: join(__dirname, '../signal.proto'),
+            url: configService.get<string>('SIGNAL_SERVICE_URL'),
+          },
+        }),
+        inject: [ConfigService],
       },
     ]),
   ],

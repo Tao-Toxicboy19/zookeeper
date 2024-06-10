@@ -5,9 +5,14 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Positions } from './entities/positions.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: './apps/signal/.env',
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: './app.sqlite',
