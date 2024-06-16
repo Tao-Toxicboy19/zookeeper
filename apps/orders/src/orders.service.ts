@@ -9,10 +9,18 @@ import {
   SIGNAL_SERVICE_NAME,
   SignalServiceClient
 } from '@app/common';
-import { HttpStatus, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit
+} from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { Cron } from '@nestjs/schedule';
+import axios from 'axios';
 
 @Injectable()
 export class OrdersService implements OnModuleInit {
@@ -62,8 +70,29 @@ export class OrdersService implements OnModuleInit {
     }
   }
 
+  async setLineNotify(message: string): Promise<void> {
+    try {
+      await axios.post(
+        'https://notify-api.line.me/api/notify',
+        { message },
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer 41U6HJq0N1chNIjynWGCp5BEIbrABjEQX15DcUrBoSd`,
+          },
+        }
+      )
+    } catch (error) {
+      throw error
+    }
+  }
+
+  @Cron('0 */5 * * * *', {
+    timeZone: 'Asia/Bangkok',
+  })
   async debug() {
     try {
+      this.logger.debug(new Date())
       const orders = await this.prisma.orders.groupBy({
         by: [
           'symbol',
@@ -78,7 +107,7 @@ export class OrdersService implements OnModuleInit {
         message: 'not found orders'
       }
 
-      orders.map(async (item) => {
+      const processOrder = orders.map(async (item) => {
         const symbol = {
           ema: item.ema,
           symbol: item.symbol,
@@ -88,18 +117,25 @@ export class OrdersService implements OnModuleInit {
           const value = await firstValueFrom(this.signalServiceClient.ema(symbol))
           if (value.positions) {
             const orders = await this.queryOrders({ symbol: item.symbol, ema: item.ema, type: item.type })
-            this.logger.debug(orders)
             /// Open Orders ////
+            let result: string = `${value.positions} ${item.symbol} EMA ${new Date()}`
+            await this.setLineNotify(result)
+            this.logger.debug(result)
           }
+          await this.setLineNotify('ไม่มี EMA')
         } else if (item.type === 'CDC') {
           const value = await firstValueFrom(this.signalServiceClient.cdcActionZone(symbol))
           if (value.positions) {
             const orders = await this.queryOrders({ symbol: item.symbol, type: item.type })
-            this.logger.debug(orders)
-            this.logger.debug(item.symbol)
+            let result: string = `${value.positions} ${item.symbol} CDC ${new Date()}`
+            await this.setLineNotify(result)
+            this.logger.debug(result)
           }
+          await this.setLineNotify('ไม่มี CDC')
         }
       })
+
+      await Promise.all(processOrder)
 
       return {
         statusCode: HttpStatus.OK,

@@ -4,6 +4,7 @@ import {
   AUTH_SERVICE_NAME,
   AuthServiceClient,
   ConfirmOTPDto,
+  EmailResponse,
   SigninDto,
   SignupDto,
   ValidateDto
@@ -22,8 +23,12 @@ export class AuthClientService implements OnModuleInit {
     this.authServiceClient = this.client.getService<AuthServiceClient>(AUTH_SERVICE_NAME)
   }
 
-  signup(request: SignupDto) {
-    return this.authServiceClient.signup(request)
+  async signup(request: SignupDto) {
+    try {
+      return this.authServiceClient.signup(request)
+    } catch (error) {
+      throw error
+    }
   }
 
   signin(request: SigninDto) {

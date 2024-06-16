@@ -20,7 +20,6 @@ export class SignalService implements OnModuleInit {
   private readonly logger = new Logger(SignalService.name)
   private exchange: ccxt.Exchange
 
-
   constructor(
     @InjectRepository(Positions)
     private readonly positionRepository: Repository<Positions>,
@@ -29,6 +28,7 @@ export class SignalService implements OnModuleInit {
   onModuleInit() {
     this.exchange = new ccxt.binance();
   }
+
   async calculate(data: number[], ema: number) {
     try {
       if (data.length < ema) return null;
@@ -68,19 +68,21 @@ export class SignalService implements OnModuleInit {
     }
   }
 
-  async saveSymbol(symbol: string, type: string): Promise<Positions> {
+  async saveSymbol(symbol: string, type: string, ema?: number): Promise<Positions> {
     try {
-      let posi = await this.positionRepository.findOne({
+      let position = await this.positionRepository.find({
         where: {
           symbol,
-          type
+          type,
+          ema: ema ? ema : null
         }
       })
+      let posi = position[0]
       if (!posi) {
-        posi = await this.positionRepository.save({
-          symbol,
-        })
+        posi = this.positionRepository.create({ symbol, type })
+        await this.positionRepository.save(posi)
       }
+
       return posi
     } catch (error) {
       throw error
@@ -139,7 +141,7 @@ export class SignalService implements OnModuleInit {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
-      const ohlcv = await this.exchange.fetchOHLCV(dto.symbol, dto.timeframe, undefined, 52)
+      const ohlcv = await this.exchange.fetchOHLCV(dto.symbol, dto.timeframe, undefined, dto.ema * 2)
       const data = ohlcv.map((data) => data[4])
       // const response = await firstValueFrom(this.indicatorsServiceClient.fetchPrice(dto))
       // const data = JSON.parse(response.candles).slice(0, -1).map((data: any[]) => parseFloat(data[4]))
@@ -149,28 +151,27 @@ export class SignalService implements OnModuleInit {
         this.calculate(data.slice(0, -1), 15)
       ])
 
-      const posi = await this.saveSymbol(dto.symbol, 'EMA')
+      const posi = await this.saveSymbol(dto.symbol, 'EMA', dto.ema)
 
       if (emaPreviousDay.ema > emaPreviousDay.lastPrice) {
         await this.updatePosition({ symbol: dto.symbol, position: 'Short', type: 'EMA' })
-        if (posi.position === 'Long' || emaCurrentDay.ema < emaCurrentDay.lastPrice)
-          await this.setLineNotify(`Open LONG EMA`)
-        return {
-          positions: 'Long'
+        if (posi.position === 'Long' || emaCurrentDay.ema < emaCurrentDay.lastPrice) {
+          return {
+            positions: 'Long'
+          }
         }
       }
 
       if (emaPreviousDay.ema < emaPreviousDay.lastPrice) {
         await this.updatePosition({ symbol: dto.symbol, position: 'Long', type: 'EMA' })
-        if (posi.position === 'Short' || emaCurrentDay.ema > emaCurrentDay.lastPrice)
-          await this.setLineNotify(`Open SHORT EMA`)
-        return {
-          positions: 'Short'
+        if (posi.position === 'Short' || emaCurrentDay.ema > emaCurrentDay.lastPrice) {
+          return {
+            positions: 'Short'
+          }
         }
       }
-      await this.setLineNotify(`don't have signal`)
 
-      return { positions: '' }
+      return { positions: null }
 
     } catch (error) {
       throw error

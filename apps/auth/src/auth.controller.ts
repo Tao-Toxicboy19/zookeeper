@@ -7,7 +7,7 @@ import {
   SignupDto,
   ValidateDto
 } from '@app/common';
-import { ConfirmOTPDto } from '@app/common/types/auth';
+import { ConfirmOTPDto } from '@app/common/types/auth/auth';
 
 @Controller()
 @AuthServiceControllerMethods()

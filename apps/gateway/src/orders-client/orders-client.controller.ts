@@ -41,14 +41,15 @@ export class OrdersClientController {
 
     @Post('read')
     async findAll(page: number = 1, pageSize: number = 50) {
-        return await this.prisma.orders.groupBy({
-            by: [
-                'symbol',
-                'ema',
-                'timeframe',
-                'type'
-            ]
-        })
+        return await this.prisma.orders.deleteMany({ where: { id: 'a137ae21-bab3-4636-bf39-06c868659041' } })
+        // return await this.prisma.orders.groupBy({
+        //     by: [
+        //         'symbol',
+        //         'ema',
+        //         'timeframe',
+        //         'type'
+        //     ]
+        // })
         // return await this.prisma.orders.findMany()
         // return await this.prisma.orders.deleteMany()
         // const skip = (page - 1) * pageSize;

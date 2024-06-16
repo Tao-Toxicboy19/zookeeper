@@ -1,6 +1,14 @@
-export * from './jew-payload.type'
-export * from './token.type'
-export * from './indicator.type'
+export * from './indicator'
+
+export {
+    OrdersDto,
+    OrderResponse,
+    ORDERS_PACKAGE_NAME,
+    OrdersServiceClient,
+    OrdersServiceController,
+    OrdersServiceControllerMethods,
+    ORDERS_SERVICE_NAME,
+} from './orders'
 
 export {
     SignalDto,
@@ -26,6 +34,8 @@ export {
     AUTH_PACKAGE_NAME,
     ConfirmOTPDto,
     EmailResponse,
+    JwtPayload,
+    Tokens
 } from './auth'
 
 export {
@@ -48,15 +58,7 @@ export {
     ExchangeServiceControllerMethods,
 } from './exchange'
 
-export {
-    OrdersDto,
-    OrderResponse,
-    ORDERS_PACKAGE_NAME,
-    OrdersServiceClient,
-    OrdersServiceController,
-    OrdersServiceControllerMethods,
-    ORDERS_SERVICE_NAME,
-} from './orders'
+
 
 export {
     CreateKeyDto,

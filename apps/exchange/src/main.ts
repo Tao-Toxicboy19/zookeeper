@@ -14,7 +14,6 @@ async function bootstrap() {
     options: {
       protoPath: join(__dirname, '../exchange.proto'),
       package: EXCHANGE_PACKAGE_NAME,
-      // url: 'localhost:5003'
       url: configService.get<string>('GRPC_URL')
     }
   })

@@ -1,28 +1,36 @@
-FROM node:alpine As development
+### Gateway - Build Stage
+FROM node:20-alpine as build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# RUN npm install
+# Install all dependencies (including dev dependencies)
 RUN npm install --force
 
+# Generate Prisma Client
+RUN npx prisma generate
 
-COPY . .
+# Copy the entire project
+COPY . ./
 
+# Build the project
 RUN npm run build
 
-FROM node:alpine as production
+### Gateway - Production Stage
+FROM node:20-alpine
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+WORKDIR /app
 
-WORKDIR /usr/src/app
+# Copy package.json and package-lock.json from build stage
+COPY --from=build /app/package*.json ./
 
-COPY package*.json ./
+# Install production dependencies
+RUN npm install --only=production --force
 
-RUN npm install --only=production
+# Copy built files from build stage
+COPY --from=build /app/dist ./dist
 
-COPY . .
-
-COPY --from=development /usr/src/app/dist ./dist
+# Command to start the application
+CMD ["node", "dist/apps/gateway/src/main.js"]

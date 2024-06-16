@@ -5,7 +5,7 @@ export class Positions {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({ unique: true })
+    @Column()
     symbol: string
 
     @Column({ nullable: true })

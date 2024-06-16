@@ -1,4 +1,16 @@
-import { ConfirmOTPDto, EmailResponse, JwtPayload, PrismaService, RedisService, SigninDto, SignupDto, TokenResponse, Tokens, UserResponse, ValidateDto } from '@app/common'
+import {
+  ConfirmOTPDto,
+  EmailResponse,
+  JwtPayload,
+  PrismaService,
+  RedisService,
+  SigninDto,
+  SignupDto,
+  TokenResponse,
+  Tokens,
+  UserResponse,
+  ValidateDto
+} from '@app/common'
 import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
