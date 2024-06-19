@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { KeyController } from './key.controller';
 import { KeyService } from './key.service';
-import { EXCHANGE_PACKAGE_NAME, PrismaService } from '@app/common';
+import { DatabaseModule, EXCHANGE_PACKAGE_NAME, PrismaService } from '@app/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { KeysRepository } from './key.repository';
+import { MongooseModule } from '@nestjs/mongoose';
+import { KeySchema, Keys } from './schemas/key.schema';
 
 @Module({
   imports: [
@@ -27,11 +30,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         inject: [ConfigService],
       },
     ]),
+    MongooseModule.forFeature([{ name: Keys.name, schema: KeySchema }]),
+    DatabaseModule,
   ],
   controllers: [KeyController],
   providers: [
     KeyService,
-    PrismaService,
+    KeysRepository,
   ],
 })
 export class KeyModule { }

@@ -14,7 +14,6 @@ async function bootstrap() {
     options: {
       protoPath: join(__dirname, '../key.proto'),
       package: KEY_PACKAGE_NAME,
-      // url: 'localhost:5005'
       url: configService.get<string>('GRPC_URL')
     }
   })

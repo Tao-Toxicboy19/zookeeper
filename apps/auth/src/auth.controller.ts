@@ -8,14 +8,18 @@ import {
   ValidateDto
 } from '@app/common';
 import { ConfirmOTPDto } from '@app/common/types/auth/auth';
+import { UsersService } from './users/users.service';
 
 @Controller()
 @AuthServiceControllerMethods()
 export class AuthController implements AuthServiceController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) { }
 
   signup(request: SignupDto) {
-    return this.authService.signup(request)
+    return this.userService.signup(request)
   }
 
   signin(request: SigninDto) {

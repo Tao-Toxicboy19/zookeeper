@@ -3,9 +3,12 @@ import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { EXCHANGE_PACKAGE_NAME, PrismaService, SIGNAL_PACKAGE_NAME } from '@app/common';
+import { DatabaseModule, EXCHANGE_PACKAGE_NAME, PrismaService, SIGNAL_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule'
+import { MongooseModule } from '@nestjs/mongoose';
+import { OrderSchema, Orders } from './schemas/order.schema';
+import { OrdersRepository } from './order.repository';
 
 @Module({
   imports: [
@@ -42,10 +45,13 @@ import { ScheduleModule } from '@nestjs/schedule'
         inject: [ConfigService],
       },
     ]),
+    MongooseModule.forFeature([{ name: Orders.name, schema: OrderSchema }]),
+    DatabaseModule,
   ],
   controllers: [OrdersController],
   providers: [
     OrdersService,
+    OrdersRepository,
     PrismaService,
   ],
 })

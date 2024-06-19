@@ -52,17 +52,6 @@
         "watchAssets": true
       }
     },
-    "mail": {
-      "type": "application",
-      "root": "apps/mail",
-      "entryFile": "src/main",
-      "sourceRoot": "./",
-      "compilerOptions": {
-        "tsConfigPath": "apps/mail/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
-        "watchAssets": true
-      }
-    },
     "exchange": {
       "type": "application",
       "root": "apps/exchange",

@@ -2,10 +2,8 @@ import {
   ConfirmOTPDto,
   EmailResponse,
   JwtPayload,
-  PrismaService,
   RedisService,
   SigninDto,
-  SignupDto,
   TokenResponse,
   Tokens,
   UserResponse,
@@ -16,27 +14,29 @@ import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { ProducerService } from './producer/producer.service'
 import * as bcrypt from 'bcrypt'
+import { UsersService } from './users/users.service'
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name)
 
   constructor(
-    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly producerService: ProducerService,
     private readonly redisService: RedisService,
+    private readonly userService: UsersService,
   ) { }
 
   onModuleInit() { }
 
   async validateUser(dto: ValidateDto): Promise<UserResponse> {
-    const user = await this.prisma.users.findUnique({ where: { username: dto.username } })
+    const user = await this.userService.validateUser(dto.username)
     if (user && await bcrypt.compare(dto.password, user.password)) {
       return {
         username: user.username,
-        sub: user.id,
+        sub: new ObjectId(user._id).toHexString()
       }
     }
     return {
@@ -45,47 +45,9 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async signup(dto: SignupDto): Promise<EmailResponse> {
-    try {
-      const [existUser, existEmail] = await Promise.all([
-        this.prisma.users.findUnique({ where: { username: dto.username } }),
-        this.prisma.users.findUnique({ where: { email: dto.email } })
-      ])
-
-      if (existUser || existEmail) {
-        if (existEmail && existUser) {
-          return {
-            statusCode: HttpStatus.CONFLICT,
-            message: `User and email already exists`
-          }
-        }
-        return {
-          statusCode: HttpStatus.CONFLICT,
-          message: `${existEmail ? 'Email' + existEmail.email : 'User' + existUser.username} already exists`
-        }
-      }
-
-      const hash = await bcrypt.hash(dto.password, 12)
-
-      const user = {
-        ...dto,
-        id: dto.uuid,
-        password: hash
-      }
-
-      await this.producerService.sendSignup(JSON.stringify(user))
-
-      return {
-        email: dto.email
-      }
-    } catch (error) {
-      throw error
-    }
-  }
-
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
-      const user = await this.prisma.users.findUnique({ where: { id: dto.userId } })
+      const user = await this.userService.validateUser(dto.username)
       await this.producerService.sendMail(JSON.stringify(user))
       return {
         email: user.email

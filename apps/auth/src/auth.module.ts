@@ -4,7 +4,8 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { ProducerModule } from './producer/producer.module';
-import { PrismaService, RedisModule } from '@app/common';
+import { DatabaseModule, RedisModule } from '@app/common';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -15,11 +16,12 @@ import { PrismaService, RedisModule } from '@app/common';
     }),
     ProducerModule,
     RedisModule,
+    UsersModule,
+    DatabaseModule,
   ],
   controllers: [AuthController],
   providers: [
     AuthService,
-    PrismaService,
   ],
 })
 export class AuthModule { }

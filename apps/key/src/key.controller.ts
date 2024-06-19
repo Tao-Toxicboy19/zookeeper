@@ -15,10 +15,7 @@ export class KeyController implements KeyServiceController {
   }
 
   getKey(request: KeyUserId): KeyResponse | Promise<KeyResponse> | Observable<KeyResponse> {
-    return {
-      apiKey: 'te',
-      secretKey: 'test'
-    }
+    return this.keyService.getKey(request.userId)
   }
 
 }

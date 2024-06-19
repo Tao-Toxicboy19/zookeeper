@@ -1,4 +1,4 @@
-import { KeyServiceClient, KEY_PACKAGE_NAME, KEY_SERVICE_NAME, CreateKeyDto } from '@app/common';
+import { KeyServiceClient, KEY_PACKAGE_NAME, KEY_SERVICE_NAME, CreateKeyDto, KeyUserId } from '@app/common';
 import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { OrdersService } from 'apps/orders/src/orders.service';
@@ -18,5 +18,9 @@ export class KeyClientService implements OnModuleInit {
 
     create(request: CreateKeyDto) {
         return this.keyServiceClient.createKey(request)
+    }
+
+    getKey(request: KeyUserId) {
+        return this.keyServiceClient.getKey(request)
     }
 }

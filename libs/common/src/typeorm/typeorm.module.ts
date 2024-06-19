@@ -4,13 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
     imports: [
         TypeOrmModule.forRoot({
-            type: 'mongodb',
-            url: 'mongodb://admin:password@localhost:27017/zookeeper?authSource=admin',
-            entities: [('../entities/**.entity{.ts.js}')],
+            type: 'postgres',
+            url: '',
+            autoLoadEntities: true,
             synchronize: true,
-            useNewUrlParser: true,
-            logging: true,
-        }),
+            entities:[('../entities/**.entity{.ts.js}')]
+         })
     ]
 })
 export class TypeormModule { }

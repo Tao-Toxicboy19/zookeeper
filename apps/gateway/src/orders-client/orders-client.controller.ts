@@ -3,6 +3,7 @@ import { OrdersClientService } from './orders-client.service';
 import { OrderDto } from './dto';
 import { JwtAuthGuard, JwtPayload, PrismaService } from '@app/common';
 import { randomUUID } from 'crypto';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('orders')
 export class OrdersClientController {
@@ -28,15 +29,16 @@ export class OrdersClientController {
         return this.status
     }
 
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
     @Post('create')
-    createOrder(
+    async createOrder(
         @Body() dto: OrderDto,
         @Req() req: { user: JwtPayload }
     ) {
-        console.log('hello world')
-        // return this.ordersClientService.createOrder({ ...dto, userId: "81a048a1-41af-4d09-a8fd-2031a252c2fc" })
-        return this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
+        let result = await firstValueFrom(this.ordersClientService.createOrder({ ...dto, userId: '163d8bfb-ccd8-4fbd-812e-3cc41c79ed21' }))
+        console.log(result)
+        return result
+        // return this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
     }
 
     @Post('read')

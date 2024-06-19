@@ -230,24 +230,3 @@ export class OrdersService implements OnModuleInit {
     }
   }
 }
-
-// const symbol = {
-//   ema: 15,
-//   symbol: 'BTCUSDT',
-//   timeframe: '5m'
-// }
-// const data = await firstValueFrom(this.signalServiceClient.ema(symbol))
-// this.logger.debug(data)
-
-
-//// ไม่เอาแล้ว
-//   const existSymbol = await tx.symbols.findUnique({ where: { symbol: dto.symbol } })
-//   if (!existSymbol) {
-//     await tx.symbols.create({
-//       data: {
-//         id: randomUUID(),
-//         symbol: dto.symbol
-//       }
-//     })
-//   }
-/////////////////////////

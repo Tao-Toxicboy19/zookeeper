@@ -1,0 +1,208 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: zookeeper
+      POSTGRES_PASSWORD: testpass123
+      POSTGRES_USER: postgres
+    ports:
+      - '3500:5432'
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+    restart: always
+
+    mongodb-primary:
+      image: docker.io/bitnami/mongodb:5.0
+      environment:
+        - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+        - MONGODB_REPLICA_SET_MODE=primary
+        - MONGODB_ROOT_PASSWORD=password123
+        - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      volumes:
+        - 'mongodb_master_data:/bitnami/mongodb'
+      ports:
+        - '27017:27017'
+      restart: always
+
+    mongodb-secondary:
+      image: docker.io/bitnami/mongodb:5.0
+      depends_on:
+        - mongodb-primary
+      environment:
+        - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+        - MONGODB_REPLICA_SET_MODE=secondary
+        - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+        - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+        - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      restart: always
+
+    mongodb-arbiter:
+      image: docker.io/bitnami/mongodb:5.0
+      depends_on:
+        - mongodb-primary
+      environment:
+        - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+        - MONGODB_REPLICA_SET_MODE=arbiter
+        - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+        - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
+        - MONGODB_REPLICA_SET_KEY=replicasetkey123
+      restart: always
+
+  # mongo:
+  #   image: mongo
+  #   restart: always
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: example
+  #   ports:
+  #     - '27017:27017'
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: mikelopster
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    restart: always
+
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    restart: always
+
+  # exchange-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/exchange/Dockerfile
+  #   environment:
+  #     GRPC_URL: localhost:5003
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - postgres
+  #     - rabbitmq
+  #     - redis
+
+  # gateway-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/gateway/Dockerfile
+  #   environment:
+  #     NODE_ENV: production
+  #     AT_SECRET: AFA9C871D7C6ACD3D9DA62D47DDA5
+  #     RT_SECRET: 3A21D1D8DF367F68D4199CD2DE3B5
+  #     PORT: 3000
+  #     AUTH_SERVICE_URL: http://auth-service:5002
+  #     KEY_SERVICE_URL: http://key-service:5005
+  #     ORDERS_SERVICE_URL: http://orders-service:5004
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - '4000:3000'
+
+  # amqp-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/amqp/Dockerfile
+  #   environment:
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     MAIL_SERVICE_URL: http://mail-service:5001
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+
+  # auth-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/auth/Dockerfile
+  #   environment:
+  #     AT_SECRET: AFA9C871D7C6ACD3D9DA62D47DDA5
+  #     RT_SECRET: 3A21D1D8DF367F68D4199CD2DE3B5
+  #     REDIS_URL: redis
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     GRPC_URL: localhost:5002
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+
+  # key-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/key/Dockerfile
+  #   environment:
+  #     EXCHANGE_SERVICE_URL: exchange-service:5003
+  #     GRPC_URL: localhost:5005
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+
+  # mail-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/mail/Dockerfile
+  #   environment:
+  #     USERNAME_EMAIL: themanpoolbot@gmail.com
+  #     PASSWORD_EMAIL: jvpp fujd ecvy pifo
+  #     REDIS_URL: redis
+  #     GRPC_URL: localhost:5001
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+
+  # orders-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/orders/Dockerfile
+  #   environment:
+  #     GRPC_URL: localhost:5004
+  #     EXCHANGE_SERVICE_URL: exchange-service:5003
+  #     SIGNAL_SERVICE_URL: signal-service:5007
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+
+  # signal-service:
+  #   container_name: signal-service
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/signal/Dockerfile
+  #   environment:
+  #     GRPC_URL: localhost:5007
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mongodb_master_data:
+  postgres_data:
