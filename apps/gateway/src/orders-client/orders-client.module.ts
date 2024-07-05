@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { OrdersClientService } from './orders-client.service';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ORDERS_PACKAGE_NAME, PrismaService } from '@app/common';
+import { ORDERS_PACKAGE_NAME } from '@app/common';
 import { join } from 'path';
 import { OrdersClientController } from './orders-client.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -25,6 +25,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ]),
   ],
   controllers: [OrdersClientController],
-  providers: [OrdersClientService, PrismaService],
+  providers: [OrdersClientService],
 })
 export class OrdersClientModule { }

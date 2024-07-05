@@ -1,8 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { KeyClientService } from './key-client.service';
-import { JwtAuthGuard } from '../../../../libs/common/src/guards/jwt-auth.guard';
 import { KeyDto } from './dto';
-import { JwtPayload } from '@app/common';
+import { JwtAuthGuard, JwtPayload } from '@app/common';
 
 @Controller('key')
 export class KeyClientController {

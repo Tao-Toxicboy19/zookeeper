@@ -17,5 +17,7 @@ postgres_data
 node_modules
 proto
 .env
-
+dist
+app.sqlite
+docker-compose.yaml.bak
 docker-compose.yaml

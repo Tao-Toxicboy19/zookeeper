@@ -1,4 +1,4 @@
-import { ORDERS_PACKAGE_NAME, ORDERS_SERVICE_NAME, OrdersDto, OrdersServiceClient } from '@app/common';
+import { ORDERS_PACKAGE_NAME, ORDERS_SERVICE_NAME, OrderResponse, OrdersDto, OrdersServiceClient } from '@app/common';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
@@ -12,10 +12,14 @@ export class OrdersClientService implements OnModuleInit {
     ) { }
 
     onModuleInit() {
-        this.ordersServiceClient = this.client.getService<OrdersClientService>(ORDERS_SERVICE_NAME)
+        this.ordersServiceClient = this.client.getService<OrdersServiceClient>(ORDERS_SERVICE_NAME)
     }
 
-    createOrder(request: OrdersDto) {
-        return this.ordersServiceClient.createOrder(request)
+    async createOrder(request: OrdersDto): Promise<OrderResponse> {
+        try {
+            return await firstValueFrom(this.ordersServiceClient.createOrder(request))
+        } catch (error) {
+            throw error
+        }
     }
 }

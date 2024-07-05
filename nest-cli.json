@@ -63,17 +63,6 @@
         "watchAssets": true
       }
     },
-    "orders": {
-      "type": "application",
-      "root": "apps/orders",
-      "entryFile": "src/main",
-      "sourceRoot": "./",
-      "compilerOptions": {
-        "tsConfigPath": "apps/orders/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
-        "watchAssets": true
-      }
-    },
     "key": {
       "type": "application",
       "root": "apps/key",
@@ -81,17 +70,6 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/key/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
-        "watchAssets": true
-      }
-    },
-    "signal": {
-      "type": "application",
-      "root": "apps/signal",
-      "entryFile": "src/main",
-      "sourceRoot": "./",
-      "compilerOptions": {
-        "tsConfigPath": "apps/signal/tsconfig.app.json",
         "assets": ["proto/*.proto"],
         "watchAssets": true
       }

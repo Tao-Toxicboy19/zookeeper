@@ -76,8 +76,12 @@ export class AuthClientController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response
   ) {
-    const { accessToken, refreshToken, statusCode, message } = await firstValueFrom(this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id }))
-    if (statusCode) {
+    const {
+      accessToken,
+      refreshToken,
+      statusCode,
+      message } = await firstValueFrom(this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id }))
+    if (statusCode != 200) {
       return {
         statusCode,
         message
