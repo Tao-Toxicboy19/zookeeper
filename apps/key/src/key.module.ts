@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { KeyController } from './key.controller';
 import { KeyService } from './key.service';
-import { DatabaseModule, EXCHANGE_PACKAGE_NAME, PrismaService } from '@app/common';
+import { DatabaseModule, EXCHANGE_PACKAGE_NAME } from '@app/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { ConfigModule, ConfigService } from '@nestjs/config';

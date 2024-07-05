@@ -1,5 +1,5 @@
 import { BadRequestException, HttpStatus, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CreateKeyDto, EXCHANGE_PACKAGE_NAME, EXCHANGE_SERVICE_NAME, ExchangeServiceClient, KeyResponse, PrismaService } from '@app/common';
+import { CreateKeyDto, EXCHANGE_PACKAGE_NAME, EXCHANGE_SERVICE_NAME, ExchangeServiceClient, KeyResponse } from '@app/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { KeysRepository } from './key.repository';
