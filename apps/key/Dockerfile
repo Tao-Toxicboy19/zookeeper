@@ -15,9 +15,6 @@ COPY . ./
 # Build the project
 RUN npm run build
 
-# Generate Prisma Client
-RUN npx prisma generate
-
 ### Key - Production Stage
 FROM node:20-alpine
 

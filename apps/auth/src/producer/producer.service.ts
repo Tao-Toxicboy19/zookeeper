@@ -15,7 +15,6 @@ export class ProducerService {
         this.channelWrapper = connection.createChannel({
             setup: async (channel: Channel) => {
                 Promise.all([
-                    channel.assertQueue('signup', { durable: true }),
                     channel.assertQueue('mail', { durable: true })
                 ])
             }
@@ -31,6 +30,7 @@ export class ProducerService {
     }
 
     async sendMsg(queue: string, msg: string) {
+        console.log('hello world')
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
             return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true, })
         })

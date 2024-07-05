@@ -5,7 +5,6 @@ import { SignupDto } from './dto'
 import { JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
 import { OtpDto } from './dto/otp.dto'
 import { randomUUID } from 'crypto'
-import { firstValueFrom } from 'rxjs'
 
 @Controller('auth')
 export class AuthClientController {
@@ -32,6 +31,7 @@ export class AuthClientController {
     @Req() req: { user: JwtPayload },
     @Res({ passthrough: true }) res: Response,
   ) {
+    console.log(req.user)
     res.cookie('user_id', req.user.sub, {
       httpOnly: true,
       maxAge: 5 * 60 * 1000 // 5m
@@ -81,7 +81,7 @@ export class AuthClientController {
       refreshToken,
       statusCode,
       message } = await this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id })
-    if (statusCode != 200) {
+    if (statusCode) {
       return {
         statusCode,
         message

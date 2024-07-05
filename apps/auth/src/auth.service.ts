@@ -48,7 +48,7 @@ export class AuthService implements OnModuleInit {
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
       const user = await this.userService.validateUser(dto.username)
-      await this.producerService.sendMsg('mail',JSON.stringify(user))
+      await this.producerService.sendMsg('mail', JSON.stringify(user))
       return {
         email: user.email
       }
@@ -59,14 +59,15 @@ export class AuthService implements OnModuleInit {
 
   async confrimOTP(dto: ConfirmOTPDto): Promise<TokenResponse> {
     try {
-      const value = await this.redisService.getValue(dto.userId)
-      const user = JSON.parse(value)
-      if (!value) {
+      const user = JSON.parse(await this.redisService.getValue(dto.userId))
+      console.log(user)
+      if (!user) {
         return {
           statusCode: HttpStatus.BAD_REQUEST,
           message: `don't have otp`
         }
       }
+
       if (dto.otp !== user.otp) {
         return {
           statusCode: HttpStatus.BAD_REQUEST,

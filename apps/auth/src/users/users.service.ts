@@ -36,7 +36,7 @@ export class UsersService {
                 password: hash,
                 createdAt: new Date()
             })
-
+            
             await this.producerService.sendMsg('mail',JSON.stringify(user))
 
             return {

@@ -9,8 +9,7 @@ COPY package*.json ./
 # Install all dependencies (including dev dependencies)
 RUN npm install --force
 
-# Generate Prisma Client
-RUN npx prisma generate
+
 
 # Copy the entire project
 COPY . ./

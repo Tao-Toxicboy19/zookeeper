@@ -9,6 +9,14 @@ async function bootstrap() {
   let configService = configApp.get(ConfigService)
 
   const app = await NestFactory.create(AppModule)
+
+  // Enable CORS for all origins, methods, and headers
+  app.enableCors({
+    allowedHeaders: ['Content-Type', '*'],
+    origin: ['http://localhost:5173', configService.get<string>('CLIEN_URL')],
+    credentials: true,
+  })
+
   app.setGlobalPrefix('api')
   app.useGlobalPipes(new ValidationPipe())
   app.use(cookieParser())

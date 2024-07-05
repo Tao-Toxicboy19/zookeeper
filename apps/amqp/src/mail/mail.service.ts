@@ -16,7 +16,6 @@ export class MailService {
     ) { }
 
     async sendMail(dto: MailDto) {
-        console.log('hello world from mail')
         const user: User = JSON.parse(dto.message)
         try {
             const otp = await this.generateOTP()

@@ -16,14 +16,19 @@ export class ConsumerService implements OnModuleInit {
         private readonly mailService: MailService
     ) {
         const connection = amqp.connect([this.configService.get<string>('RABBIT_MQ_URL')])
-        this.channelWrapper = connection.createChannel()
+        this.channelWrapper = connection.createChannel({
+            setup: async (channel: ConfirmChannel) => {
+                await channel.assertQueue('mail', { durable: true })
+                await channel.assertQueue('orders', { durable: true })
+                this.logger.log('Queues set up successfully')
+            },
+        })
     }
 
     async onModuleInit() {
         this.channelWrapper.addSetup((channel: ConfirmChannel) => {
-            channel.consume('mail', async (msg: ConsumeMessage) => {
-                channel.assertQueue('mail', { durable: true })
-                channel.prefetch(2)
+            const queue = 'mail'
+            channel.consume(queue, async (msg: ConsumeMessage) => {
                 if (msg) {
                     const content: User = JSON.parse(msg.content.toString())
                     await this.mailService.sendMail({
@@ -33,6 +38,17 @@ export class ConsumerService implements OnModuleInit {
                             username: content.username
                         })
                     })
+                    channel.ack(msg)
+                }
+            })
+        })
+
+        this.channelWrapper.addSetup((channel: ConfirmChannel) => {
+            const queue = 'orders'
+            console.log('hello world orders queue')
+            channel.consume(queue, async (msg: ConsumeMessage) => {
+                if (msg) {
+                    this.logger.debug(msg.content.toString())
                     channel.ack(msg)
                 }
             })
