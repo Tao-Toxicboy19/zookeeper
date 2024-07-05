@@ -1,10 +1,10 @@
-import { Module } from '@nestjs/common';
-import { OrdersClientService } from './orders-client.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ORDERS_PACKAGE_NAME } from '@app/common';
-import { join } from 'path';
-import { OrdersClientController } from './orders-client.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common'
+import { OrdersClientService } from './orders-client.service'
+import { ClientsModule, Transport } from '@nestjs/microservices'
+import { ORDERS_PACKAGE_NAME } from '@app/common'
+import { join } from 'path'
+import { OrdersClientController } from './orders-client.controller'
+import { ConfigModule, ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [

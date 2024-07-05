@@ -1,11 +1,11 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res } from '@nestjs/common';
-import { AuthClientService } from './auth-client.service';
-import { Request, Response } from 'express';
-import { SignupDto } from './dto';
-import { JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common';
-import { OtpDto } from './dto/otp.dto';
-import { randomUUID } from 'crypto';
-import { firstValueFrom } from 'rxjs';
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res } from '@nestjs/common'
+import { AuthClientService } from './auth-client.service'
+import { Request, Response } from 'express'
+import { SignupDto } from './dto'
+import { JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
+import { OtpDto } from './dto/otp.dto'
+import { randomUUID } from 'crypto'
+import { firstValueFrom } from 'rxjs'
 
 @Controller('auth')
 export class AuthClientController {
@@ -49,10 +49,10 @@ export class AuthClientController {
     const {
       accessToken,
       refreshToken
-    } = await firstValueFrom(this.authClientService.refreshToken({
+    } = await this.authClientService.refreshToken({
       userId: req.user.sub,
       username: req.user.username
-    }))
+    })
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,
@@ -80,7 +80,7 @@ export class AuthClientController {
       accessToken,
       refreshToken,
       statusCode,
-      message } = await firstValueFrom(this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id }))
+      message } = await this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id })
     if (statusCode != 200) {
       return {
         statusCode,

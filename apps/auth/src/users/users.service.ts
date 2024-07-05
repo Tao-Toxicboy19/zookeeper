@@ -37,7 +37,7 @@ export class UsersService {
                 createdAt: new Date()
             })
 
-            await this.producerService.sendMail(JSON.stringify(user))
+            await this.producerService.sendMsg('mail',JSON.stringify(user))
 
             return {
                 email: dto.email

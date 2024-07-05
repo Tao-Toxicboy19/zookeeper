@@ -1,10 +1,10 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import amqp, { ChannelWrapper } from "amqp-connection-manager";
+import { Injectable, Logger, OnModuleInit } from "@nestjs/common"
+import { ConfigService } from "@nestjs/config"
+import amqp, { ChannelWrapper } from "amqp-connection-manager"
 import { ConfirmChannel, ConsumeMessage } from "amqplib"
-import { User } from "./connect.type";
-import { MailService } from "./mail/mail.service";
-import { ObjectId } from "mongodb";
+import { User } from "./connect.type"
+import { MailService } from "./mail/mail.service"
+import { ObjectId } from "mongodb"
 
 @Injectable()
 export class ConsumerService implements OnModuleInit {

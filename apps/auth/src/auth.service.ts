@@ -48,7 +48,7 @@ export class AuthService implements OnModuleInit {
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
       const user = await this.userService.validateUser(dto.username)
-      await this.producerService.sendMail(JSON.stringify(user))
+      await this.producerService.sendMsg('mail',JSON.stringify(user))
       return {
         email: user.email
       }

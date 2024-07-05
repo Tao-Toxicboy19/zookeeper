@@ -30,9 +30,9 @@ export class ProducerService {
         })
     }
 
-    async sendMail(msg: string) {
+    async sendMsg(queue: string, msg: string) {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
-            return channel.sendToQueue('mail', Buffer.from(msg), { persistent: true, })
+            return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true, })
         })
     }
 }

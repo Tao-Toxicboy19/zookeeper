@@ -1,7 +1,6 @@
 import {
   BalanceResponse,
   ExchangeResponse,
-  PrismaService,
   ValidateKeyDto
 } from '@app/common';
 import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common';
@@ -13,7 +12,6 @@ export class ExchangeService implements OnModuleInit {
   private readonly logger = new Logger(ExchangeService.name)
 
   constructor(
-    private readonly prisma: PrismaService,
   ) { }
 
   onModuleInit() { }
@@ -29,11 +27,11 @@ export class ExchangeService implements OnModuleInit {
     })
   }
 
-  private async getApiKeys(userId: string): Promise<{ apiKey: string; secret: string }> {
-    const apiKey = await this.prisma.keys.findUnique({ where: { userId: userId } })
-    // this.exchange.watchPositionForSymbols
-    return { apiKey: apiKey.apiKey, secret: apiKey.secretKey }
-  }
+  // private async getApiKeys(userId: string): Promise<{ apiKey: string; secret: string }> {
+  //   const apiKey = await this.prisma.keys.findUnique({ where: { userId: userId } })
+  //   // this.exchange.watchPositionForSymbols
+  //   return { apiKey: apiKey.apiKey, secret: apiKey.secretKey }
+  // }
 
   async validateKey(dto: ValidateKeyDto): Promise<ExchangeResponse> {
     try {

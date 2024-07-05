@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ExchangeController } from './exchange.controller';
 import { ExchangeService } from './exchange.service';
-import { PrismaService } from '@app/common';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -14,7 +13,6 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [ExchangeController],
   providers: [
     ExchangeService,
-    PrismaService,
   ],
 })
 export class ExchangeModule { }

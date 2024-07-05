@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import {
   AUTH_PACKAGE_NAME,
   AUTH_SERVICE_NAME,
@@ -8,8 +8,9 @@ import {
   SigninDto,
   SignupDto,
   ValidateDto
-} from '@app/common';
-import { ClientGrpc } from '@nestjs/microservices';
+} from '@app/common'
+import { ClientGrpc } from '@nestjs/microservices'
+import { firstValueFrom } from 'rxjs'
 
 @Injectable()
 export class AuthClientService implements OnModuleInit {
@@ -25,25 +26,41 @@ export class AuthClientService implements OnModuleInit {
 
   async signup(request: SignupDto) {
     try {
-      return this.authServiceClient.signup(request)
+      return await firstValueFrom(this.authServiceClient.signup(request))
     } catch (error) {
       throw error
     }
   }
 
-  signin(request: SigninDto) {
-    return this.authServiceClient.signin(request)
+  async signin(request: SigninDto) {
+    try {
+      return await firstValueFrom(this.authServiceClient.signin(request))
+    } catch (error) {
+      throw error
+    }
   }
 
-  validate(request: ValidateDto) {
-    return this.authServiceClient.validate(request)
+  async validate(request: ValidateDto) {
+    try {
+      return await firstValueFrom(this.authServiceClient.validate(request))
+    } catch (error) {
+      throw error
+    }
   }
 
-  refreshToken(request: SigninDto) {
-    return this.authServiceClient.refreshToken(request)
+  async refreshToken(request: SigninDto) {
+    try {
+      return await firstValueFrom(this.authServiceClient.refreshToken(request))
+    } catch (error) {
+      throw error
+    }
   }
 
-  confirmOtp(request: ConfirmOTPDto) {
-    return this.authServiceClient.confirmOtp(request)
+  async confirmOtp(request: ConfirmOTPDto) {
+    try {
+      return await firstValueFrom(this.authServiceClient.confirmOtp(request))
+    } catch (error) {
+      throw error
+    }
   }
 }
