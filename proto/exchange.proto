@@ -4,12 +4,17 @@ package exchange;
 
 service ExchangeService {
     rpc ValidateKey (ValidateKeyDto) returns (ExchangeResponse) {}
-    rpc Balance (ValidateKeyDto) returns (BalanceResponse) {}
+    rpc Balance (BalanceDto) returns (BalanceResponse) {}
 }
 
 message ValidateKeyDto {
     string api_key = 1;
-    string secret_key = 2;}
+    string secret_key = 2;
+}
+
+message BalanceDto {
+    string user_id = 1;
+}
 
 message ExchangeResponse {
     int32 statusCode = 1;

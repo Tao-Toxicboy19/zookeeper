@@ -9,13 +9,18 @@ import {
   UserResponse,
   ValidateDto
 } from '@app/common'
-import { HttpStatus, Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { ProducerService } from './producer/producer.service'
 import * as bcrypt from 'bcrypt'
 import { UsersService } from './users/users.service'
-import { ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb'
+import {
+  GrpcInvalidArgumentException,
+  GrpcNotFoundException,
+  GrpcUnauthenticatedException
+} from 'nestjs-grpc-exceptions'
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -39,10 +44,7 @@ export class AuthService implements OnModuleInit {
         sub: new ObjectId(user._id).toHexString()
       }
     }
-    return {
-      message: 'Unauthorized',
-      statusCode: HttpStatus.UNAUTHORIZED
-    }
+    throw new GrpcUnauthenticatedException('User not found.')
   }
 
   async signin(dto: SigninDto): Promise<EmailResponse> {
@@ -60,20 +62,10 @@ export class AuthService implements OnModuleInit {
   async confrimOTP(dto: ConfirmOTPDto): Promise<TokenResponse> {
     try {
       const user = JSON.parse(await this.redisService.getValue(dto.userId))
-      console.log(user)
-      if (!user) {
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: `don't have otp`
-        }
-      }
+      if (!user) throw new GrpcNotFoundException('User not found.')
 
-      if (dto.otp !== user.otp) {
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'otp invalid'
-        }
-      }
+      if (dto.otp !== user.otp) throw new GrpcInvalidArgumentException('OTP invalid.')
+
       const tokens = await this.getTokens(dto.userId, user.user.username)
       return {
         accessToken: tokens.accessToken,

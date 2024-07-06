@@ -6,25 +6,10 @@ import { JwtAuthGuard, JwtPayload } from '@app/common'
 @Controller('orders')
 export class OrdersClientController {
     private readonly logger = new Logger(OrdersClientController.name)
-    private status: null | string
 
     constructor(
         private readonly ordersClientService: OrdersClientService,
     ) { }
-
-    @Get()
-    debug() {
-        if (this.status === "hello") {
-            this.status = "yeah"
-        }
-        if (this.status === "hello") {
-            this.status = "wordl"
-        }
-        if (!this.status) {
-            this.status = "hello"
-        }
-        return this.status
-    }
 
     @UseGuards(JwtAuthGuard)
     @Post('create')

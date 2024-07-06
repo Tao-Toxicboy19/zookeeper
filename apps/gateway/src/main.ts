@@ -16,7 +16,6 @@ async function bootstrap() {
     origin: ['http://localhost:5173', configService.get<string>('CLIEN_URL')],
     credentials: true,
   })
-
   app.setGlobalPrefix('api')
   app.useGlobalPipes(new ValidationPipe())
   app.use(cookieParser())

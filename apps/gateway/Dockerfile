@@ -9,8 +9,6 @@ COPY package*.json ./
 # Install all dependencies (including dev dependencies)
 RUN npm install --force
 
-
-
 # Copy the entire project
 COPY . ./
 

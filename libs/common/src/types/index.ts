@@ -39,6 +39,7 @@ export {
 export {
     ValidateKeyDto,
     BalanceResponse,
+    BalanceDto,
     ExchangeResponse,
     EXCHANGE_PACKAGE_NAME,
     EXCHANGE_SERVICE_NAME,

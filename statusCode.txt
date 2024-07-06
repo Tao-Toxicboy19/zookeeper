@@ -1,0 +1,11 @@
+404 GrpcNotFoundException
+405 GrpcAbortedException
+502 GrpcUnknownException
+500 GrpcInternalException
+404 GrpcUnavailableException
+401 GrpcUnauthenticatedException
+403 GrpcPermissionDeniedException
+422 GrpcInvalidArgumentException
+429 GrpcResourceExhaustedException
+409 GrpcAlreadyExistsException
+405 GrpcCancelledException

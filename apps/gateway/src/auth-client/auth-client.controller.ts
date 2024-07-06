@@ -1,10 +1,11 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors } from '@nestjs/common'
 import { AuthClientService } from './auth-client.service'
 import { Request, Response } from 'express'
 import { SignupDto } from './dto'
 import { JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
 import { OtpDto } from './dto/otp.dto'
 import { randomUUID } from 'crypto'
+import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 
 @Controller('auth')
 export class AuthClientController {
@@ -12,6 +13,7 @@ export class AuthClientController {
 
   constructor(private readonly authClientService: AuthClientService) { }
 
+  @UseInterceptors(GrpcToHttpInterceptor)
   @Post('signup/local')
   signupLocal(
     @Body() dto: SignupDto,
@@ -24,6 +26,7 @@ export class AuthClientController {
     return this.authClientService.signup({ ...dto, uuid: id })
   }
 
+  @UseInterceptors(GrpcToHttpInterceptor)
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('signin/local')
@@ -69,6 +72,7 @@ export class AuthClientController {
     }
   }
 
+  @UseInterceptors(GrpcToHttpInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('confirm/otp')
   async confirmOtp(
@@ -78,15 +82,9 @@ export class AuthClientController {
   ) {
     const {
       accessToken,
-      refreshToken,
-      statusCode,
-      message } = await this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id })
-    if (statusCode) {
-      return {
-        statusCode,
-        message
-      }
-    }
+      refreshToken
+    } = await this.authClientService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id })
+    
     res.cookie('user_id', req.cookies.user_id, {
       httpOnly: true,
     })

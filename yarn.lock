@@ -6032,6 +6032,11 @@ neo-async@^2.6.2:
   resolved "https://registry.yarnpkg.com/neo-async/-/neo-async-2.6.2.tgz#b4aafb93e3aeb2d8174ca53cf163ab7d7308305f"
   integrity sha512-Yd3UES5mWCSqR+qNT93S3UoYUkqAZ9lLg8a7g9rimsWmYGK8cVToA4/sF3RrshdyV3sAGMXVUmpMYOw+dLpOuw==
 
+nestjs-grpc-exceptions@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/nestjs-grpc-exceptions/-/nestjs-grpc-exceptions-0.2.2.tgz#8adc59216c6e22d9ddc68cf309615f852a8bf805"
+  integrity sha512-z0uwcUkeh34nzQ2NA1q8KdeFpRE51OUFjgGuJvNJWx/uRMXQnTp+82OKaPqHDhQnIvi3BRPDSOsNoGc0CcvTBA==
+
 nestjs-proto-gen-ts@^1.0.21:
   version "1.0.21"
   resolved "https://registry.yarnpkg.com/nestjs-proto-gen-ts/-/nestjs-proto-gen-ts-1.0.21.tgz#d1be4f541446c7a9d82254a0fede9a5ad1cc263e"

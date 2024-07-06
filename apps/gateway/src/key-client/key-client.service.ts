@@ -1,5 +1,11 @@
-import { KeyServiceClient, KEY_PACKAGE_NAME, KEY_SERVICE_NAME, CreateKeyDto, KeyUserId } from '@app/common'
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import {
+    KeyServiceClient,
+    KEY_PACKAGE_NAME,
+    KEY_SERVICE_NAME,
+    CreateKeyDto,
+    KeyUserId
+} from '@app/common'
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
 
@@ -23,11 +29,11 @@ export class KeyClientService implements OnModuleInit {
         }
     }
 
-    async getKey(request: KeyUserId) {
-        try {
-            return await firstValueFrom(this.keyServiceClient.getKey(request))
-        } catch (error) {
-            throw error
-        }
-    }
+    // async getKey(request: KeyUserId) {
+    //     try {
+    //         return await firstValueFrom(this.keyServiceClient.getKey(request))
+    //     } catch (error) {
+    //         throw error
+    //     }
+    // }
 }

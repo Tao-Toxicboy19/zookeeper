@@ -1,7 +1,12 @@
 import { Controller, Get, Logger } from '@nestjs/common';
 import { KeyService } from './key.service';
-import { CreateKeyDto, KeyResponse, KeyServiceController, KeyServiceControllerMethods, KeyUserId } from '@app/common';
-import { Observable } from 'rxjs';
+import {
+  CreateKeyDto,
+  KeyResponse,
+  KeyServiceController,
+  KeyServiceControllerMethods,
+  KeyUserId
+} from '@app/common';
 
 @Controller()
 @KeyServiceControllerMethods()
@@ -14,7 +19,7 @@ export class KeyController implements KeyServiceController {
     return this.keyService.create(request)
   }
 
-  getKey(request: KeyUserId): KeyResponse | Promise<KeyResponse> | Observable<KeyResponse> {
+  getKey(request: KeyUserId): Promise<KeyResponse> {
     return this.keyService.getKey(request.userId)
   }
 

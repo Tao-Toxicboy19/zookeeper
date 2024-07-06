@@ -15,6 +15,10 @@ export interface ValidateKeyDto {
   secretKey: string;
 }
 
+export interface BalanceDto {
+  userId: string;
+}
+
 export interface ExchangeResponse {
   statusCode: number;
   message: string;
@@ -31,13 +35,13 @@ export const EXCHANGE_PACKAGE_NAME = "exchange";
 export interface ExchangeServiceClient {
   validateKey(request: ValidateKeyDto): Observable<ExchangeResponse>;
 
-  balance(request: ValidateKeyDto): Observable<BalanceResponse>;
+  balance(request: BalanceDto): Observable<BalanceResponse>;
 }
 
 export interface ExchangeServiceController {
   validateKey(request: ValidateKeyDto): Promise<ExchangeResponse> | Observable<ExchangeResponse> | ExchangeResponse;
 
-  balance(request: ValidateKeyDto): Promise<BalanceResponse> | Observable<BalanceResponse> | BalanceResponse;
+  balance(request: BalanceDto): Promise<BalanceResponse> | Observable<BalanceResponse> | BalanceResponse;
 }
 
 export function ExchangeServiceControllerMethods() {

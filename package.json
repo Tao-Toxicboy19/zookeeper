@@ -56,6 +56,7 @@
     "moment": "^2.30.1",
     "mongodb": "^6.6.1",
     "mongoose": "^8.4.0",
+    "nestjs-grpc-exceptions": "^0.2.2",
     "nestjs-proto-gen-ts": "^1.0.21",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

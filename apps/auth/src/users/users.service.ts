@@ -1,10 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { UsersRepository } from './user.repository';
-import { User } from './schemas/user.schemas';
-import { UserDto } from './dto/user.dto';
-import { EmailResponse } from '@app/common';
+import { Injectable } from '@nestjs/common'
+import { UsersRepository } from './user.repository'
+import { User } from './schemas/user.schemas'
+import { UserDto } from './dto/user.dto'
+import { EmailResponse } from '@app/common'
 import * as bcrypt from 'bcrypt'
-import { ProducerService } from '../producer/producer.service';
+import { ProducerService } from '../producer/producer.service'
+import { GrpcAlreadyExistsException, GrpcInternalException } from 'nestjs-grpc-exceptions'
 
 @Injectable()
 export class UsersService {
@@ -18,15 +19,9 @@ export class UsersService {
             const existUser = await this.validateUser(dto.username)
             const existEmail = await this.validateEmail(dto.email)
             if (existUser) {
-                return {
-                    statusCode: HttpStatus.CONFLICT,
-                    message: `email already exists`
-                }
+                throw new GrpcAlreadyExistsException("User already exists.")
             } else if (existEmail) {
-                return {
-                    statusCode: HttpStatus.CONFLICT,
-                    message: `email already exists`
-                }
+                throw new GrpcAlreadyExistsException("Email already exists.")
             }
 
             const hash = await bcrypt.hash(dto.password, 12)
@@ -36,14 +31,14 @@ export class UsersService {
                 password: hash,
                 createdAt: new Date()
             })
-            
-            await this.producerService.sendMsg('mail',JSON.stringify(user))
+
+            await this.producerService.sendMsg('mail', JSON.stringify(user))
 
             return {
                 email: dto.email
             }
         } catch (error) {
-            throw error
+            throw new GrpcInternalException(error)
         }
     }
 
