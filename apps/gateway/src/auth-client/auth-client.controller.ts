@@ -34,7 +34,6 @@ export class AuthClientController {
     @Req() req: { user: JwtPayload },
     @Res({ passthrough: true }) res: Response,
   ) {
-    console.log(req.user)
     res.cookie('user_id', req.user.sub, {
       httpOnly: true,
       maxAge: 5 * 60 * 1000 // 5m

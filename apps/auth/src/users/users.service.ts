@@ -19,9 +19,9 @@ export class UsersService {
             const existUser = await this.validateUser(dto.username)
             const existEmail = await this.validateEmail(dto.email)
             if (existUser) {
-                throw new GrpcAlreadyExistsException("User already exists.")
+                throw new GrpcAlreadyExistsException('User already exists.')
             } else if (existEmail) {
-                throw new GrpcAlreadyExistsException("Email already exists.")
+                throw new GrpcAlreadyExistsException('Email already exists.')
             }
 
             const hash = await bcrypt.hash(dto.password, 12)
@@ -38,7 +38,7 @@ export class UsersService {
                 email: dto.email
             }
         } catch (error) {
-            throw new GrpcInternalException(error)
+            throw error
         }
     }
 

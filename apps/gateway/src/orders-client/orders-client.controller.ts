@@ -11,12 +11,14 @@ export class OrdersClientController {
         private readonly ordersClientService: OrdersClientService,
     ) { }
 
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
     @Post('create')
     async createOrder(
         @Body() dto: OrderDto,
         @Req() req: { user: JwtPayload }
     ) {
-        return await this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
+        return await this.ordersClientService.createOrder({ ...dto, userId: '66878a7a4b14bfa599308738' })
     }
 }
+
+// return await this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
