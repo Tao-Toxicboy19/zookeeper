@@ -1,11 +1,16 @@
-import { Module } from '@nestjs/common';
-import { MailService } from './mail.service';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ConfigService } from '@nestjs/config';
-import { RedisModule } from '@app/common';
+import { Module, forwardRef } from '@nestjs/common'
+import { MailService } from './mail.service'
+import { MailerModule } from '@nestjs-modules/mailer'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { RedisModule } from '@app/common'
+import { MailConsumerService } from './mail.consumer'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: './apps/mail/.env',
+    }),
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         transport: {
@@ -22,7 +27,10 @@ import { RedisModule } from '@app/common';
     }),
     RedisModule,
   ],
-  providers: [MailService],
+  providers: [
+    MailService,
+    MailConsumerService,
+  ],
   exports: [MailService]
 })
 export class MailModule { }

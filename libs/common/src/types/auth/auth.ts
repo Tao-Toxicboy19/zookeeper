@@ -21,6 +21,7 @@ export interface EmailResponse {
   email?: string | undefined;
   statusCode?: number | undefined;
   message?: string | undefined;
+  userId?: string | undefined;
 }
 
 export interface TokenResponse {
@@ -43,7 +44,6 @@ export interface SigninDto {
 }
 
 export interface SignupDto {
-  uuid: string;
   username: string;
   password: string;
   email: string;

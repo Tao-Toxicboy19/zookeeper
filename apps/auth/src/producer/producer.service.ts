@@ -6,6 +6,7 @@ import { ConfirmChannel } from 'amqplib';
 @Injectable()
 export class ProducerService {
     private readonly channelWrapper: ChannelWrapper
+    private readonly mailQueue: string = 'mail_queue'
     private readonly logger = new Logger(ProducerService.name)
 
     constructor(
@@ -15,7 +16,7 @@ export class ProducerService {
         this.channelWrapper = connection.createChannel({
             setup: async (channel: Channel) => {
                 Promise.all([
-                    channel.assertQueue('mail', { durable: true })
+                    channel.assertQueue(this.mailQueue, { durable: true })
                 ])
             }
         })
@@ -29,10 +30,9 @@ export class ProducerService {
         })
     }
 
-    async sendMsg(queue: string, msg: string) {
-        console.log('hello world')
+    async sendMsg(msg: string) {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
-            return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true, })
+            return channel.sendToQueue(this.mailQueue, Buffer.from(msg), { persistent: true, })
         })
     }
 }

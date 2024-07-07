@@ -50,7 +50,7 @@ export class AuthService implements OnModuleInit {
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
       const user = await this.userService.validateUser(dto.username)
-      await this.producerService.sendMsg('mail', JSON.stringify(user))
+      await this.producerService.sendMsg(JSON.stringify(user))
       return {
         email: user.email
       }
@@ -62,6 +62,7 @@ export class AuthService implements OnModuleInit {
   async confrimOTP(dto: ConfirmOTPDto): Promise<TokenResponse> {
     try {
       const user = JSON.parse(await this.redisService.getValue(dto.userId))
+      console.log(user)
       if (!user) throw new GrpcNotFoundException('User not found.')
 
       if (dto.otp !== user.otp) throw new GrpcInvalidArgumentException('OTP invalid.')

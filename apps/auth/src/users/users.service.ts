@@ -6,6 +6,7 @@ import { EmailResponse } from '@app/common'
 import * as bcrypt from 'bcrypt'
 import { ProducerService } from '../producer/producer.service'
 import { GrpcAlreadyExistsException, GrpcInternalException } from 'nestjs-grpc-exceptions'
+import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class UsersService {
@@ -32,10 +33,11 @@ export class UsersService {
                 createdAt: new Date()
             })
 
-            await this.producerService.sendMsg('mail', JSON.stringify(user))
+            await this.producerService.sendMsg(JSON.stringify(user))
 
             return {
-                email: dto.email
+                email: dto.email,
+                userId: new ObjectId(user._id).toHexString()
             }
         } catch (error) {
             throw error
