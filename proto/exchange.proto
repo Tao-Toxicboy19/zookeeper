@@ -1,10 +1,14 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 package exchange;
 
 service ExchangeService {
     rpc ValidateKey (ValidateKeyDto) returns (ExchangeResponse) {}
     rpc Balance (BalanceDto) returns (BalanceResponse) {}
+    rpc CreateLimitBuy (CreateLimit) returns (google.protobuf.Empty);
+    rpc CreateLimitSell (CreateLimit) returns (google.protobuf.Empty);
+    rpc ClosePosition (CreateLimit) returns (google.protobuf.Empty);
 }
 
 message ValidateKeyDto {
@@ -19,6 +23,15 @@ message BalanceDto {
 message ExchangeResponse {
     int32 statusCode = 1;
     string message = 2;
+}
+
+message CreateLimit{
+    string id = 1;
+    string symbol = 2;
+    int32 leverage =3;
+    int32 quantity = 4;
+    string user_id = 5;
+    optional string position = 6;
 }
 
 message BalanceResponse {

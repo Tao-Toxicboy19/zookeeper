@@ -13,18 +13,20 @@ import {
   Injectable,
   Logger,
   OnModuleInit
-} from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
-import * as ccxt from 'ccxt';
-import { Key } from './type';
-import { firstValueFrom } from 'rxjs';
+} from '@nestjs/common'
+import { ClientGrpc } from '@nestjs/microservices'
+import * as ccxt from 'ccxt'
+import { Key } from './type'
+import { createLimitOrderDto } from './dto/create-limit-order.dto'
 
 @Injectable()
 export class ExchangeService implements OnModuleInit {
   private exchange: ccxt.Exchange
   private keyServiceClient: KeyServiceClient
+  private readonly long: string = "LONG"
+  private readonly short: string = "SHORT"
 
-  private readonly logger = new Logger(ExchangeService.name)
+  private readonly logger: Logger = new Logger(ExchangeService.name)
 
   constructor(
     @Inject(KEY_PACKAGE_NAME) private keyClient: ClientGrpc,
@@ -87,4 +89,65 @@ export class ExchangeService implements OnModuleInit {
       }
     }
   }
+
+  async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
+    try {
+      const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+      await this.createExchange({ apiKey, secretKey })
+      await this.exchange.setLeverage(dto.leverage, dto.symbol)
+      const price = await this.exchange.fetchTicker(dto.symbol)
+      const quantity = (dto.quantity / price.last) * dto.leverage
+      await this.exchange.createLimitBuyOrder(
+        dto.symbol,
+        quantity,
+        price.last,
+        {
+          positionSide: this.long
+        }
+      )
+
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async createLimitSellOrder(dto: createLimitOrderDto): Promise<void> {
+    try {
+      const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+      await this.createExchange({ apiKey, secretKey })
+      await this.exchange.setLeverage(dto.leverage, dto.symbol)
+      const price = await this.exchange.fetchTicker(dto.symbol)
+      const quantity = (dto.quantity / price.last) * dto.leverage
+      await this.exchange.createLimitSellOrder(
+        dto.symbol,
+        quantity,
+        price.last,
+        {
+          positionSide: this.short
+        }
+      )
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async closePosition(dto: createLimitOrderDto): Promise<void> {
+    try {
+      const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+      await this.createExchange({ apiKey, secretKey })
+      const price = await this.exchange.fetchTicker(dto.symbol)
+      const quantity = (dto.quantity / price.last) * dto.leverage
+
+      // if (dto.position === this.long) {
+      //     // Close SHORT
+      //     await this.exchange.createMarketBuyOrder(dto.symbol, quantity, { positionSide: this.short })
+      // } else if (dto.position === this.short) {
+      //     // Close LONG
+      //     await this.exchange.createMarketSellOrder(dto.symbol, quantity, { positionSide: this.long })
+      // }
+    } catch (error) {
+      throw error
+    }
+  }
+
 }

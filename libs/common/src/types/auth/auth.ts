@@ -10,6 +10,14 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "auth";
 
+export interface GetEmailDto {
+  userId: string;
+}
+
+export interface MailResponse {
+  email: string;
+}
+
 export interface ConfirmOTPDto {
   message?: string | undefined;
   statusCode?: number | undefined;
@@ -66,6 +74,8 @@ export interface AuthServiceClient {
   confirmOtp(request: ConfirmOTPDto): Observable<TokenResponse>;
 
   refreshToken(request: SigninDto): Observable<TokenResponse>;
+
+  getEmail(request: GetEmailDto): Observable<MailResponse>;
 }
 
 export interface AuthServiceController {
@@ -78,11 +88,13 @@ export interface AuthServiceController {
   confirmOtp(request: ConfirmOTPDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 
   refreshToken(request: SigninDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
+
+  getEmail(request: GetEmailDto): Promise<MailResponse> | Observable<MailResponse> | MailResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["signin", "signup", "validate", "confirmOtp", "refreshToken"];
+    const grpcMethods: string[] = ["signin", "signup", "validate", "confirmOtp", "refreshToken", "getEmail"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

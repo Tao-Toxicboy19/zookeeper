@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { UsersRepository } from './user.repository'
 import { User } from './schemas/user.schemas'
 import { UserDto } from './dto/user.dto'
-import { EmailResponse } from '@app/common'
+import { EmailResponse, MailResponse } from '@app/common'
 import * as bcrypt from 'bcrypt'
 import { ProducerService } from '../producer/producer.service'
 import { GrpcAlreadyExistsException, GrpcInternalException } from 'nestjs-grpc-exceptions'
@@ -38,6 +38,18 @@ export class UsersService {
             return {
                 email: dto.email,
                 userId: new ObjectId(user._id).toHexString()
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getEmail(userId: string): Promise<MailResponse> {
+        try {
+            const email = await this.usersRepository.findOne({ _id: userId })
+            console.log(email)
+            return {
+                email: 'test@gamil.com'
             }
         } catch (error) {
             throw error

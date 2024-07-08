@@ -1,9 +1,21 @@
-import { BadRequestException, HttpStatus, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CreateKeyDto, EXCHANGE_PACKAGE_NAME, EXCHANGE_SERVICE_NAME, ExchangeServiceClient, KeyResponse } from '@app/common';
-import { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
-import { KeysRepository } from './key.repository';
-import { GrpcAlreadyExistsException, GrpcInvalidArgumentException } from 'nestjs-grpc-exceptions';
+import {
+  HttpStatus,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit
+} from '@nestjs/common'
+import {
+  CreateKeyDto,
+  EXCHANGE_PACKAGE_NAME,
+  EXCHANGE_SERVICE_NAME,
+  ExchangeServiceClient,
+  KeyResponse
+} from '@app/common'
+import { ClientGrpc } from '@nestjs/microservices'
+import { firstValueFrom } from 'rxjs'
+import { KeysRepository } from './key.repository'
+import { GrpcAlreadyExistsException, GrpcInvalidArgumentException } from 'nestjs-grpc-exceptions'
 
 @Injectable()
 export class KeyService implements OnModuleInit {
@@ -22,7 +34,7 @@ export class KeyService implements OnModuleInit {
   async getKey(userId: string): Promise<KeyResponse> {
     try {
       const key = await this.keysRepository.findOne({ userId })
-      if (!key) throw new GrpcAlreadyExistsException('Keys invalid.')
+      if (!key) throw new GrpcInvalidArgumentException('Keys invalid.')
 
       return {
         apiKey: key.apiKey,
@@ -39,8 +51,7 @@ export class KeyService implements OnModuleInit {
       const existKey = await this.keysRepository.findOne({ userId: dto.userId })
       if (existKey) throw new GrpcAlreadyExistsException('Keys already exist for this user.')
 
-      const { apiKey, secretKey } = await this.getKey(dto.userId)
-      const validate = await firstValueFrom(this.exchangeServiceClient.validateKey({ apiKey, secretKey }))
+      const validate = await firstValueFrom(this.exchangeServiceClient.validateKey({ apiKey: dto.apiKey, secretKey: dto.secretKey }))
       if (validate.statusCode !== 200) throw new GrpcInvalidArgumentException(validate.message)
 
       await this.keysRepository.create({
@@ -49,6 +60,7 @@ export class KeyService implements OnModuleInit {
         secretKey: dto.secretKey,
         userId: dto.userId
       })
+      
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Key created successfully',

@@ -1,14 +1,15 @@
-import { Controller } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Controller } from '@nestjs/common'
+import { AuthService } from './auth.service'
 import {
   AuthServiceController,
   AuthServiceControllerMethods,
   SigninDto,
   SignupDto,
   ValidateDto
-} from '@app/common';
-import { ConfirmOTPDto } from '@app/common/types/auth/auth';
-import { UsersService } from './users/users.service';
+} from '@app/common'
+import { ConfirmOTPDto, GetEmailDto, MailResponse } from '@app/common/types/auth/auth'
+import { UsersService } from './users/users.service'
+import { Observable } from 'rxjs'
 
 @Controller()
 @AuthServiceControllerMethods()
@@ -36,6 +37,10 @@ export class AuthController implements AuthServiceController {
 
   confirmOtp(request: ConfirmOTPDto) {
     return this.authService.confrimOTP(request)
+  }
+
+  getEmail(request: GetEmailDto) {
+    return this.userService.getEmail(request.userId)
   }
 
 }

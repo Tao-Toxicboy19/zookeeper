@@ -24,7 +24,9 @@ export {
     ConfirmOTPDto,
     EmailResponse,
     JwtPayload,
-    Tokens
+    Tokens,
+    MailResponse,
+    GetEmailDto,
 } from './auth'
 
 export {
