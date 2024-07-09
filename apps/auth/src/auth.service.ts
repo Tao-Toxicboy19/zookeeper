@@ -62,7 +62,6 @@ export class AuthService implements OnModuleInit {
   async confrimOTP(dto: ConfirmOTPDto): Promise<TokenResponse> {
     try {
       const user = JSON.parse(await this.redisService.getValue(dto.userId))
-      console.log(user)
       if (!user) throw new GrpcNotFoundException('User not found.')
 
       if (dto.otp !== user.otp) throw new GrpcInvalidArgumentException('OTP invalid.')

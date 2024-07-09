@@ -12,15 +12,12 @@ export class NotiOrderQueueService {
 
     async sendMail(dto: MailDto) {
         try {
-            const mailOptions = {
+            const options = {
                 to: dto.email,
                 subject: `open position symbol: ${dto.symbol}`,
                 html: `<h1>open position ${dto.symbol} leverage: ${dto.leverage}</h1>`,
             }
-            await Promise.all([
-                this.mailerService.sendMail(mailOptions),
-            ])
-
+            await this.mailerService.sendMail(options)
         } catch (error) {
             throw error
         }

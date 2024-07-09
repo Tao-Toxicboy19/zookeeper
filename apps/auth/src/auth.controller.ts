@@ -7,9 +7,8 @@ import {
   SignupDto,
   ValidateDto
 } from '@app/common'
-import { ConfirmOTPDto, GetEmailDto, MailResponse } from '@app/common/types/auth/auth'
+import { ConfirmOTPDto, GetEmailDto } from '@app/common/types/auth/auth'
 import { UsersService } from './users/users.service'
-import { Observable } from 'rxjs'
 
 @Controller()
 @AuthServiceControllerMethods()

@@ -28,27 +28,52 @@ services:
       - '6379:6379'
     restart: always
 
-  # gateway-service:
+  gateway-service:
+    build:
+      context: .
+      dockerfile: ./apps/gateway/Dockerfile
+    environment:
+      NODE_ENV: production
+      AT_SECRET: AFA9C871D7C6ACD3D9DA62D47DDA5
+      RT_SECRET: 3A21D1D8DF367F68D4199CD2DE3B5
+      PORT: 3000
+      # AUTH_SERVICE_URL: http://auth-service:5002
+      # KEY_SERVICE_URL: http://key-service:5005
+      # ORDERS_SERVICE_URL: http://orders-service:5004
+    depends_on:
+      - redis
+      - rabbitmq
+    networks:
+      - backend
+    ports:
+      - '4000:3000'
+
+  # auth-service:
   #   build:
   #     context: .
-  #     dockerfile: ./apps/gateway/Dockerfile
+  #     dockerfile: ./apps/auth/Dockerfile
   #   environment:
-  #     NODE_ENV: production
   #     AT_SECRET: AFA9C871D7C6ACD3D9DA62D47DDA5
   #     RT_SECRET: 3A21D1D8DF367F68D4199CD2DE3B5
-  #     PORT: 3000
-  #     AUTH_SERVICE_URL: http://auth-service:5002
-  #     KEY_SERVICE_URL: http://key-service:5005
-  #     ORDERS_SERVICE_URL: http://orders-service:5004
+  #     REDIS_URL: redis
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     GRPC_URL: localhost:50022
+  #     MONGODB_URI: mongodb://root:example@localhost:27017/zookeeper?authSource=admin
   #   depends_on:
   #     - redis
   #     - rabbitmq
   #   networks:
   #     - backend
-  #   ports:
-  #     - '4000:3000'
 
-  # amqp-service:
+networks:
+  backend:
+    driver: bridge
+
+
+
+
+
+# amqp-service:
   #   build:
   #     context: .
   #     dockerfile: ./apps/amqp/Dockerfile
@@ -76,11 +101,3 @@ services:
   #     - rabbitmq
   #   networks:
   #     - backend
-
-networks:
-  backend:
-    driver: bridge
-
-volumes:
-  mongodb_master_data:
-  postgres_data:

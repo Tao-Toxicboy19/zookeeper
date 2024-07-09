@@ -3,12 +3,15 @@ import { NotiOrderQueueConsumer } from './noti-order-queue.consumer'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { NotiOrderQueueService } from './noti-order-queue.service'
+import { ClientsModule, Transport } from '@nestjs/microservices'
+import { AUTH_PACKAGE_NAME } from '@app/common'
+import { join } from 'path'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/mail-queue/.env',
+      envFilePath: './apps/noti-order-queue/.env',
     }),
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
@@ -24,6 +27,21 @@ import { NotiOrderQueueService } from './noti-order-queue.service'
       }),
       inject: [ConfigService],
     }),
+    ClientsModule.registerAsync([
+      {
+        name: AUTH_PACKAGE_NAME,
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.GRPC,
+          options: {
+            package: AUTH_PACKAGE_NAME,
+            protoPath: join(__dirname, '../auth.proto'),
+            url: configService.get<string>('AUTH_SERVICE_URL'),
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
   ],
   controllers: [],
   providers: [

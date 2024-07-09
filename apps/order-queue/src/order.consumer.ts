@@ -31,7 +31,7 @@ export type Order = {
     UpdatedAt: Date
     DeletedAt: null
     Leverage: number
-    UserId: string
+    user_id: string
     Status: null
 }
 
@@ -75,7 +75,7 @@ export class OrderQueueConsumer implements OnModuleInit {
                         this.sendTask(
                             this.notiOrderQueue,
                             JSON.stringify({
-                                user_id: order.order.UserId,
+                                user_id: order.order.user_id,
                                 symbol: order.order.Symbol,
                                 leverage: order.order.Leverage,
                                 quantity: order.order.Quantity,
@@ -97,7 +97,7 @@ export class OrderQueueConsumer implements OnModuleInit {
                     symbol: dto.order.Symbol,
                     leverage: dto.order.Leverage,
                     quantity: dto.order.Quantity,
-                    userId: dto.order.UserId,
+                    userId: dto.order.user_id,
                     position: dto.position
                 }).toPromise()
             } else if (dto.position === 'Short') {
@@ -106,7 +106,7 @@ export class OrderQueueConsumer implements OnModuleInit {
                     symbol: dto.order.Symbol,
                     leverage: dto.order.Leverage,
                     quantity: dto.order.Quantity,
-                    userId: dto.order.UserId,
+                    userId: dto.order.user_id,
                     position: dto.position
                 }).toPromise()
             }

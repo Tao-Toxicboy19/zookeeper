@@ -46,11 +46,8 @@ export class UsersService {
 
     async getEmail(userId: string): Promise<MailResponse> {
         try {
-            const email = await this.usersRepository.findOne({ _id: userId })
-            console.log(email)
-            return {
-                email: 'test@gamil.com'
-            }
+            const { email } = await this.usersRepository.findOne({ _id: userId })
+            return { email }
         } catch (error) {
             throw error
         }

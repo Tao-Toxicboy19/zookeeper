@@ -63,4 +63,8 @@ export class AuthClientService implements OnModuleInit {
       throw error
     }
   }
+
+  async getEmail() {
+    return this.authServiceClient.getEmail({ userId: 'uset' })
+  }
 }
