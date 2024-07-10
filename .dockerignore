@@ -14,10 +14,8 @@ README.md
 readme.txt
 
 postgres_data
-node_modules
-proto
+mongo
+
 .env
-dist
 app.sqlite
 docker-compose.yaml.bak
-docker-compose.yaml

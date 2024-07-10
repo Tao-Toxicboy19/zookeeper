@@ -26,9 +26,6 @@ COPY --from=build /app/package*.json ./
 # Install production dependencies
 RUN npm install --only=production --force
 
-# Copy generated Prisma Client
-COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
-
 # Copy built files from build stage
 COPY --from=build /app/dist ./dist
 

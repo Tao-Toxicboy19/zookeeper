@@ -1,59 +1,35 @@
-# ### Gateway - Build Stage
-# FROM node:20-alpine as build
+### Key - Build Stage
+FROM node:20-alpine as build
 
-# WORKDIR /app
-
-# # Copy package.json และ package-lock.json
-# COPY package*.json ./
-
-# # ติดตั้ง dependencies ทั้งหมด (รวมถึง dev dependencies)
-# RUN npm install --force
-
-# # คัดลอกโปรเจกต์ทั้งหมด
-# COPY . ./
-
-# # สร้างโปรเจกต์
-# RUN npm run build
-
-# ### Gateway - Production Stage
-# FROM node:20-alpine
-
-# WORKDIR /app
-
-# # คัดลอก package.json และ package-lock.json จาก build stage
-# COPY --from=build /app/package*.json ./
-
-# # ติดตั้ง dependencies สำหรับ production
-# RUN npm install --only=production --force
-
-# # คัดลอกไฟล์ที่สร้างจาก build stage
-# COPY --from=build /app/dist ./dist
-
-# # คำสั่งเริ่มต้นแอปพลิเคชัน
-# CMD ["node", "dist/apps/gateway/src/main.js"]
-
-
-# ใช้ Node.js ล่าสุดเป็นฐาน
-FROM node:latest
-
-# ตั้งค่าโฟลเดอร์ทำงาน
 WORKDIR /app
 
-# คัดลอก package.json และ package-lock.json (หรือ yarn.lock) เข้ามาใน container
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# ติดตั้ง dependencies โดยใช้ npm (หรือ yarn)
-RUN npm install
+# Install all dependencies (including dev dependencies)
+RUN npm install --force
 
-# คัดลอกโค้ดทั้งหมดไปยัง container
-COPY . .
+# Copy the entire project
+COPY . ./
 
-# สร้าง production build
+# Build the project
 RUN npm run build
 
-# เปิดพอร์ตที่ใช้งาน
-EXPOSE 3000
+### Key - Production Stage
+FROM node:20-alpine
 
-# เริ่มแอปพลิเคชัน NestJS
-# CMD ["node", "dist/main"]
+WORKDIR /app
+
+# Copy package.json and package-lock.json from build stage
+COPY --from=build /app/package*.json ./
+
+# Install production dependencies
+RUN npm install --only=production --force
+
+COPY --from=build /app/proto ./dist/apps/gateway
+
+# Copy built files from build stage
+COPY --from=build /app/dist ./dist
+
+# Command to start the application
 CMD ["node", "dist/apps/gateway/src/main.js"]

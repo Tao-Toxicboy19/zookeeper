@@ -41,6 +41,7 @@ services:
       # KEY_SERVICE_URL: http://key-service:5005
       # ORDERS_SERVICE_URL: http://orders-service:5004
     depends_on:
+      - mongo
       - redis
       - rabbitmq
     networks:
