@@ -70,14 +70,14 @@ export class OrdersClientService implements OnModuleInit {
 
     async position(): Promise<any> {
         try {
-            await this.exchangeServiceClient.createLimitBuyOrder({
+            await this.exchangeServiceClient.createLimitBuy({
                 id: '123',
                 symbol: '123',
                 leverage: 10,
-                quantity: dto.order.Quantity,
-                userId: dto.order.user_id,
-                position: dto.position
-            })
+                quantity: 10,
+                userId: '123',
+                position: '123'
+            }).toPromise()
             // await this.createExchange()
             // const position = await this.exchange.fetchPositions()
             // return position

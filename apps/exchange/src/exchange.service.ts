@@ -21,6 +21,8 @@ import {
 import * as ccxt from 'ccxt'
 import { Key } from './type'
 import { createLimitOrderDto } from './dto/create-limit-order.dto'
+import { Admin, Kafka } from '@nestjs/microservices/external/kafka.interface';
+import { KafkaProducerService } from './producer/kafka-producer.service'
 
 @Injectable()
 export class ExchangeService implements OnModuleInit {
@@ -34,15 +36,18 @@ export class ExchangeService implements OnModuleInit {
 
   constructor(
     @Inject(KEY_PACKAGE_NAME) private keyClient: ClientGrpc,
-    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka
+    private readonly kafkaProducerService: KafkaProducerService,
   ) { }
 
-  onModuleInit() {
+
+
+  async onModuleInit() {
     this.keyServiceClient = this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
   }
 
-  async sendMessage(topic: string, message: string) {
-    return this.kafkaClient.send(topic, message)
+  async debug(): Promise<void> {
+    console.log('send topic success');
+    return this.kafkaProducerService.publish({ msg: 'hello world kafka' });
   }
 
   async createExchange(dto: Key) {
@@ -101,21 +106,20 @@ export class ExchangeService implements OnModuleInit {
 
   async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
     try {
-      this.sendMessage(this.positionTopic, JSON.stringify({ msg: 'hello world kafka' }))
       this.logger.debug('send message to kafka success')
-      // const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
-      // await this.createExchange({ apiKey, secretKey })
-      // await this.exchange.setLeverage(dto.leverage, dto.symbol)
-      // const price = await this.exchange.fetchTicker(dto.symbol)
-      // const quantity = (dto.quantity / price.last) * dto.leverage
-      // await this.exchange.createLimitBuyOrder(
-      //   dto.symbol,
-      //   quantity,
-      //   price.last,
-      //   {
-      //     positionSide: this.long
-      //   }
-      // )
+      const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+      await this.createExchange({ apiKey, secretKey })
+      await this.exchange.setLeverage(dto.leverage, dto.symbol)
+      const price = await this.exchange.fetchTicker(dto.symbol)
+      const quantity = (dto.quantity / price.last) * dto.leverage
+      await this.exchange.createLimitBuyOrder(
+        dto.symbol,
+        quantity,
+        price.last,
+        {
+          positionSide: this.long
+        }
+      )
 
     } catch (error) {
       throw error

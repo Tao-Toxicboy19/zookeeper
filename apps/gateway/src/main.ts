@@ -21,4 +21,5 @@ async function bootstrap() {
   app.use(cookieParser())
   await app.listen(configService.get<string>('PORT'))
 }
+
 bootstrap()

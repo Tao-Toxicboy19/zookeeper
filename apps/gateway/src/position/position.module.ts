@@ -1,8 +1,9 @@
-import { Module } from '@nestjs/common';
-import { PositionService } from './position.service';
-import { PositionGateway } from './position.gateway';
+import { Module } from '@nestjs/common'
+import { PositionGateway } from './position.gateway'
+import { PositionService } from './position.service'
 
 @Module({
+  imports: [],
   providers: [
     PositionGateway,
     PositionService

@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { KEY_PACKAGE_NAME } from '@app/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { KafkaProducerModule } from './producer/kafka-producer.module';
 
 @Module({
   imports: [
@@ -26,24 +27,8 @@ import { join } from 'path';
         }),
         inject: [ConfigService],
       },
-      {
-        name: 'KAFKA_SERVICE',
-        imports: [ConfigModule],
-        useFactory: async (configService: ConfigService) => ({
-          transport: Transport.KAFKA,
-          options: {
-            client: {
-              clientId: 'position-client',
-              brokers: ['localhost:9092'],
-            },
-            consumer: {
-              groupId: 'position-group',
-            },
-          },
-        }),
-        inject: [ConfigService],
-      },
     ]),
+    KafkaProducerModule,
   ],
   controllers: [ExchangeController],
   providers: [
