@@ -56,18 +56,6 @@ export class OrdersClientService implements OnModuleInit {
         }
     }
 
-    private async createExchange() {
-        this.exchange = new ccxt.binance({
-            apiKey: 'lTuNlO5EnfHPGiIIeY6vdQeNiPfQB16SyNIpIE8sCotKe9unmUq8u5qk7QbVCIOa',
-            secret: 'gtXa9rva2MdnNEl0rzizie0MWIBfGY1J32hRUWyjNEIr6LoOMuUh1tHIuePgkkgB',
-            'enableRateLimit': true,
-            options: {
-                defaultType: "future",
-            },
-        })
-    }
-
-
     async position(): Promise<any> {
         try {
             await this.exchangeServiceClient.createLimitBuy({

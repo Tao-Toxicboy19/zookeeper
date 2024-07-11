@@ -19,12 +19,12 @@ export class PositionGateway {
 
   @SubscribeMessage('message')
   handleMessage(@MessageBody() message: string): void {
-    console.log('Received message from client:', message);
-    this.server.emit('message', message);
+    console.log('Received message from client:', message)
+    this.server.emit('message', message)
   }
 
   emitMessage(message: string): void {
-    console.log('Forwarding message to WebSocket:', message);
-    this.server.emit('message', message);
+    console.log('Forwarding message to WebSocket:', message)
+    this.server.emit('message', message)
   }
 }
