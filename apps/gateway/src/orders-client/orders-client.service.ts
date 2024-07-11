@@ -1,4 +1,7 @@
 import {
+    EXCHANGE_PACKAGE_NAME,
+    EXCHANGE_SERVICE_NAME,
+    ExchangeServiceClient,
     ORDERS_PACKAGE_NAME,
     ORDERS_SERVICE_NAME,
     OrderResponse,
@@ -25,13 +28,16 @@ import * as ccxt from 'ccxt'
 export class OrdersClientService implements OnModuleInit {
     private ordersServiceClient: OrdersServiceClient
     private exchange: ccxt.Exchange
+    private exchangeServiceClient: ExchangeServiceClient
 
     constructor(
         @Inject(ORDERS_PACKAGE_NAME) private client: ClientGrpc,
+        @Inject(EXCHANGE_PACKAGE_NAME) private clientEx: ClientGrpc,
     ) { }
 
     async onModuleInit() {
         this.ordersServiceClient = this.client.getService<OrdersServiceClient>(ORDERS_SERVICE_NAME)
+        this.exchangeServiceClient = this.clientEx.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
     }
 
     async createOrder(request: OrdersDto): Promise<OrderResponse> {
@@ -64,7 +70,15 @@ export class OrdersClientService implements OnModuleInit {
 
     async position(): Promise<any> {
         try {
-            await this.createExchange()
+            await this.exchangeServiceClient.createLimitBuyOrder({
+                id: '123',
+                symbol: '123',
+                leverage: 10,
+                quantity: dto.order.Quantity,
+                userId: dto.order.user_id,
+                position: dto.position
+            })
+            // await this.createExchange()
             // const position = await this.exchange.fetchPositions()
             // return position
             return 'OK'

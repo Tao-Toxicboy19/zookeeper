@@ -4,6 +4,7 @@ import { OrdersClientModule } from './orders-client/orders-client.module';
 import { KeyClientModule } from './key-client/key-client.module';
 import { ConfigModule } from '@nestjs/config';
 import { CorsMiddleware } from './cors/cors.middleware';
+import { PositionModule } from './position/position.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CorsMiddleware } from './cors/cors.middleware';
     AuthClientModule,
     OrdersClientModule,
     KeyClientModule,
+    PositionModule,
   ],
   controllers: [],
   providers: [],

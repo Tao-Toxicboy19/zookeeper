@@ -102,6 +102,7 @@ export class ExchangeService implements OnModuleInit {
   async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
     try {
       this.sendMessage(this.positionTopic, JSON.stringify({ msg: 'hello world kafka' }))
+      this.logger.debug('send message to kafka success')
       // const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
       // await this.createExchange({ apiKey, secretKey })
       // await this.exchange.setLeverage(dto.leverage, dto.symbol)
