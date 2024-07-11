@@ -206,3 +206,43 @@ networks:
 volumes:
   mongodb_master_data:
   postgres_data:
+
+
+  # gateway-service:
+  #   # image: taotoxicboy/zookeeper-gateway-service:0.1
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/order-queue/Dockerfile
+  #   environment:
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@docker.for.mac.host.internal:5672
+  #     EXCHANGE_SERVICE_URL: localhost:50052
+  #   depends_on:
+  #     - mongo
+  #     - redis
+  #     - rabbitmq
+  #   networks:
+  #     - backend
+    # ports:
+    #   - '4000:3000'
+    #   - '8002:8001'
+
+  # zookeeper:
+  #   image: wurstmeister/zookeeper:latest
+  #   ports:
+  #     - "2181:2181"
+  #   environment:
+  #     - ALLOW_ANONYMOUS_LOGIN=yes
+  
+  # kafka:
+  #   image: wurstmeister/kafka:latest
+  #   ports:
+  #     - "9092:9092"
+  #   environment:
+  #     - KAFKA_BROKER_ID=1
+  #     - KAFKA_LISTENERS=PLAINTEXT://:9092
+  #     - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+  #     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+  #     - ALLOW_PLAINTEXT_LISTENER=yes
+  #   depends_on:
+  #     - zookeeper
+

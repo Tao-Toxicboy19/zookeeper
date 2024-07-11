@@ -14,7 +14,10 @@ import {
   Logger,
   OnModuleInit
 } from '@nestjs/common'
-import { ClientGrpc } from '@nestjs/microservices'
+import {
+  ClientGrpc,
+  ClientKafka
+} from '@nestjs/microservices'
 import * as ccxt from 'ccxt'
 import { Key } from './type'
 import { createLimitOrderDto } from './dto/create-limit-order.dto'
@@ -25,15 +28,21 @@ export class ExchangeService implements OnModuleInit {
   private keyServiceClient: KeyServiceClient
   private readonly long: string = "LONG"
   private readonly short: string = "SHORT"
+  private readonly positionTopic: string = 'position-topic'
 
   private readonly logger: Logger = new Logger(ExchangeService.name)
 
   constructor(
     @Inject(KEY_PACKAGE_NAME) private keyClient: ClientGrpc,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka
   ) { }
 
   onModuleInit() {
     this.keyServiceClient = this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
+  }
+
+  async sendMessage(topic: string, message: string) {
+    return this.kafkaClient.send(topic, message)
   }
 
   async createExchange(dto: Key) {
@@ -92,19 +101,20 @@ export class ExchangeService implements OnModuleInit {
 
   async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
     try {
-      const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
-      await this.createExchange({ apiKey, secretKey })
-      await this.exchange.setLeverage(dto.leverage, dto.symbol)
-      const price = await this.exchange.fetchTicker(dto.symbol)
-      const quantity = (dto.quantity / price.last) * dto.leverage
-      await this.exchange.createLimitBuyOrder(
-        dto.symbol,
-        quantity,
-        price.last,
-        {
-          positionSide: this.long
-        }
-      )
+      this.sendMessage(this.positionTopic, JSON.stringify({ msg: 'hello world kafka' }))
+      // const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+      // await this.createExchange({ apiKey, secretKey })
+      // await this.exchange.setLeverage(dto.leverage, dto.symbol)
+      // const price = await this.exchange.fetchTicker(dto.symbol)
+      // const quantity = (dto.quantity / price.last) * dto.leverage
+      // await this.exchange.createLimitBuyOrder(
+      //   dto.symbol,
+      //   quantity,
+      //   price.last,
+      //   {
+      //     positionSide: this.long
+      //   }
+      // )
 
     } catch (error) {
       throw error

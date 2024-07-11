@@ -29,4 +29,9 @@ export class OrdersClientController {
     ) {
         return await this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
     }
+
+    @Post('debug')
+    async position() {
+        return await this.ordersClientService.position()
+    }
 }

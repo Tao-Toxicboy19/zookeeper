@@ -29,6 +29,14 @@ export class MailConsumer implements OnModuleInit {
                 this.logger.log('Queues set up successfully')
             },
         })
+
+        connection.on('connect', () => {
+            this.logger.debug('Connected to RabbitMQ')
+        })
+
+        connection.on('disconnect', (err) => {
+            this.logger.debug('Disconnected from RabbitMQ:', err)
+        })
     }
 
     async onModuleInit() {

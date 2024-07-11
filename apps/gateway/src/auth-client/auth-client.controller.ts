@@ -12,6 +12,11 @@ export class AuthClientController {
 
   constructor(private readonly authClientService: AuthClientService) { }
 
+  @Post('test')
+  async debug(@Body() dto: any) {
+    return dto
+  }
+
   @UseInterceptors(GrpcToHttpInterceptor)
   @Post('signup/local')
   async signupLocal(

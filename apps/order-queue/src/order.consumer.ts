@@ -14,6 +14,7 @@ import {
     EXCHANGE_SERVICE_NAME,
     ExchangeServiceClient
 } from '@app/common'
+import axios from 'axios'
 
 export type CreateLimit = {
     position: string
@@ -65,6 +66,13 @@ export class OrderQueueConsumer implements OnModuleInit {
                     const order: CreateLimit = JSON.parse(msg.content.toString())
                     this.logger.debug(order)
                     await Promise.all([
+                        this.setLineNotify(JSON.stringify({
+                            timeframe: order.order.Timeframe,
+                            symbol: order.order.Symbol,
+                            type: order.order.Type,
+                            EMA: order.order.Ema,
+                            position:order.position
+                        }))
                         // this.sendTask(
                         //     this.orderUpdateQueue,
                         //     JSON.stringify({
@@ -72,15 +80,15 @@ export class OrderQueueConsumer implements OnModuleInit {
                         //         id: order.order.ID
                         //     })
                         // ),
-                        this.sendTask(
-                            this.notiOrderQueue,
-                            JSON.stringify({
-                                user_id: order.order.user_id,
-                                symbol: order.order.Symbol,
-                                leverage: order.order.Leverage,
-                                quantity: order.order.Quantity,
-                            })
-                        ),
+                        // this.sendTask(
+                        //     this.notiOrderQueue,
+                        //     JSON.stringify({
+                        //         user_id: order.order.user_id,
+                        //         symbol: order.order.Symbol,
+                        //         leverage: order.order.Leverage,
+                        //         quantity: order.order.Quantity,
+                        //     })
+                        // ),
                         // this.process(order)
                     ])
                     channel.ack(msg)
@@ -119,5 +127,22 @@ export class OrderQueueConsumer implements OnModuleInit {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
             return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true, })
         })
+    }
+
+    async setLineNotify(message: string): Promise<void> {
+        try {
+            await axios.post(
+                'https://notify-api.line.me/api/notify',
+                { message },
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer 41U6HJq0N1chNIjynWGCp5BEIbrABjEQX15DcUrBoSd`,
+                    },
+                }
+            )
+        } catch (error) {
+            throw error
+        }
     }
 }

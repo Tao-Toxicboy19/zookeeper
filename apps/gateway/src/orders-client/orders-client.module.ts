@@ -6,6 +6,7 @@ import { join } from 'path'
 import { OrdersClientController } from './orders-client.controller'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
+import { OrderClientGateway } from './order-client.gateway'
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
   providers: [
     OrdersClientService,
     GrpcToHttpInterceptor,
+    OrderClientGateway,
   ],
 })
 export class OrdersClientModule { }

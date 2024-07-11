@@ -1,0 +1,98 @@
+version: '3'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./mongo:/data/db
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: mikelopster
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    restart: always
+    networks:
+      - backend
+
+  redis:
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    restart: always
+    networks:
+      - backend
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: ./apps/gateway/Dockerfile
+    environment:
+      NODE_ENV: production
+      AT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+      RT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+      PORT: 3000
+      AUTH_SERVICE_URL: auth-service:50022
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    networks:
+      - backend
+    ports:
+      - '4000:3000'
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./apps/auth/Dockerfile
+    environment:
+      AT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+      RT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+      REDIS_URL: docker.for.mac.host.internal
+      REDIS_PORT: 6379
+      RABBIT_MQ_URL: amqp://mikelopster:password@docker.for.mac.host.internal:5672
+      GRPC_URL: 0.0.0.0:50022
+      MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+    depends_on:
+      - redis
+      - rabbitmq
+      - mongo
+    networks:
+      - backend
+    ports:
+    - '50022:50022'
+    restart: always
+
+  mail-queue-service:
+    build:
+      context: .
+      dockerfile: ./apps/mail-queue/Dockerfile
+    environment:
+      USERNAME_EMAIL: themanpoolbot@gmail.com
+      PASSWORD_EMAIL: jvpp fujd ecvy pifo
+      REDIS_URL: redis
+      REDIS_PORT: 6379
+      RABBIT_MQ_URL: amqp://mikelopster:password@docker.for.mac.host.internal:5672
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    networks:
+      - backend
+    restart: always
+
+networks:
+  backend:
+    driver: bridge

@@ -17,7 +17,6 @@ async function bootstrap() {
       url: configService.get<string>('GRPC_URL')
     }
   })
-  console.log(`server gRPC runing... on port:${configService.get<string>('GRPC_URL')}`)
   await app.listen()
 }
 bootstrap()

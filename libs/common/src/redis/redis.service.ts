@@ -6,12 +6,10 @@ import Redis from 'ioredis'
 export class RedisService {
     private readonly client: Redis
 
-    constructor(
-        private readonly configService: ConfigService
-    ) {
+    constructor(private readonly configService: ConfigService) {
         this.client = new Redis({
-            host: configService.get<string>('REDIS_URL'),
-            port: Number(configService.get<string>('REDIS_PORT')),
+            host: this.configService.get<string>('REDIS_URL'),
+            port: Number(this.configService.get<string>('REDIS_PORT')),
             retryStrategy: (times) => Math.min(times * 50, 2000),
         })
     }

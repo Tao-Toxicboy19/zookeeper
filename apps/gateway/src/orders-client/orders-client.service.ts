@@ -15,17 +15,22 @@ import {
     NotFoundException,
     OnModuleInit
 } from '@nestjs/common'
-import { ClientGrpc } from '@nestjs/microservices'
+import {
+    ClientGrpc,
+    ClientKafka
+} from '@nestjs/microservices'
+import * as ccxt from 'ccxt'
 
 @Injectable()
 export class OrdersClientService implements OnModuleInit {
     private ordersServiceClient: OrdersServiceClient
+    private exchange: ccxt.Exchange
 
     constructor(
         @Inject(ORDERS_PACKAGE_NAME) private client: ClientGrpc,
     ) { }
 
-    onModuleInit() {
+    async onModuleInit() {
         this.ordersServiceClient = this.client.getService<OrdersServiceClient>(ORDERS_SERVICE_NAME)
     }
 
@@ -42,6 +47,29 @@ export class OrdersClientService implements OnModuleInit {
             } else {
                 throw new InternalServerErrorException(error.message.split(':')[1].trim())
             }
+        }
+    }
+
+    private async createExchange() {
+        this.exchange = new ccxt.binance({
+            apiKey: 'lTuNlO5EnfHPGiIIeY6vdQeNiPfQB16SyNIpIE8sCotKe9unmUq8u5qk7QbVCIOa',
+            secret: 'gtXa9rva2MdnNEl0rzizie0MWIBfGY1J32hRUWyjNEIr6LoOMuUh1tHIuePgkkgB',
+            'enableRateLimit': true,
+            options: {
+                defaultType: "future",
+            },
+        })
+    }
+
+
+    async position(): Promise<any> {
+        try {
+            await this.createExchange()
+            // const position = await this.exchange.fetchPositions()
+            // return position
+            return 'OK'
+        } catch (error) {
+
         }
     }
 }

@@ -26,6 +26,23 @@ import { join } from 'path';
         }),
         inject: [ConfigService],
       },
+      {
+        name: 'KAFKA_SERVICE',
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.KAFKA,
+          options: {
+            client: {
+              clientId: 'position-client',
+              brokers: ['localhost:9092'],
+            },
+            consumer: {
+              groupId: 'position-group',
+            },
+          },
+        }),
+        inject: [ConfigService],
+      },
     ]),
   ],
   controllers: [ExchangeController],
