@@ -1,34 +1,50 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { Kafka, Producer } from 'kafkajs'
 
 @Injectable()
 export class KafkaProducerService {
+    private readonly logger = new Logger(KafkaProducerService.name)
     private readonly kafkaInstance: Kafka
     private producer: Producer
-    private readonly positionTopic: string = 'position-topic'
-    private readonly positionClient: string = 'position-client'
 
     constructor(
-        private readonly configService: ConfigService,
+        private readonly configService: ConfigService
     ) {
         this.kafkaInstance = new Kafka({
-            clientId: this.positionClient,
-            brokers: [configService.get<string>('KAFKA_URL')],
-            connectionTimeout: 3000,
-            authenticationTimeout: 1000,
-            reauthenticationThreshold: 10000,
+            clientId: 'position-client',
+            brokers: [
+                configService.get<string>('KAFKA_URL_ONE'),
+                configService.get<string>('KAFKA_URL_TWO'),
+                configService.get<string>('KAFKA_URL_TREE'),
+            ],
         })
 
         this.producer = this.kafkaInstance.producer()
+
+        this.producer.on('producer.connect', () => {
+            this.logger.debug('Connected to Kafka')
+        })
+
+        this.producer.on('producer.disconnect', (err) => {
+            this.logger.debug('Disconnected from Kafka:', err)
+        })
     }
 
     async publish(message: string): Promise<void> {
-        await this.producer.connect()
-        await this.producer.send({
-            topic: this.positionTopic,
-            messages: [{ value: message }],
-        })
-        console.log('Message published to Kafka:', message)  // เพิ่ม log เพื่อตรวจสอบการส่งข้อมูล
+        try {
+            await this.producer.connect()
+            await this.producer.send({
+                topic: 'position-topic',
+                messages: [{ value: message }],
+            })
+
+            this.logger.debug('Message sent to Kafka')
+        } catch (error) {
+            this.logger.error('Failed to send message to Kafka', error)
+        } finally {
+            await this.producer.disconnect()
+            this.logger.debug('Producer disconnected from Kafka')
+        }
     }
 }

@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Get,
     Logger,
     Post,
     Req,
@@ -28,10 +29,5 @@ export class OrdersClientController {
         @Req() req: { user: JwtPayload }
     ) {
         return await this.ordersClientService.createOrder({ ...dto, userId: req.user.sub })
-    }
-
-    @Post('debug')
-    async position() {
-        return await this.ordersClientService.position()
     }
 }

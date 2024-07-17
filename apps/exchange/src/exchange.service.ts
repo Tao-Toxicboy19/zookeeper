@@ -38,41 +38,17 @@ export class ExchangeService implements OnModuleInit {
 
   async onModuleInit() {
     this.keyServiceClient = this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
-    this.startPublishingMessages()
   }
 
-  private async createExchangev2() {
-    this.exchange = new ccxt.binance({
-      apiKey: 'lTuNlO5EnfHPGiIIeY6vdQeNiPfQB16SyNIpIE8sCotKe9unmUq8u5qk7QbVCIOa',
-      secret: 'gtXa9rva2MdnNEl0rzizie0MWIBfGY1J32hRUWyjNEIr6LoOMuUh1tHIuePgkkgB',
-      'enableRateLimit': true,
-      options: {
-        defaultType: "future",
-      },
-    })
-  }
-
-  async position(): Promise<ccxt.Position[]> {
+  async position(userId: string): Promise<void> {
     try {
-      await this.createExchangev2()
+      const { apiKey, secretKey } = await this.getApiKeys(userId)
+      await this.createExchange({ apiKey, secretKey })
       const position = await this.exchange.fetchPositions()
-      return position
+      this.kafkaProducerService.publish(JSON.stringify(position))
     } catch (error) {
-
+      throw error
     }
-  }
-
-  async debug(): Promise<void> {
-    console.log('send topic success')
-    const posi = await this.position()
-    return this.kafkaProducerService.publish(JSON.stringify({ posi }));
-  }
-
-  startPublishingMessages(): void {
-    console.log('starting....')
-    setInterval(async () => {
-      await this.debug()
-    }, 1000)
   }
 
   async createExchange(dto: Key) {

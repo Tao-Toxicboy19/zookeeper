@@ -49,6 +49,178 @@ services:
     networks:
       - backend
 
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - '2181:2181'
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - '9092:9092'
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+
+  # key-service:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/key/Dockerfile
+  #   environment:
+  #     GRPC_URL: localhost:5005
+  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+  #     EXCHANGE_SERVICE_URL: localhost:50052
+  #   depends_on:
+  #     - mongo
+  #     - redis
+  #     - rabbitmq
+  #     - zookeeper
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - '5005:5005'
+
+networks:
+  backend:
+
+volumes:
+  postgres_data:
+
+
+  # zookeeper:
+  #   image: wurstmeister/zookeeper:latest
+  #   ports:
+  #     - '2181:2181'
+  #   environment:
+  #     ALLOW_ANONYMOUS_LOGIN: 'yes'
+  #   networks:
+  #     - backend
+
+  # kafka1:
+  #   image: wurstmeister/kafka:latest
+  #   ports:
+  #     - '9092:9092'
+  #   environment:
+  #     KAFKA_BROKER_ID: 1
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENERS: PLAINTEXT://:9092
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092
+  #     # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+  #     ALLOW_PLAINTEXT_LISTENER: 'yes'
+  #   depends_on:
+  #     - zookeeper
+  #   networks:
+  #     - backend
+
+  # kafka2:
+  #   image: wurstmeister/kafka:latest
+  #   ports:
+  #     - '9093:9093'
+  #   environment:
+  #     KAFKA_BROKER_ID: 2
+  #     KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #     KAFKA_LISTENERS: PLAINTEXT://:9093
+  #     # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9093
+  #     KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9093
+  #     ALLOW_PLAINTEXT_LISTENER: 'yes'
+  #   depends_on:
+  #     - zookeeper
+  #   networks:
+  #     - backend
+
+  # gateway:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/gateway/Dockerfile
+  #   environment:
+  #     NODE_ENV: production
+  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+  #     PORT: 3000
+  #     AUTH_SERVICE_URL: auth-service:50022
+  #     CLIENT_URL: http://localhost:3000
+  #     KAFKA_URL_ONE: kafka1:9092
+  #     KAFKA_URL_TWO: kafka2:9093
+  #     EXCHANGE_SERVICE_URL: exchange:50052
+  #     WEB_SOCKET: 8031
+  #   depends_on:
+  #     - mongo
+  #     - redis
+  #     - rabbitmq
+  #     - zookeeper
+  #     - kafka1
+  #     - kafka2
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - '4000:3000'
+  #     - '8002:8001'
+
+  # exchange:
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/exchange/Dockerfile
+  #   environment:
+  #     GRPC_URL: exchange:50052
+  #     KEY_SERVICE_URL: localhost:5005
+  #     KAFKA_URL_ONE: kafka1:9092
+  #     KAFKA_URL_TWO: kafka2:9093
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka1
+  #     - kafka2
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - '50052:50052'
+  #   restart: always
+
+  # mail-queue:
+  #   image: taotoxicboy/zookeeper-mail-queue-service:0.1
+  #   environment:
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     USERNAME_EMAIL: themanpoolbot@gmail.com
+  #     PASSWORD_EMAIL: jvpp fujd ecvy pifo
+  #     REDIS_URL: redis
+  #     REDIS_PORT: 6379
+  #   networks:
+  #     - backend
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka1
+  #     # - kafka2
+  #     - rabbitmq
+  #   restart: always
+
+  # auth-service:
+  #   image: taotoxicboy/zookeeper-auth-service:0.1
+  #   environment:
+  #     GRPC_URL: auth-service:50022
+  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+  #     REDIS_URL: redis
+  #     REDIS_PORT: 6379
+  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #   networks:
+  #     - backend
+  #   ports:
+  #     - '50022:50022'
+  #   depends_on:
+  #     - redis
+  #     - zookeeper
+  #     - kafka1
+  #     - kafka2
+  #     - rabbitmq
+  #   restart: always
+
   # order-service:
   #   image: taotoxicboy/go-order-service:0.5.2
   #   ports:
@@ -74,7 +246,7 @@ services:
   #     - DB_USER=myuser
   #     - DB_PASSWORD=mypassword
   #     - DB_NAME=mydatabase
-  #     - RABBITMQ_URL=amqp://mikelopster:password@docker.for.mac.host.internal:5672
+  #     - RABBITMQ_URL=amqp://mikelopster:password@rabbitmq:5672
   #   depends_on:
   #     - postgres
   #     - rabbitmq
@@ -90,7 +262,7 @@ services:
   #     - DB_USER=myuser
   #     - DB_PASSWORD=mypassword
   #     - DB_NAME=mydatabase
-  #     - RABBITMQ_URL=amqp://mikelopster:password@docker.for.mac.host.internal:5672
+  #     - RABBITMQ_URL=amqp://mikelopster:password@rabbitmq:5672
   #   depends_on:
   #     - postgres
   #     - rabbitmq
@@ -99,65 +271,15 @@ services:
   #     - backend
 
   # order-queue-service:
-  #   # image: taotoxicboy/zookeeper-gateway-service:0.1
   #   build:
   #     context: .
   #     dockerfile: ./apps/order-queue/Dockerfile
   #   environment:
-  #     RABBIT_MQ_URL: amqp://mikelopster:password@docker.for.mac.host.internal:5672
-  #     EXCHANGE_SERVICE_URL: localhost:50052
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     EXCHANGE_SERVICE_URL: exchange:50052
   #   depends_on:
   #     - mongo
   #     - redis
   #     - rabbitmq
   #   networks:
   #     - backend
-
-  # gateway-service:
-  #   # image: taotoxicboy/zookeeper-gateway-service:0.1
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/gateway/Dockerfile
-  #   environment:
-  #     NODE_ENV: production
-  #     AT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
-  #     RT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
-  #     PORT: 3000
-  #     AUTH_SERVICE_URL: auth-service:50022
-  #     CLIENT_URL: http://localhost:3000
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #   networks:
-  #     - backend
-  # ports:
-  #   - '4000:3000'
-  #   - '8002:8001'
-
-  zookeeper:
-    image: wurstmeister/zookeeper:latest
-    ports:
-      - "2181:2181"
-    environment:
-      - ALLOW_ANONYMOUS_LOGIN=yes
-
-  kafka:
-    image: wurstmeister/kafka:latest
-    ports:
-      - "9092:9092"
-    environment:
-      - KAFKA_BROKER_ID=1
-      - KAFKA_LISTENERS=PLAINTEXT://:9092
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
-      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
-      - ALLOW_PLAINTEXT_LISTENER=yes
-    depends_on:
-      - zookeeper
-
-networks:
-  backend:
-    driver: bridge
-
-volumes:
-  postgres_data:

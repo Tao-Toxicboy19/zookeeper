@@ -20,14 +20,11 @@ import {
 } from '@nestjs/common'
 import {
     ClientGrpc,
-    ClientKafka
 } from '@nestjs/microservices'
-import * as ccxt from 'ccxt'
 
 @Injectable()
 export class OrdersClientService implements OnModuleInit {
     private ordersServiceClient: OrdersServiceClient
-    private exchange: ccxt.Exchange
     private exchangeServiceClient: ExchangeServiceClient
 
     constructor(
@@ -38,6 +35,7 @@ export class OrdersClientService implements OnModuleInit {
     async onModuleInit() {
         this.ordersServiceClient = this.client.getService<OrdersServiceClient>(ORDERS_SERVICE_NAME)
         this.exchangeServiceClient = this.clientEx.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
+        // this.debug()แ
     }
 
     async createOrder(request: OrdersDto): Promise<OrderResponse> {
@@ -56,22 +54,10 @@ export class OrdersClientService implements OnModuleInit {
         }
     }
 
-    async position(): Promise<any> {
-        try {
-            await this.exchangeServiceClient.createLimitBuy({
-                id: '123',
-                symbol: '123',
-                leverage: 10,
-                quantity: 10,
-                userId: '123',
-                position: '123'
-            }).toPromise()
-            // await this.createExchange()
-            // const position = await this.exchange.fetchPositions()
-            // return position
-            return 'OK'
-        } catch (error) {
-
-        }
-    }
+    // async debug() {
+    //     setInterval(async () => {
+    //         await this.exchangeServiceClient.sendUserId({ userId: '668b958cdf4b353d1962d8a6' }).toPromise()
+    //     }, 3000)
+    //     // return await this.exchangeServiceClient.sendUserId({ userId: '123' }).toPromise()
+    // }
 }

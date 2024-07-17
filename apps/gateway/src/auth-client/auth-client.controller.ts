@@ -42,7 +42,7 @@ export class AuthClientController {
   ) {
     res.cookie('user_id', req.user.sub, {
       httpOnly: true,
-      maxAge: 5 * 60 * 1000 // 5m
+      maxAge: 1 * 24 * 60 * 60 * 1000 // 1d
     })
     return this.authClientService.signin({ username: req.user.username, userId: req.user.sub })
   }
@@ -64,11 +64,11 @@ export class AuthClientController {
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      maxAge: 15 * 60 * 1000 // 15m
+      maxAge: 1 * 24 * 60 * 60 * 1000 // 1d
     })
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 1d
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
     })
 
     return {

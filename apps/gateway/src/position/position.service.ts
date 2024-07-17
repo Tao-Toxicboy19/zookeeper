@@ -1,48 +1,31 @@
-import { Injectable, OnModuleInit } from '@nestjs/common'
-import { Consumer, Kafka } from 'kafkajs'
-import { PositionGateway } from './position.gateway'
-import { ConfigService } from '@nestjs/config'
+import {
+    EXCHANGE_PACKAGE_NAME,
+    EXCHANGE_SERVICE_NAME,
+    ExchangeServiceClient
+} from "@app/common"
+import {
+    Inject,
+    Injectable,
+    OnModuleInit
+} from "@nestjs/common"
+import {
+    ClientGrpc
+} from "@nestjs/microservices"
 
 @Injectable()
 export class PositionService implements OnModuleInit {
-    private readonly kafkaInstance: Kafka
-    private consumer: Consumer
-    private readonly positionTopic: string = 'position-topic'
-    private readonly positionGroup: string = 'position-group'
-    private readonly positionClient: string = 'position-client'
+    private exchangeServiceClient: ExchangeServiceClient
 
     constructor(
-        private readonly appGateway: PositionGateway,
-        private readonly configService: ConfigService,
-    ) {
-        this.kafkaInstance = new Kafka({
-            clientId: this.positionClient,
-            brokers: [configService.get<string>('KAFKA_URL')],
-            connectionTimeout: 3000,
-            authenticationTimeout: 1000,
-            reauthenticationThreshold: 10000,
-        })
-
-        this.consumer = this.kafkaInstance.consumer({ groupId: this.positionGroup })
-    }
+        @Inject(EXCHANGE_PACKAGE_NAME) private client: ClientGrpc,
+    ) { }
 
     async onModuleInit() {
-        await this.connectConsumer()
+        this.exchangeServiceClient = this.client.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
     }
 
-    async connectConsumer() {
-        await this.consumer.connect()
-        await this.consumer.subscribe({ topic: this.positionTopic, fromBeginning: false })
-        await this.consumer.run({
-            eachMessage: async ({ topic, partition, message }) => {
-                const msg = message.value.toString()
-                console.log({
-                    partition,
-                    offset: message.offset,
-                    value: msg,
-                })
-                this.appGateway.emitMessage(msg) // Forward message to WebSocket
-            },
-        })
+    async sendUserId(userId: string): Promise<void> {
+        await this.exchangeServiceClient.sendUserId({ userId }).toPromise()
+        console.log('send user_id OK')
     }
 }

@@ -103,7 +103,7 @@ export class AuthService implements OnModuleInit {
       }),
       this.jwtService.signAsync(jwtPayload, {
         secret: this.configService.get<string>('RT_SECRET'),
-        expiresIn: '3d',
+        expiresIn: '7d',
       }),
     ])
 

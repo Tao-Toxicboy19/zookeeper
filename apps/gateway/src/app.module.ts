@@ -20,7 +20,7 @@ import { PositionModule } from './position/position.module';
   controllers: [],
   providers: [],
 })
-// export class AppModule { }
+
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
