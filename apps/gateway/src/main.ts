@@ -13,13 +13,14 @@ async function bootstrap() {
   // Enable CORS for all origins, methods, and headers
   app.enableCors({
     allowedHeaders: ['Content-Type', '*'],
-    origin: [configService.get<string>('CLIEN_URL')],
+    origin: [configService.get<string>('CLIEN_URL'), 'http://localhost:5173'],
     credentials: true,
   })
   app.setGlobalPrefix('api')
   app.useGlobalPipes(new ValidationPipe())
   app.use(cookieParser())
-  await app.listen(configService.get<string>('PORT'))
+  await app.listen(configService.get<string>('PORT') || 3000)
+  console.log(`Application is running on: ${await app.getUrl()}`);
 }
 
 bootstrap()

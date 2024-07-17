@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { PositionGateway } from './position.gateway'
-import { PositionConsumer } from './position.consumer'
+// import { PositionConsumer } from './position.consumer'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { EXCHANGE_PACKAGE_NAME } from '@app/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
@@ -26,8 +26,8 @@ import { PositionService } from './position.service'
     ]),
   ],
   providers: [
-    PositionGateway,
-    PositionConsumer,
+    // PositionGateway,
+    // PositionConsumer,
     PositionService
   ],
 })

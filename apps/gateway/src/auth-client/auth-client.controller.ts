@@ -13,8 +13,8 @@ export class AuthClientController {
   constructor(private readonly authClientService: AuthClientService) { }
 
   @Post('test')
-  async debug(@Body() dto: any) {
-    return dto
+  async debug() {
+    return 'OK'
   }
 
   @UseInterceptors(GrpcToHttpInterceptor)
