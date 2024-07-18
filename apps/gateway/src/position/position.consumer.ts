@@ -40,7 +40,8 @@ export class PositionConsumer implements OnModuleInit {
             this.logger.debug('Disconnected from Kafka:', err)
         })
 
-        console.log('hello world')
+        // console.log('hello world')
+        // test branch
     }
 
     async onModuleInit() {
