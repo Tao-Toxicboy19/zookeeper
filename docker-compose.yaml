@@ -56,8 +56,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
       - '27017:27017'
-    volumes:
-      - ./mongo:/data/db
+    # volumes:
+    #   - ./mongo:/data/db
 
   rabbitmq:
     image: rabbitmq:management-alpine
