@@ -39,6 +39,8 @@ export class PositionConsumer implements OnModuleInit {
         this.consumer.on('consumer.disconnect', (err) => {
             this.logger.debug('Disconnected from Kafka:', err)
         })
+
+        console.log('hello world')
     }
 
     async onModuleInit() {
