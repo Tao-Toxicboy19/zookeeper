@@ -1,10 +1,11 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { AuthClientModule } from './auth-client/auth-client.module';
-import { OrdersClientModule } from './orders-client/orders-client.module';
-import { KeyClientModule } from './key-client/key-client.module';
-import { ConfigModule } from '@nestjs/config';
-import { CorsMiddleware } from './cors/cors.middleware';
-import { PositionModule } from './position/position.module';
+import {
+  Module,
+} from '@nestjs/common'
+import { AuthModule } from './auth/auth.module'
+import { OrdersModule } from './orders/orders.module'
+import { ConfigModule } from '@nestjs/config'
+import { PositionModule } from './position/position.module'
+import { KeyModule } from './key/key.module'
 
 @Module({
   imports: [
@@ -12,9 +13,9 @@ import { PositionModule } from './position/position.module';
       isGlobal: true,
       envFilePath: './apps/gateway/.env',
     }),
-    AuthClientModule,
-    OrdersClientModule,
-    KeyClientModule,
+    AuthModule,
+    OrdersModule,
+    KeyModule,
     PositionModule,
   ],
   controllers: [],
@@ -22,11 +23,3 @@ import { PositionModule } from './position/position.module';
 })
 
 export class AppModule { }
-
-// export class AppModule implements NestModule {
-//   configure(consumer: MiddlewareConsumer) {
-//     consumer
-//       .apply(CorsMiddleware)
-//       .forRoutes({ path: '*', method: RequestMethod.ALL });
-//   }
-// }

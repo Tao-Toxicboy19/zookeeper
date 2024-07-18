@@ -45,7 +45,9 @@ export class ExchangeService implements OnModuleInit {
       const { apiKey, secretKey } = await this.getApiKeys(userId)
       await this.createExchange({ apiKey, secretKey })
       const position = await this.exchange.fetchPositions()
-      this.kafkaProducerService.publish(JSON.stringify(position))
+      if (position.length !== 0) {
+        this.kafkaProducerService.publish(JSON.stringify(position))
+      }
     } catch (error) {
       throw error
     }
@@ -107,7 +109,6 @@ export class ExchangeService implements OnModuleInit {
 
   async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
     try {
-      this.logger.debug('send message to kafka success')
       const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
       await this.createExchange({ apiKey, secretKey })
       await this.exchange.setLeverage(dto.leverage, dto.symbol)

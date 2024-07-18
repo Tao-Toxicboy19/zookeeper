@@ -26,6 +26,5 @@ export class PositionService implements OnModuleInit {
 
     async sendUserId(userId: string): Promise<void> {
         await this.exchangeServiceClient.sendUserId({ userId }).toPromise()
-        console.log('send user_id OK')
     }
 }

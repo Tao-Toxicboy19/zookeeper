@@ -5,7 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { KEY_PACKAGE_NAME } from '@app/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
-// import { KafkaProducerModule } from './producer/kafka-producer.module';
+import { KafkaProducerModule } from './producer/kafka-producer.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { join } from 'path';
         inject: [ConfigService],
       },
     ]),
-    // KafkaProducerModule,
+    KafkaProducerModule,
   ],
   controllers: [ExchangeController],
   providers: [
