@@ -3,7 +3,6 @@ import {
   WsJwtGuard
 } from '@app/common'
 import {
-  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -36,21 +35,24 @@ export class PositionGateway {
   }
 
 
-  @SubscribeMessage('message')
+  @SubscribeMessage('position')
   handleMessage(
-    @MessageBody() message: string,
     @ConnectedSocket() client: Socket,
   ): void {
     const payload: JwtPayload = client['user']
     if (payload.sub) {
+
+      client.join(payload.sub)
+
       setInterval(async () => {
         await this.positionService.sendUserId(payload.sub)
       }, 1000)
+
+      this.server.to(payload.sub).emit('position')
     }
-    this.server.emit('message', message)
   }
 
-  emitMessage(message: string): void {
-    this.server.emit('message', message)
+  emitMessage(msg: string, userId: string): void {
+    this.server.to(userId).emit('position', msg)
   }
 }

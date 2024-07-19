@@ -9,6 +9,7 @@ import {
 } from 'kafkajs'
 import { ConfigService } from '@nestjs/config'
 import { PositionGateway } from './position.gateway'
+import * as ccxt from 'ccxt'
 
 @Injectable()
 export class PositionConsumer implements OnModuleInit {
@@ -39,9 +40,6 @@ export class PositionConsumer implements OnModuleInit {
         this.consumer.on('consumer.disconnect', (err) => {
             this.logger.debug('Disconnected from Kafka:', err)
         })
-
-        // console.log('hello world')
-        // test branch
     }
 
     async onModuleInit() {
@@ -49,14 +47,16 @@ export class PositionConsumer implements OnModuleInit {
         await this.consumer.subscribe({ topic: 'position-topic', fromBeginning: false })
         await this.consumer.run({
             eachMessage: async ({ topic, partition, message }) => {
-                const msg = message.value.toString()
+                const msg: {
+                    user_id: string
+                    position: ccxt.Position[]
+                } = JSON.parse(message.value.toString())
                 console.log({
                     partition,
                     offset: message.offset,
                     value: msg,
                 })
-                console.log(msg)
-                this.positionGateway.emitMessage(msg)
+                this.positionGateway.emitMessage(JSON.stringify(msg.position), msg.user_id)
             },
         })
     }

@@ -7,14 +7,18 @@ import {
     Logger,
     OnModuleInit
 } from '@nestjs/common'
-import amqp, { ChannelWrapper } from 'amqp-connection-manager'
-import { ConfirmChannel, ConsumeMessage } from 'amqplib'
+import amqp, {
+    ChannelWrapper
+} from 'amqp-connection-manager'
+import {
+    ConfirmChannel,
+    ConsumeMessage
+} from 'amqplib'
 import {
     EXCHANGE_PACKAGE_NAME,
     EXCHANGE_SERVICE_NAME,
     ExchangeServiceClient
 } from '@app/common'
-import axios from 'axios'
 
 export type CreateLimit = {
     position: string
@@ -66,13 +70,6 @@ export class OrderQueueConsumer implements OnModuleInit {
                     const order: CreateLimit = JSON.parse(msg.content.toString())
                     this.logger.debug(order)
                     await Promise.all([
-                        this.setLineNotify(JSON.stringify({
-                            timeframe: order.order.Timeframe,
-                            symbol: order.order.Symbol,
-                            type: order.order.Type,
-                            EMA: order.order.Ema,
-                            position:order.position
-                        }))
                         // this.sendTask(
                         //     this.orderUpdateQueue,
                         //     JSON.stringify({
@@ -99,6 +96,11 @@ export class OrderQueueConsumer implements OnModuleInit {
 
     async process(dto: CreateLimit): Promise<void> {
         try {
+            const { usdt } = await this.exchangeServiceClient.balance({ userId: dto.order.user_id }).toPromise()
+            if (+usdt < dto.order.Quantity) {
+                // send mail 
+                return
+            }
             if (dto.position === 'Long') {
                 await this.exchangeServiceClient.createLimitBuy({
                     id: dto.order.ID,
@@ -127,22 +129,5 @@ export class OrderQueueConsumer implements OnModuleInit {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
             return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true, })
         })
-    }
-
-    async setLineNotify(message: string): Promise<void> {
-        try {
-            await axios.post(
-                'https://notify-api.line.me/api/notify',
-                { message },
-                {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': `Bearer 41U6HJq0N1chNIjynWGCp5BEIbrABjEQX15DcUrBoSd`,
-                    },
-                }
-            )
-        } catch (error) {
-            throw error
-        }
     }
 }

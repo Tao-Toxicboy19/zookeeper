@@ -46,7 +46,10 @@ export class ExchangeService implements OnModuleInit {
       await this.createExchange({ apiKey, secretKey })
       const position = await this.exchange.fetchPositions()
       if (position.length !== 0) {
-        this.kafkaProducerService.publish(JSON.stringify(position))
+        this.kafkaProducerService.publish(JSON.stringify({
+          user_id: userId,
+          position,
+        }))
       }
     } catch (error) {
       throw error
