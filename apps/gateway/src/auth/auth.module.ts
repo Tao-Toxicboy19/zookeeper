@@ -1,12 +1,18 @@
 import { Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
-import { AUTH_PACKAGE_NAME, JwtStrategy, RefreshJwtStrategy } from '@app/common'
+import {
+  JwtStrategy,
+  AUTH_PACKAGE_NAME,
+  RefreshJwtStrategy
+} from '@app/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { PassportModule } from '@nestjs/passport'
 import { join } from 'path'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { LocalStrategy } from './strategies'
+import { APP_FILTER } from '@nestjs/core'
+import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions'
 
 @Module({
   imports: [
@@ -33,6 +39,10 @@ import { LocalStrategy } from './strategies'
     LocalStrategy,
     JwtStrategy,
     RefreshJwtStrategy,
+    {
+      provide: APP_FILTER,
+      useClass: GrpcServerExceptionFilter,
+    },
   ],
 })
 export class AuthModule { }

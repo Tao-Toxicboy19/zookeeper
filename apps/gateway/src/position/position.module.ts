@@ -26,7 +26,7 @@ import { PositionService } from './position.service'
     ]),
   ],
   providers: [
-    PositionGateway,
+    // PositionGateway,
     PositionConsumer,
     PositionService
   ],

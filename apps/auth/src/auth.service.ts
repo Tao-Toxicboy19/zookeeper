@@ -44,11 +44,11 @@ export class AuthService implements OnModuleInit {
         sub: new ObjectId(user._id).toHexString()
       }
     }
-    throw new GrpcUnauthenticatedException('User not found.')
   }
 
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
+      console.log('hello world')
       const user = await this.userService.validateUser(dto.username)
       await this.producerService.sendMsg(JSON.stringify(user))
       return {

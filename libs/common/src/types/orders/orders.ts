@@ -10,13 +10,6 @@ import { Observable } from "rxjs";
 
 export const protobufPackage = "orders";
 
-/**
- * message OrderResponse {
- *     int32 statusCode = 1;
- *     string message = 2;
- * }
- */
-
 export interface OrdersDto {
   symbol: string;
   leverage: number;

@@ -1,63 +1,24 @@
-import {
-    EXCHANGE_PACKAGE_NAME,
-    EXCHANGE_SERVICE_NAME,
-    ExchangeServiceClient,
-    ORDERS_PACKAGE_NAME,
-    ORDERS_SERVICE_NAME,
-    OrderResponse,
-    OrdersDto,
-    OrdersServiceClient
-} from '@app/common'
-import {
-    BadRequestException,
-    ConflictException,
-    HttpStatus,
-    Inject,
-    Injectable,
-    InternalServerErrorException,
-    NotFoundException,
-    OnModuleInit
-} from '@nestjs/common'
-import {
-    ClientGrpc,
-} from '@nestjs/microservices'
+import { OrdersDto } from '@app/common'
+import { Inject, Injectable } from '@nestjs/common'
+import { ClientProxy } from '@nestjs/microservices'
+import { OrderDto } from './dto'
 
 @Injectable()
-export class OrdersService implements OnModuleInit {
-    private ordersServiceClient: OrdersServiceClient
-    private exchangeServiceClient: ExchangeServiceClient
-
+export class OrdersService {
     constructor(
-        @Inject(ORDERS_PACKAGE_NAME) private client: ClientGrpc,
-        @Inject(EXCHANGE_PACKAGE_NAME) private clientEx: ClientGrpc,
+        @Inject('ORDERS_SERVICE') private readonly client: ClientProxy,
     ) { }
 
-    async onModuleInit() {
-        this.ordersServiceClient = this.client.getService<OrdersServiceClient>(ORDERS_SERVICE_NAME)
-        this.exchangeServiceClient = this.clientEx.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
-        // this.debug()แ
+    async createOrder(dto: OrderDto): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.client.send<string>('create_order', dto).subscribe({
+                next: (response) => {
+                    resolve(response)
+                },
+                error: (err) => {
+                    reject(err)
+                },
+            })
+        })
     }
-
-    async createOrder(request: OrdersDto): Promise<OrderResponse> {
-        try {
-            return await this.ordersServiceClient.createOrder(request).toPromise()
-        } catch (error) {
-            if (error.code === HttpStatus.NOT_FOUND) {
-                throw new NotFoundException(error.message.split(':')[1].trim())
-            } else if (error.code === HttpStatus.CONFLICT) {
-                throw new ConflictException(error.message.split(':')[1].trim())
-            } else if (error.code === HttpStatus.INTERNAL_SERVER_ERROR) {
-                throw new BadRequestException(error.message.split(':')[1].trim())
-            } else {
-                throw new InternalServerErrorException(error.message.split(':')[1].trim())
-            }
-        }
-    }
-
-    // async debug() {
-    //     setInterval(async () => {
-    //         await this.exchangeServiceClient.sendUserId({ userId: '668b958cdf4b353d1962d8a6' }).toPromise()
-    //     }, 3000)
-    //     // return await this.exchangeServiceClient.sendUserId({ userId: '123' }).toPromise()
-    // }
 }

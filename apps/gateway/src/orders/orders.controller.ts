@@ -28,6 +28,10 @@ export class OrdersController {
         @Body() dto: OrderDto,
         @Req() req: { user: JwtPayload }
     ) {
-        return await this.ordersService.createOrder({ ...dto, userId: req.user.sub })
+        await this.ordersService.createOrder({ ...dto, userId: req.user.sub })
+        return {
+            message: 'OK',
+            statusCode: 200
+        }
     }
 }

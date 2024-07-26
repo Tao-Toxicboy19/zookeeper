@@ -13,7 +13,8 @@ async function bootstrap() {
   // Enable CORS for all origins, methods, and headers
   app.enableCors({
     allowedHeaders: ['Content-Type', '*'],
-    origin: [configService.get<string>('CLIEN_URL'), 'http://localhost:5173'],
+    // origin: [configService.get<string>('CLIEN_URL')],
+    origin: true,
     credentials: true,
   })
   app.setGlobalPrefix('api')

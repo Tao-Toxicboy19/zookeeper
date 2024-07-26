@@ -16,7 +16,7 @@ import { PositionService } from './position.service'
 import { UseGuards } from '@nestjs/common'
 import { SocketAuthMiddleware } from '../auth/socket-io.middleware'
 
-@WebSocketGateway(+process.env.WEB_SOCKET || 8001, {
+@WebSocketGateway(+process.env.WEB_SOCKET || 909, {
   cors: '*'
 })
 @UseGuards(WsJwtGuard)

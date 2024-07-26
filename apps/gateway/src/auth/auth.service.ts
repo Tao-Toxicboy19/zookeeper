@@ -4,13 +4,13 @@ import {
   AUTH_SERVICE_NAME,
   AuthServiceClient,
   ConfirmOTPDto,
-  EmailResponse,
   SigninDto,
   SignupDto,
   ValidateDto
 } from '@app/common'
 import { ClientGrpc } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
+import { ProfileDto } from '@app/common/types/auth'
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -64,7 +64,11 @@ export class AuthService implements OnModuleInit {
     }
   }
 
-  async getEmail() {
-    return this.authServiceClient.getEmail({ userId: 'uset' })
+  async profile(request: ProfileDto) {
+    try {
+      return await this.authServiceClient.profile(request).toPromise()
+    } catch (error) {
+      throw error
+    }
   }
 }

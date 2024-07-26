@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { UsersRepository } from './user.repository'
 import { User } from './schemas/user.schemas'
 import { UserDto } from './dto/user.dto'
-import { EmailResponse, MailResponse } from '@app/common'
+import { EmailResponse } from '@app/common'
 import * as bcrypt from 'bcrypt'
 import { ProducerService } from '../producer/producer.service'
 import { GrpcAlreadyExistsException, GrpcInternalException } from 'nestjs-grpc-exceptions'
@@ -18,6 +18,7 @@ export class UsersService {
     async signup(dto: UserDto): Promise<EmailResponse> {
         try {
             const existUser = await this.validateUser(dto.username)
+            console.log(existUser)
             const existEmail = await this.validateEmail(dto.email)
             if (existUser) {
                 throw new GrpcAlreadyExistsException('User already exists.')
@@ -44,7 +45,7 @@ export class UsersService {
         }
     }
 
-    async getEmail(userId: string): Promise<MailResponse> {
+    async getEmail(userId: string){
         try {
             const { email } = await this.usersRepository.findOne({ _id: userId })
             return { email }

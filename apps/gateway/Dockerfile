@@ -33,3 +33,5 @@ COPY --from=build /app/dist ./dist
 
 # Command to start the application
 CMD ["node", "dist/apps/gateway/src/main.js"]
+# CMD ["sh", "-c", "ls"]
+

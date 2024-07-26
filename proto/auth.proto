@@ -8,15 +8,17 @@ service AuthService {
     rpc Validate (ValidateDto) returns (UserResponse) {}
     rpc ConfirmOTP (ConfirmOTPDto) returns (TokenResponse) {}
     rpc RefreshToken (SigninDto) returns (TokenResponse) {}
-    rpc GetEmail (GetEmailDto) returns (MailResponse) {} 
+    rpc Profile (ProfileDto) returns (ProfileResponse) {} 
 }
 
-message GetEmailDto {
+message ProfileResponse {
     string user_id = 1;
+    string username = 2;
+    string email = 3;
 }
 
-message MailResponse {
-    string email = 1;
+message ProfileDto {
+    string username = 1;
 }
 
 message ConfirmOTPDto {

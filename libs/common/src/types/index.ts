@@ -25,8 +25,8 @@ export {
     EmailResponse,
     JwtPayload,
     Tokens,
-    MailResponse,
-    GetEmailDto,
+    ProfileDto,
+    ProfileResponse
 } from './auth'
 
 export {
@@ -51,7 +51,11 @@ export {
     SendUserIdDto,
 } from './exchange'
 
-
+export {
+    PredictServiceClient,
+    PREDICT_SERVICE_NAME,
+    PREDICT_PACKAGE_NAME,
+} from './predict'
 
 export {
     CreateKeyDto,

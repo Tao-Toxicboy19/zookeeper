@@ -1,7 +1,7 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors, Get } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { SignupDto } from './dto'
-import { JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
+import { JwtAuthGuard, JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
 import { OtpDto } from './dto/otp.dto'
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 import { AuthService } from './auth.service'
@@ -20,7 +20,10 @@ export class AuthController {
   ) {
     const { email, userId } = await this.authService.signup(dto)
     res.cookie('user_id', userId, {
+      secure: process.env.NODE_ENV === 'production',
       httpOnly: true,
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+      sameSite: 'strict',
     })
     return {
       email
@@ -37,7 +40,9 @@ export class AuthController {
   ) {
     res.cookie('user_id', req.user.sub, {
       httpOnly: true,
-      maxAge: 1 * 24 * 60 * 60 * 1000 // 1d
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+      sameSite: 'strict'
     })
     return this.authService.signin({ username: req.user.username, userId: req.user.sub })
   }
@@ -59,16 +64,20 @@ export class AuthController {
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      maxAge: 1 * 24 * 60 * 60 * 1000 // 1d
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+      sameSite: 'strict',
     })
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+      sameSite: 'strict',
     })
 
     return {
-      message: 'OK',
-      statusCode: 200
+      "message": "OK",
+      "statusCode": 200
     }
   }
 
@@ -85,22 +94,66 @@ export class AuthController {
       refreshToken
     } = await this.authService.confirmOtp({ otp: dto.otp, userId: req.cookies.user_id })
 
-    res.cookie('user_id', req.cookies.user_id, {
+    res.clearCookie('user_id', {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // ทำให้ cookie เป็น secure ใน production
+      sameSite: 'strict', // ใช้ sameSite เพื่อป้องกัน CSRF
     })
 
     res.cookie('access_token', accessToken, {
       httpOnly: true,
-      // maxAge: 15 * 60 * 1000 // 15m
-      maxAge: 3 * 24 * 60 * 60 * 1000 // 3d
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 3d
+      sameSite: 'strict'
     })
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
-      maxAge: 3 * 24 * 60 * 60 * 1000 // 3d
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 3d
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
     })
     return {
       message: 'OK',
       statusCode: 200
     }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    if (req.cookies.access_token || req.cookies.user_id) {
+      res.clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      })
+      res.clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      })
+      res.clearCookie('user_id', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      })
+
+    }
+    return {
+      message: 'OK',
+      statusCode: 200
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  profile(
+    @Req() req: { user: JwtPayload }
+  ) {
+    return this.authService.profile({ username: req.user.username })
   }
 }

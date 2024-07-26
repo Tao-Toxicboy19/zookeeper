@@ -18,7 +18,7 @@ export class PositionConsumer implements OnModuleInit {
     private consumer: Consumer
 
     constructor(
-        private readonly positionGateway: PositionGateway,
+        // private readonly positionGateway: PositionGateway,
         private readonly configService: ConfigService,
     ) {
         this.kafkaInstance = new Kafka({
@@ -56,7 +56,7 @@ export class PositionConsumer implements OnModuleInit {
                     offset: message.offset,
                     value: msg,
                 })
-                this.positionGateway.emitMessage(JSON.stringify(msg.position), msg.user_id)
+                // this.positionGateway.emitMessage(JSON.stringify(msg.position), msg.user_id)
             },
         })
     }

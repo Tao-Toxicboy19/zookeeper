@@ -7,8 +7,12 @@ import {
   SignupDto,
   ValidateDto
 } from '@app/common'
-import { ConfirmOTPDto, GetEmailDto } from '@app/common/types/auth/auth'
+import {
+  ConfirmOTPDto,
+  ProfileDto,
+} from '@app/common/types/auth/auth'
 import { UsersService } from './users/users.service'
+import { ObjectId } from 'mongodb'
 
 @Controller()
 @AuthServiceControllerMethods()
@@ -38,8 +42,12 @@ export class AuthController implements AuthServiceController {
     return this.authService.confrimOTP(request)
   }
 
-  getEmail(request: GetEmailDto) {
-    return this.userService.getEmail(request.userId)
+  async profile(request: ProfileDto) {
+    const { username, email, _id } = await this.userService.validateUser(request.username)
+    return {
+      userId: new ObjectId(_id).toHexString(),
+      username: username,
+      email: email
+    }
   }
-
 }
