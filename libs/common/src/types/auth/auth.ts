@@ -64,6 +64,21 @@ export interface ValidateDto {
   password: string;
 }
 
+export interface GetEmailDto {
+  userId: string;
+}
+
+export interface MailResponse {
+  email: string;
+}
+
+export interface GoogleLoginDto {
+  email: string;
+  name: string;
+  picture: string;
+  googleId: string;
+}
+
 export const AUTH_PACKAGE_NAME = "auth";
 
 export interface AuthServiceClient {
@@ -78,6 +93,10 @@ export interface AuthServiceClient {
   refreshToken(request: SigninDto): Observable<TokenResponse>;
 
   profile(request: ProfileDto): Observable<ProfileResponse>;
+
+  getEmail(request: GetEmailDto): Observable<MailResponse>;
+
+  googleLogin(request: GoogleLoginDto): Observable<TokenResponse>;
 }
 
 export interface AuthServiceController {
@@ -92,11 +111,24 @@ export interface AuthServiceController {
   refreshToken(request: SigninDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 
   profile(request: ProfileDto): Promise<ProfileResponse> | Observable<ProfileResponse> | ProfileResponse;
+
+  getEmail(request: GetEmailDto): Promise<MailResponse> | Observable<MailResponse> | MailResponse;
+
+  googleLogin(request: GoogleLoginDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
 }
 
 export function AuthServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = ["signin", "signup", "validate", "confirmOtp", "refreshToken", "profile"];
+    const grpcMethods: string[] = [
+      "signin",
+      "signup",
+      "validate",
+      "confirmOtp",
+      "refreshToken",
+      "profile",
+      "getEmail",
+      "googleLogin",
+    ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("AuthService", method)(constructor.prototype[method], method, descriptor);

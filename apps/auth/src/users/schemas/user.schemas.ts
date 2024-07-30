@@ -3,14 +3,23 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema({ versionKey: false })
 export class User extends AbstractDocument {
-    @Prop({ required: true })
+    @Prop()
     username: string
 
-    @Prop({ required: true })
+    @Prop()
     password: string
 
     @Prop({ required: true })
     email: string
+
+    @Prop()
+    name?: string
+
+    @Prop()
+    picture?: string
+
+    @Prop()
+    googleId?: string
 
     @Prop({ default: Date.now, required: false })
     createdAt?: Date

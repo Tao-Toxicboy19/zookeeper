@@ -13,27 +13,27 @@ import {
   Socket
 } from 'socket.io'
 import { PositionService } from './position.service'
-import { UseGuards } from '@nestjs/common'
+import { Logger, UseGuards } from '@nestjs/common'
 import { SocketAuthMiddleware } from '../auth/socket-io.middleware'
 
-@WebSocketGateway(+process.env.WEB_SOCKET || 909, {
+@WebSocketGateway(8001, {
   cors: '*'
 })
 @UseGuards(WsJwtGuard)
 export class PositionGateway {
+  private readonly logger = new Logger(PositionGateway.name)
 
   constructor(
     private readonly positionService: PositionService,
-  ) { }
-
-  @WebSocketServer()
-  server: Server
-
+  ) {
+  }
 
   afterInit(clinet: Socket) {
     clinet.use(SocketAuthMiddleware() as any)
   }
 
+  @WebSocketServer()
+  server: Server
 
   @SubscribeMessage('position')
   handleMessage(
@@ -53,6 +53,7 @@ export class PositionGateway {
   }
 
   emitMessage(msg: string, userId: string): void {
+    console.log(msg)
     this.server.to(userId).emit('position', msg)
   }
 }

@@ -10,12 +10,27 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
     ClientsModule.registerAsync([
       {
         name: 'ORDERS_SERVICE',
-        imports: [ConfigModule],  // เพิ่ม ConfigModule เพื่อให้สามารถใช้ ConfigService ได้
+        imports: [ConfigModule],
         useFactory: async (configService: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
             urls: [configService.get<string>('RABBITMQ_URL')],
-            queue: configService.get<string>('RABBITMQ_QUEUE'),
+            queue: configService.get<string>('RABBITMQ_QUEUE_TX'),
+            queueOptions: {
+              durable: true,
+            },
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: 'ORDER_QUERY_QUEUE',
+        imports: [ConfigModule],
+        useFactory: async (configService: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [configService.get<string>('RABBITMQ_URL')],
+            queue: configService.get<string>('RABBITMQ_QUEUE_QUERY'),
             queueOptions: {
               durable: true,
             },

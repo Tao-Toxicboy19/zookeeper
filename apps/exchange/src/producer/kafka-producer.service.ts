@@ -18,6 +18,7 @@ export class KafkaProducerService {
             ],
         })
 
+
         this.producer = this.kafkaInstance.producer()
 
         this.producer.on('producer.connect', () => {

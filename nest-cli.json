@@ -85,13 +85,13 @@
         "watchAssets": true
       }
     },
-    "noti-order-queue": {
+    "notification": {
       "type": "application",
-      "root": "apps/noti-order-queue",
+      "root": "apps/notification",
       "entryFile": "src/main",
       "sourceRoot": "./",
       "compilerOptions": {
-        "tsConfigPath": "apps/noti-order-queue/tsconfig.app.json",
+        "tsConfigPath": "apps/notification/tsconfig.app.json",
         "assets": ["proto/*.proto"],
         "watchAssets": true
       }

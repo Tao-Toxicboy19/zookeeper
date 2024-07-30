@@ -1,6 +1,7 @@
 import {
   ConfirmOTPDto,
   EmailResponse,
+  GoogleLoginDto,
   JwtPayload,
   RedisService,
   SigninDto,
@@ -48,7 +49,6 @@ export class AuthService implements OnModuleInit {
 
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
-      console.log('hello world')
       const user = await this.userService.validateUser(dto.username)
       await this.producerService.sendMsg(JSON.stringify(user))
       return {
@@ -73,6 +73,31 @@ export class AuthService implements OnModuleInit {
       }
     } catch (error) {
       throw error
+    }
+  }
+
+  async googleLogin(dto: GoogleLoginDto): Promise<TokenResponse> {
+    this.logger.debug(dto)
+    const user = await this.userService.validateEmail(dto.email)
+    if (user) {
+      const { accessToken, refreshToken } = await this.getTokens(new ObjectId(user._id).toHexString(), user.email)
+      return {
+        accessToken,
+        refreshToken,
+      }
+    }
+    const { email, userId } = await this.userService.signup({
+      email: dto.email,
+      name: dto.name,
+      picture: dto.picture,
+      googleId: dto.googleId,
+    })
+    
+    const { accessToken, refreshToken } = await this.getTokens(userId, email)
+
+    return {
+      accessToken,
+      refreshToken,
     }
   }
 

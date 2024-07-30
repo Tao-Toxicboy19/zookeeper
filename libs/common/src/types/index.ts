@@ -26,7 +26,9 @@ export {
     JwtPayload,
     Tokens,
     ProfileDto,
-    ProfileResponse
+    ProfileResponse,
+    GetEmailDto,
+    GoogleLoginDto,
 } from './auth'
 
 export {

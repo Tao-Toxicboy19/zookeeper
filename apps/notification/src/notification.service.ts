@@ -1,10 +1,10 @@
 
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
-import { MailDto } from './dto/noti-order.dto'
+import { MailDto } from './dto/notification.dto'
 
 @Injectable()
-export class NotiOrderQueueService {
+export class NotificationService {
 
     constructor(
         private readonly mailerService: MailerService,

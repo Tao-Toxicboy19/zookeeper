@@ -9,6 +9,8 @@ service AuthService {
     rpc ConfirmOTP (ConfirmOTPDto) returns (TokenResponse) {}
     rpc RefreshToken (SigninDto) returns (TokenResponse) {}
     rpc Profile (ProfileDto) returns (ProfileResponse) {} 
+    rpc GetEmail (GetEmailDto) returns (MailResponse) {} 
+    rpc GoogleLogin (GoogleLoginDto) returns (TokenResponse){}
 }
 
 message ProfileResponse {
@@ -63,4 +65,19 @@ message SignupDto {
 message ValidateDto {
     string username = 1;
     string password = 2;
+}
+
+message GetEmailDto {
+    string user_id = 1;
+}
+
+message MailResponse {
+    string email = 1;
+}
+
+message GoogleLoginDto {
+    string email = 1;
+    string name = 2;
+    string picture = 3;
+    string googleId = 4;
 }

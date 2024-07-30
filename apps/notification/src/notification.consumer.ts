@@ -7,13 +7,13 @@ import {
 import { ConfigService } from '@nestjs/config'
 import amqp, { ChannelWrapper } from 'amqp-connection-manager'
 import { ConfirmChannel, ConsumeMessage } from 'amqplib'
-import { NotiOrderQueueService } from './noti-order-queue.service'
 import {
   AUTH_PACKAGE_NAME,
   AUTH_SERVICE_NAME,
   AuthServiceClient
 } from '@app/common'
 import { ClientGrpc } from '@nestjs/microservices'
+import { NotificationService } from './notification.service'
 
 type User = {
   user_id: string
@@ -23,15 +23,15 @@ type User = {
 }
 
 @Injectable()
-export class NotiOrderQueueConsumer implements OnModuleInit {
+export class NotificationConsumer implements OnModuleInit {
   private readonly channelWrapper: ChannelWrapper
   private readonly notiOrderQueue: string = 'noti_order_queue'
-  private readonly logger: Logger = new Logger(NotiOrderQueueConsumer.name)
+  private readonly logger: Logger = new Logger(NotificationConsumer.name)
   private authServiceClient: AuthServiceClient
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly notifyService: NotiOrderQueueService,
+    private readonly notificationService: NotificationService,
     @Inject(AUTH_PACKAGE_NAME) private client: ClientGrpc,
   ) {
     const connection = amqp.connect([this.configService.get<string>('RABBIT_MQ_URL')])
@@ -50,10 +50,10 @@ export class NotiOrderQueueConsumer implements OnModuleInit {
       channel.consume(this.notiOrderQueue, async (msg: ConsumeMessage) => {
         if (msg) {
           const { user_id, leverage, symbol, quantity }: User = JSON.parse(msg.content.toString())
-          const { email } = await this.authServiceClient.getEmail({ userId: user_id }).toPromise()
-          this.logger.debug(email)
-          await this.notifyService.sendMail({ email, symbol, leverage, quantity, })
-          this.logger.debug('send req ok')
+          // const { email } = await this.authServiceClient.getEmail({ userId: user_id }).toPromise()
+          // this.logger.debug(email)
+          // await this.notifyService.sendMail({ email, symbol, leverage, quantity, })
+          // this.logger.debug('send req ok')
           channel.ack(msg)
         }
       })

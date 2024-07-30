@@ -3,14 +3,14 @@ import { AuthService } from './auth.service'
 import {
   AuthServiceController,
   AuthServiceControllerMethods,
+  ConfirmOTPDto,
+  GetEmailDto,
+  GoogleLoginDto,
+  ProfileDto,
   SigninDto,
   SignupDto,
   ValidateDto
 } from '@app/common'
-import {
-  ConfirmOTPDto,
-  ProfileDto,
-} from '@app/common/types/auth/auth'
 import { UsersService } from './users/users.service'
 import { ObjectId } from 'mongodb'
 
@@ -49,5 +49,15 @@ export class AuthController implements AuthServiceController {
       username: username,
       email: email
     }
+  }
+
+  getEmail(request: GetEmailDto) {
+    return {
+      email: ''
+    }
+  }
+
+  googleLogin(request: GoogleLoginDto) {
+    return this.authService.googleLogin(request)
   }
 }

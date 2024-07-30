@@ -43,7 +43,7 @@ export type Order = {
 @Injectable()
 export class OrderQueueConsumer implements OnModuleInit {
     private readonly channelWrapper: ChannelWrapper
-    private readonly orderQueue: string = 'order_future_queue'
+    private readonly orderFutureQueue: string = 'order_future_queue'
     private readonly orderUpdateQueue: string = 'order_update_queue'
     private readonly notiOrderQueue: string = 'noti_order_queue'
     private readonly logger: Logger = new Logger(OrderQueueConsumer.name)
@@ -56,8 +56,8 @@ export class OrderQueueConsumer implements OnModuleInit {
         const connection = amqp.connect([this.configService.get<string>('RABBIT_MQ_URL')])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: ConfirmChannel) => {
-                await channel.assertQueue(this.orderQueue, { durable: true })
-                this.logger.log('Queues set up successfully')
+                await channel.assertQueue(this.orderFutureQueue, { durable: true })
+                this.logger.debug('Queues set up successfully')
             },
         })
     }
@@ -65,7 +65,7 @@ export class OrderQueueConsumer implements OnModuleInit {
     async onModuleInit() {
         this.exchangeServiceClient = this.client.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
         this.channelWrapper.addSetup((channel: ConfirmChannel) => {
-            channel.consume(this.orderQueue, async (msg: ConsumeMessage) => {
+            channel.consume(this.orderFutureQueue, async (msg: ConsumeMessage) => {
                 if (msg) {
                     const order: CreateLimit = JSON.parse(msg.content.toString())
                     this.logger.debug(order)

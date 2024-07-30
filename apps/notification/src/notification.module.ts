@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common'
-import { NotiOrderQueueConsumer } from './noti-order-queue.consumer'
+import { NotificationConsumer } from './notification.consumer'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { ConfigModule, ConfigService } from '@nestjs/config'
-import { NotiOrderQueueService } from './noti-order-queue.service'
+import { NotificationService } from './notification.service'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { AUTH_PACKAGE_NAME } from '@app/common'
 import { join } from 'path'
@@ -45,8 +45,8 @@ import { join } from 'path'
   ],
   controllers: [],
   providers: [
-    NotiOrderQueueConsumer,
-    NotiOrderQueueService
+    NotificationConsumer,
+    NotificationService
   ],
 })
-export class NotiOrderQueueModule { }
+export class NotificationModule { }

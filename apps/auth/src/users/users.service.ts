@@ -5,7 +5,7 @@ import { UserDto } from './dto/user.dto'
 import { EmailResponse } from '@app/common'
 import * as bcrypt from 'bcrypt'
 import { ProducerService } from '../producer/producer.service'
-import { GrpcAlreadyExistsException, GrpcInternalException } from 'nestjs-grpc-exceptions'
+import { GrpcAlreadyExistsException } from 'nestjs-grpc-exceptions'
 import { ObjectId } from 'mongodb'
 
 @Injectable()
@@ -18,7 +18,6 @@ export class UsersService {
     async signup(dto: UserDto): Promise<EmailResponse> {
         try {
             const existUser = await this.validateUser(dto.username)
-            console.log(existUser)
             const existEmail = await this.validateEmail(dto.email)
             if (existUser) {
                 throw new GrpcAlreadyExistsException('User already exists.')
@@ -26,13 +25,20 @@ export class UsersService {
                 throw new GrpcAlreadyExistsException('Email already exists.')
             }
 
-            const hash = await bcrypt.hash(dto.password, 12)
+            let hash: string | undefined
+            if (dto.password) {
+                hash = await bcrypt.hash(dto.password, 12)
+            }
+
             const user = await this.usersRepository.create({
-                username: dto.username,
+                username: dto.googleId ? dto.email : dto.username,
                 email: dto.email,
                 password: hash,
-                createdAt: new Date()
-            })
+                createdAt: new Date(),
+                googleId: dto.googleId,
+                name: dto.name,
+                picture: dto.picture,
+            });
 
             await this.producerService.sendMsg(JSON.stringify(user))
 
@@ -45,7 +51,7 @@ export class UsersService {
         }
     }
 
-    async getEmail(userId: string){
+    async getEmail(userId: string) {
         try {
             const { email } = await this.usersRepository.findOne({ _id: userId })
             return { email }
@@ -54,7 +60,7 @@ export class UsersService {
         }
     }
 
-    private async validateEmail(email: string) {
+    async validateEmail(email: string) {
         return await this.usersRepository.findOne({ email })
     }
 

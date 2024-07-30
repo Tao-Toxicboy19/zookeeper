@@ -29,11 +29,11 @@ export class KeyService implements OnModuleInit {
         }
     }
 
-    // async getKey(request: KeyUserId) {
-    //     try {
-    //         return await firstValueFrom(this.keyServiceClient.getKey(request))
-    //     } catch (error) {
-    //         throw error
-    //     }
-    // }
+    async getKey(request: KeyUserId) {
+        try {
+            return await firstValueFrom(this.keyServiceClient.getKey(request))
+        } catch (error) {
+            throw error
+        }
+    }
 }

@@ -1,16 +1,21 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors, Get } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { SignupDto } from './dto'
-import { JwtAuthGuard, JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
+import { GoogleAuthGuard, JwtAuthGuard, JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
 import { OtpDto } from './dto/otp.dto'
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 import { AuthService } from './auth.service'
+import { GooglePayload } from '@app/common/types/auth/google-payload.type'
+import { ConfigService } from '@nestjs/config'
 
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name)
 
-  constructor(private readonly authService: AuthService) { }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService
+  ) { }
 
   @UseInterceptors(GrpcToHttpInterceptor)
   @Post('signup/local')
@@ -136,12 +141,6 @@ export class AuthController {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict'
       })
-      res.clearCookie('user_id', {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
-      })
-
     }
     return {
       message: 'OK',
@@ -155,5 +154,28 @@ export class AuthController {
     @Req() req: { user: JwtPayload }
   ) {
     return this.authService.profile({ username: req.user.username })
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  async googleAuthRedirect(
+    @Req() req: { user: GooglePayload },
+    @Res() res: Response
+  ) {
+    const { accessToken, refreshToken } = await this.authService.googleLogin(req)
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+      sameSite: 'strict',
+    })
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+      sameSite: 'strict',
+    })
+
+    res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
   }
 }

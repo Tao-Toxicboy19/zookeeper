@@ -34,4 +34,12 @@ export class OrdersController {
             statusCode: 200
         }
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('query')
+    async query(
+        @Req() req: { user: JwtPayload }
+    ) {
+        return await this.ordersService.query(req.user.sub)
+    }
 }

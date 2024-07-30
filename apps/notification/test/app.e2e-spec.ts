@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { NotiOrderQueueModule } from './../src/noti-order-queue.module';
+import { NotiOrderQueueModule } from '../src/notification.module';
 
 describe('NotiOrderQueueController (e2e)', () => {
   let app: INestApplication;

@@ -25,11 +25,11 @@ export class KeyController {
     return this.keyService.create({ ...dto, userId: req.user.sub })
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Post()
-  // getKey(
-  //   @Req() req: { user: JwtPayload }
-  // ) {
-  //   return this.keyClientService.getKey({ userId: req.user.sub })
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Post()
+  getKey(
+    @Req() req: { user: JwtPayload }
+  ) {
+    return this.keyService.getKey({ userId: req.user.sub })
+  }
 }
