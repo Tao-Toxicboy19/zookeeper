@@ -9,6 +9,7 @@ import {
   CreateKeyDto,
   EXCHANGE_PACKAGE_NAME,
   EXCHANGE_SERVICE_NAME,
+  ExchangeResponse,
   ExchangeServiceClient,
   KeyResponse
 } from '@app/common'
@@ -16,6 +17,7 @@ import { ClientGrpc } from '@nestjs/microservices'
 import { firstValueFrom } from 'rxjs'
 import { KeysRepository } from './key.repository'
 import { GrpcAlreadyExistsException, GrpcInvalidArgumentException } from 'nestjs-grpc-exceptions'
+import { JwtService } from '@nestjs/jwt'
 
 @Injectable()
 export class KeyService implements OnModuleInit {
@@ -25,6 +27,7 @@ export class KeyService implements OnModuleInit {
   constructor(
     @Inject(EXCHANGE_PACKAGE_NAME) private exchangeClient: ClientGrpc,
     private readonly keysRepository: KeysRepository,
+    private readonly jwtService: JwtService,
   ) { }
 
   onModuleInit() {
@@ -45,22 +48,41 @@ export class KeyService implements OnModuleInit {
     }
   }
 
+  private async encypt(value: string, secret: string): Promise<string> {
+    try {
+      return await this.jwtService.signAsync(value, { secret })
+    } catch (error) {
+      throw error
+    }
+  }
+
   async create(dto: CreateKeyDto): Promise<KeyResponse> {
 
     try {
       const existKey = await this.keysRepository.findOne({ userId: dto.userId })
-      if (existKey) throw new GrpcAlreadyExistsException('Keys already exist for this user.')
+      if (existKey) {
+        console.log('hello world')
+        throw new GrpcAlreadyExistsException('Keys already exist for this user.')
+      }
 
-      const validate = await firstValueFrom(this.exchangeServiceClient.validateKey({ apiKey: dto.apiKey, secretKey: dto.secretKey }))
-      if (validate.statusCode !== 200) throw new GrpcInvalidArgumentException(validate.message)
+      const validate = await new Promise<ExchangeResponse>((resolve, reject) => {
+        this.exchangeServiceClient.validateKey({ apiKey: dto.apiKey, secretKey: dto.secretKey })
+          .subscribe({
+            next: (response) => resolve(response),
+            error: (err) => reject(err)
+          })
+      })
+      if (validate.statusCode !== 200) {
+        throw new GrpcInvalidArgumentException(validate.message)
+      }
 
       await this.keysRepository.create({
         createdAt: new Date(),
-        apiKey: dto.apiKey,
-        secretKey: dto.secretKey,
+        apiKey: await this.encypt(dto.apiKey, dto.seedPhrase),
+        secretKey: await this.encypt(dto.secretKey, dto.seedPhrase),
         userId: dto.userId
       })
-      
+
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Key created successfully',

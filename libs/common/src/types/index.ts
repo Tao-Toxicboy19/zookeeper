@@ -1,4 +1,4 @@
-
+export * from './notifications'
 
 export {
     OrdersDto,

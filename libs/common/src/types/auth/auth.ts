@@ -14,6 +14,8 @@ export interface ProfileResponse {
   userId: string;
   username: string;
   email: string;
+  picture?: string | undefined;
+  name?: string | undefined;
 }
 
 export interface ProfileDto {

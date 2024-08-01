@@ -8,4 +8,8 @@ export class KeyDto {
     @IsNotEmpty()
     @IsString()
     secretKey: string
+
+    @IsNotEmpty()
+    @IsString()
+    seed_phrase: string
 }

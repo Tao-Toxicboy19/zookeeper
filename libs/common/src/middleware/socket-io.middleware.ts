@@ -13,6 +13,7 @@ export function SocketAuthMiddleware(): SocketIOMiddleware {
       WsJwtGuard.validateToken(client)
       next()
     } catch (error) {
+      console.log(error)
       next(error)
     }
   }

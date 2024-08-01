@@ -1,17 +1,20 @@
 import { Module } from '@nestjs/common'
-import { NotificationConsumer } from './notification.consumer'
 import { MailerModule } from '@nestjs-modules/mailer'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { NotificationService } from './notification.service'
 import { ClientsModule, Transport } from '@nestjs/microservices'
-import { AUTH_PACKAGE_NAME } from '@app/common'
+import { AUTH_PACKAGE_NAME, DatabaseModule } from '@app/common'
 import { join } from 'path'
+import { NotificationController } from './notification.controller'
+import { NotificationRepository } from './notification.repository'
+import { MongooseModule } from '@nestjs/mongoose'
+import { Notification, NotificationSchema } from './schemas/notification.schemas'
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: './apps/noti-order-queue/.env',
+      envFilePath: './apps/notification/.env',
     }),
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
@@ -42,11 +45,13 @@ import { join } from 'path'
         inject: [ConfigService],
       },
     ]),
+    DatabaseModule,
+    MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]),
   ],
-  controllers: [],
+  controllers: [NotificationController],
   providers: [
-    NotificationConsumer,
-    NotificationService
+    NotificationService,
+    NotificationRepository,
   ],
 })
 export class NotificationModule { }

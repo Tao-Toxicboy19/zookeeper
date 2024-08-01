@@ -3,12 +3,14 @@ import {
   Controller,
   Post,
   Req,
+  Res,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common'
+import { Request, Response } from 'express'
 import { KeyService } from './key.service'
 import { KeyDto } from './dto'
-import { JwtAuthGuard, JwtPayload } from '@app/common'
+import { CookieAuthGuard, JwtAuthGuard, JwtPayload } from '@app/common'
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 
 @Controller('key')
@@ -20,12 +22,19 @@ export class KeyController {
   @Post('create')
   create(
     @Body() dto: KeyDto,
-    @Req() req: { user: JwtPayload }
+    @Req() req: { user: JwtPayload },
+    @Res({ passthrough: true }) res: Response
   ) {
-    return this.keyService.create({ ...dto, userId: req.user.sub })
+    res.cookie('seed_phrase', dto.seed_phrase, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    })
+    return this.keyService.create({ ...dto, userId: req.user.sub, seedPhrase: dto.seed_phrase })
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseGuards(CookieAuthGuard)
   @Post()
   getKey(
     @Req() req: { user: JwtPayload }

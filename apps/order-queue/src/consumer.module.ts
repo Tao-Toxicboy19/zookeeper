@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { OrderQueueConsumer } from './order.consumer'
+import { ConsumerService } from './consumer.service'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { EXCHANGE_PACKAGE_NAME } from '@app/common'
@@ -25,8 +25,23 @@ import { join } from 'path'
         }),
         inject: [ConfigService],
       },
+      // {
+      //   name: 'NOTIFICATION_SERVICE',
+      //   imports: [ConfigModule],
+      //   useFactory: async (configService: ConfigService) => ({
+      //     transport: Transport.RMQ,
+      //     options: {
+      //       urls: [configService.get<string>('RABBITMQ_URL')],
+      //       queue: configService.get<string>('NOTIFY_QUEUE'),
+      //       queueOptions: {
+      //         durable: true,
+      //       },
+      //     },
+      //   }),
+      //   inject: [ConfigService],
+      // },
     ]),
   ],
-  providers: [OrderQueueConsumer],
+  providers: [ConsumerService],
 })
-export class OrderQueueModule { }
+export class ConsumerModule { }

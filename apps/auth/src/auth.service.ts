@@ -20,7 +20,6 @@ import { ObjectId } from 'mongodb'
 import {
   GrpcInvalidArgumentException,
   GrpcNotFoundException,
-  GrpcUnauthenticatedException
 } from 'nestjs-grpc-exceptions'
 
 @Injectable()
@@ -66,10 +65,10 @@ export class AuthService implements OnModuleInit {
 
       if (dto.otp !== user.otp) throw new GrpcInvalidArgumentException('OTP invalid.')
 
-      const tokens = await this.getTokens(dto.userId, user.user.username)
+      const { accessToken, refreshToken } = await this.getTokens(dto.userId, user.user.username)
       return {
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken
+        accessToken,
+        refreshToken
       }
     } catch (error) {
       throw error
@@ -77,7 +76,6 @@ export class AuthService implements OnModuleInit {
   }
 
   async googleLogin(dto: GoogleLoginDto): Promise<TokenResponse> {
-    this.logger.debug(dto)
     const user = await this.userService.validateEmail(dto.email)
     if (user) {
       const { accessToken, refreshToken } = await this.getTokens(new ObjectId(user._id).toHexString(), user.email)
@@ -92,7 +90,7 @@ export class AuthService implements OnModuleInit {
       picture: dto.picture,
       googleId: dto.googleId,
     })
-    
+
     const { accessToken, refreshToken } = await this.getTokens(userId, email)
 
     return {

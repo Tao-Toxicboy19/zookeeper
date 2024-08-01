@@ -1,5 +1,6 @@
 import {
   JwtPayload,
+  SocketAuthMiddleware,
   WsJwtGuard
 } from '@app/common'
 import {
@@ -14,7 +15,6 @@ import {
 } from 'socket.io'
 import { PositionService } from './position.service'
 import { Logger, UseGuards } from '@nestjs/common'
-import { SocketAuthMiddleware } from '../auth/socket-io.middleware'
 
 @WebSocketGateway(8001, {
   cors: '*'

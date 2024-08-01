@@ -112,6 +112,7 @@ export class ExchangeService implements OnModuleInit {
 
   async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
     try {
+      this.logger.debug('start long Process open position')
       const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
       await this.createExchange({ apiKey, secretKey })
       await this.exchange.setLeverage(dto.leverage, dto.symbol)
@@ -121,10 +122,11 @@ export class ExchangeService implements OnModuleInit {
         dto.symbol,
         quantity,
         price.last,
-        {
-          positionSide: this.long
-        }
+        // {
+        //   positionSide: 'LONG'
+        // }
       )
+      this.logger.debug('OPEN long Position')
 
     } catch (error) {
       throw error
@@ -133,19 +135,21 @@ export class ExchangeService implements OnModuleInit {
 
   async createLimitSellOrder(dto: createLimitOrderDto): Promise<void> {
     try {
+      this.logger.debug('start short Process open position')
       const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
       await this.createExchange({ apiKey, secretKey })
-      await this.exchange.setLeverage(dto.leverage, dto.symbol)
+      await this.exchange.setLeverage(75, dto.symbol)
       const price = await this.exchange.fetchTicker(dto.symbol)
       const quantity = (dto.quantity / price.last) * dto.leverage
       await this.exchange.createLimitSellOrder(
         dto.symbol,
         quantity,
         price.last,
-        {
-          positionSide: this.short
-        }
+        // {
+        //   positionSide: 'SHORT'
+        // }
       )
+      this.logger.debug('OPEN short Position')
     } catch (error) {
       throw error
     }
@@ -153,18 +157,24 @@ export class ExchangeService implements OnModuleInit {
 
   async closePosition(dto: createLimitOrderDto): Promise<void> {
     try {
+      this.logger.debug('start Process close position')
+
       const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
       await this.createExchange({ apiKey, secretKey })
       const price = await this.exchange.fetchTicker(dto.symbol)
       const quantity = (dto.quantity / price.last) * dto.leverage
 
+      await this.exchange.createMarketBuyOrder(dto.symbol, quantity, { positionSide: 'SHORT' })
+
       // if (dto.position === this.long) {
-      //     // Close SHORT
-      //     await this.exchange.createMarketBuyOrder(dto.symbol, quantity, { positionSide: this.short })
+      //   // Close SHORT
+      //   await this.exchange.createMarketBuyOrder(dto.symbol, quantity, { positionSide: this.short })
       // } else if (dto.position === this.short) {
-      //     // Close LONG
-      //     await this.exchange.createMarketSellOrder(dto.symbol, quantity, { positionSide: this.long })
+      //   // Close LONG
+      //   await this.exchange.createMarketSellOrder(dto.symbol, quantity, { positionSide: this.long })
       // }
+      this.logger.debug('Close position OK')
+
     } catch (error) {
       throw error
     }

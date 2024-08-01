@@ -18,9 +18,6 @@ import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [
-    JwtModule.register({
-      secret: '234234'
-    }),
     ClientsModule.registerAsync([
       {
         name: AUTH_PACKAGE_NAME,

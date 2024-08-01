@@ -38,7 +38,7 @@ export class UsersService {
                 googleId: dto.googleId,
                 name: dto.name,
                 picture: dto.picture,
-            });
+            })
 
             await this.producerService.sendMsg(JSON.stringify(user))
 

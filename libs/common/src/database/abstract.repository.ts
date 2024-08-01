@@ -80,4 +80,38 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         session.startTransaction();
         return session;
     }
+
+    async updateMany(
+        filterQuery: FilterQuery<TDocument>,
+        update: UpdateQuery<TDocument>,
+    ): Promise<TDocument[]> {
+        const result = await this.model.updateMany(filterQuery, update, {
+            lean: true,
+        });
+
+        if (result.modifiedCount === 0) {
+            this.logger.warn(`No documents were updated with filterQuery:`, filterQuery);
+            throw new NotFoundException('No documents found to update.');
+        }
+
+        return this.model.find(filterQuery, {}, { lean: true }) as unknown as TDocument[];
+    }
+
+    async deleteOne(filterQuery: FilterQuery<TDocument>): Promise<void> {
+        const result = await this.model.deleteOne(filterQuery).exec();
+
+        if (result.deletedCount === 0) {
+            this.logger.warn(`No documents found to delete with filterQuery:`, filterQuery);
+            throw new NotFoundException('Document not found to delete.');
+        }
+    }
+
+    async deleteMany(filterQuery: FilterQuery<TDocument>): Promise<void> {
+        const result = await this.model.deleteMany(filterQuery).exec();
+
+        if (result.deletedCount === 0) {
+            this.logger.warn(`No documents found to delete with filterQuery:`, filterQuery);
+            throw new NotFoundException('Documents not found to delete.');
+        }
+    }
 }

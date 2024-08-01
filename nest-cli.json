@@ -17,7 +17,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/gateway/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -28,7 +30,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/auth/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -48,7 +52,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/exchange/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -59,7 +65,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/key/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -70,7 +78,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/order-queue/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -81,7 +91,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/mail-queue/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     },
@@ -92,7 +104,9 @@
       "sourceRoot": "./",
       "compilerOptions": {
         "tsConfigPath": "apps/notification/tsconfig.app.json",
-        "assets": ["proto/*.proto"],
+        "assets": [
+          "proto/*.proto"
+        ],
         "watchAssets": true
       }
     }

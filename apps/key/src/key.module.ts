@@ -8,9 +8,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { KeysRepository } from './key.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { KeySchema, Keys } from './schemas/key.schema';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
+    JwtModule.register({}),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: './apps/key/.env',

@@ -39,7 +39,7 @@ export class ExchangeController implements ExchangeServiceController {
   }
 
   createLimitSell(request: CreateLimit): Promise<void> {
-    return this.exchangeService.createLimitBuyOrder({
+    return this.exchangeService.createLimitSellOrder({
       id: request.id,
       symbol: request.symbol,
       leverage: request.leverage,

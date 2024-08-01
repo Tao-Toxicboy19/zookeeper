@@ -10,12 +10,14 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(NotificationModule, {
     transport: Transport.RMQ,
     options: {
-      urls: [configService.get<string>('RABBIT_MQ_URL')],
+      urls: [configService.get<string>('RABBITMQ_URL')],
+      queue: configService.get<string>('NOTIFY_QUEUE'),
       queueOptions: {
-        durable: true,
+        durable: true
       },
     },
-  })
-  await app.listen()
+  });
+  await app.listen();
+  console.log('Microservice is listening...')
 }
 bootstrap()

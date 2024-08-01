@@ -156,6 +156,12 @@ export class AuthController {
     return this.authService.profile({ username: req.user.username })
   }
 
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth(@Req() req) {
+    // Initiates the Google OAuth process
+  }
+
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
   async googleAuthRedirect(

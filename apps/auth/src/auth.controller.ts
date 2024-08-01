@@ -43,11 +43,13 @@ export class AuthController implements AuthServiceController {
   }
 
   async profile(request: ProfileDto) {
-    const { username, email, _id } = await this.userService.validateUser(request.username)
+    const { username, email, _id, picture, name } = await this.userService.validateUser(request.username)
     return {
       userId: new ObjectId(_id).toHexString(),
       username: username,
-      email: email
+      email: email,
+      picture,
+      name,
     }
   }
 
