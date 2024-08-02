@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 package auth;
 
@@ -11,6 +12,8 @@ service AuthService {
     rpc Profile (ProfileDto) returns (ProfileResponse) {} 
     rpc GetEmail (GetEmailDto) returns (MailResponse) {} 
     rpc GoogleLogin (GoogleLoginDto) returns (TokenResponse){}
+    rpc ForgotPassword (ForgotPasswordDto) returns (google.protobuf.Empty) {}
+    rpc ResetPassword (ResetPasswordDto) returns (google.protobuf.Empty) {}
 }
 
 message ProfileResponse {
@@ -82,4 +85,13 @@ message GoogleLoginDto {
     string name = 2;
     string picture = 3;
     string googleId = 4;
+}
+
+message ForgotPasswordDto {
+    string email = 1;
+}
+
+message ResetPasswordDto {
+    string token = 1;
+    string password = 2;
 }

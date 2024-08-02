@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
-import { MailQueueService } from './mail-queue.service';
-import { RedisModule } from '@app/common';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MailConsumer } from './mail.consumer';
+import { Module } from '@nestjs/common'
+import { RedisModule } from '@app/common'
+import { MailerModule } from '@nestjs-modules/mailer'
+import { ConfigModule, ConfigService } from '@nestjs/config'
+import { ConsumerService } from './consumer.service'
 
 @Module({
   imports: [
@@ -28,9 +27,7 @@ import { MailConsumer } from './mail.consumer';
     RedisModule,
   ],
   providers: [
-    MailQueueService,
-    MailConsumer,
+    ConsumerService,
   ],
-  exports: [MailQueueService]
 })
-export class MailQueueModule { }
+export class ConsumerModule { }

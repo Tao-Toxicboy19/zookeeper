@@ -133,4 +133,22 @@ export class AuthService implements OnModuleInit {
       })
     })
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.authServiceClient.forgotPassword({ email }).subscribe({
+        next: () => resolve(),
+        error: (err) => reject(err)
+      })
+    })
+  }
+
+  async resetPassword(newPassword: string, token: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.authServiceClient.resetPassword({ token, password: newPassword }).subscribe({
+        next: () => resolve(),
+        error: (err) => reject(err)
+      })
+    })
+  }
 }

@@ -4,11 +4,18 @@ import {
   AuthServiceController,
   AuthServiceControllerMethods,
   ConfirmOTPDto,
+  EmailResponse,
+  ForgotPasswordDto,
   GetEmailDto,
   GoogleLoginDto,
+  MailResponse,
   ProfileDto,
+  ProfileResponse,
+  ResetPasswordDto,
   SigninDto,
   SignupDto,
+  TokenResponse,
+  UserResponse,
   ValidateDto
 } from '@app/common'
 import { UsersService } from './users/users.service'
@@ -22,28 +29,28 @@ export class AuthController implements AuthServiceController {
     private readonly userService: UsersService,
   ) { }
 
-  signup(request: SignupDto) {
-    return this.userService.signup(request)
+  signup(request: SignupDto): Promise<EmailResponse> {
+    return this.authService.signup(request)
   }
 
-  signin(request: SigninDto) {
+  signin(request: SigninDto): Promise<EmailResponse> {
     return this.authService.signin(request)
   }
 
-  validate(request: ValidateDto) {
+  validate(request: ValidateDto): Promise<UserResponse> {
     return this.authService.validateUser(request)
   }
 
-  refreshToken(request: SigninDto) {
+  refreshToken(request: SigninDto): Promise<TokenResponse> {
     return this.authService.refreshToken({ username: request.username, sub: request.userId })
   }
 
-  confirmOtp(request: ConfirmOTPDto) {
+  confirmOtp(request: ConfirmOTPDto): Promise<TokenResponse> {
     return this.authService.confrimOTP(request)
   }
 
-  async profile(request: ProfileDto) {
-    const { username, email, _id, picture, name } = await this.userService.validateUser(request.username)
+  async profile(request: ProfileDto): Promise<ProfileResponse> {
+    const { username, email, _id, picture, name } = await this.userService.findOneByUsername(request.username)
     return {
       userId: new ObjectId(_id).toHexString(),
       username: username,
@@ -53,13 +60,19 @@ export class AuthController implements AuthServiceController {
     }
   }
 
-  getEmail(request: GetEmailDto) {
-    return {
-      email: ''
-    }
+  async getEmail(request: GetEmailDto): Promise<MailResponse> {
+    return this.userService.getEmail(request.userId)
   }
 
-  googleLogin(request: GoogleLoginDto) {
+  googleLogin(request: GoogleLoginDto): Promise<TokenResponse> {
     return this.authService.googleLogin(request)
+  }
+
+  forgotPassword(request: ForgotPasswordDto): Promise<void> {
+    return this.authService.forgotPassword(request.email)
+  }
+
+  resetPassword(request: ResetPasswordDto): Promise<void> {
+    return this.authService.resetPassword(request.token, request.password)
   }
 }

@@ -21,6 +21,12 @@ export class User extends AbstractDocument {
     @Prop()
     googleId?: string
 
+    @Prop()
+    resetPasswordToken?: string | null
+
+    @Prop()
+    resetPasswordExpires?: Date | null
+
     @Prop({ default: Date.now, required: false })
     createdAt?: Date
 

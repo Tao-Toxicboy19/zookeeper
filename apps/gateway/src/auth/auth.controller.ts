@@ -1,16 +1,41 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors, Get, Param } from '@nestjs/common'
-import { Request, Response } from 'express'
-import { SignupDto } from './dto'
-import { GoogleAuthGuard, JwtAuthGuard, JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
-import { OtpDto } from './dto/otp.dto'
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  UseGuards,
+  Req,
+  Res,
+  UseInterceptors,
+  Get,
+  Param
+} from '@nestjs/common'
+import {
+  Request,
+  Response
+} from 'express'
+import {
+  ForgotPasswordDto,
+  OtpDto,
+  ResetPasswordDto,
+  SignupDto
+} from './dto'
+import {
+  GoogleAuthGuard,
+  JwtAuthGuard,
+  JwtPayload,
+  LocalAuthGuard,
+  RefreshJwtAuthGuard
+} from '@app/common'
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 import { AuthService } from './auth.service'
 import { GooglePayload } from '@app/common/types/auth/google-payload.type'
 import { ConfigService } from '@nestjs/config'
-import { ForgotPasswordDto } from './dto/forgot-password.dto'
-import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @Controller('auth')
+@UseInterceptors(GrpcToHttpInterceptor)
 export class AuthController {
   private readonly logger = new Logger(AuthController.name)
 
@@ -19,7 +44,6 @@ export class AuthController {
     private readonly configService: ConfigService
   ) { }
 
-  @UseInterceptors(GrpcToHttpInterceptor)
   @Post('signup/local')
   async signupLocal(
     @Body() dto: SignupDto,
@@ -37,7 +61,6 @@ export class AuthController {
     }
   }
 
-  @UseInterceptors(GrpcToHttpInterceptor)
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('signin/local')
@@ -88,7 +111,6 @@ export class AuthController {
     }
   }
 
-  @UseInterceptors(GrpcToHttpInterceptor)
   @HttpCode(HttpStatus.OK)
   @Post('confirm/otp')
   async confirmOtp(
@@ -191,7 +213,7 @@ export class AuthController {
   async forgotPassword(
     @Body() dto: ForgotPasswordDto
   ) {
-    // return this.authService.forgotPassword(forgotPasswordDto.email);
+    return this.authService.forgotPassword(dto.email)
   }
 
   @Post('reset-password/:token')
@@ -199,6 +221,6 @@ export class AuthController {
     @Param('token') token: string,
     @Body() dto: ResetPasswordDto
   ) {
-    // return this.authService.resetPassword(token, resetPasswordDto.password);
+    return this.authService.resetPassword(dto.password, token)
   }
 }

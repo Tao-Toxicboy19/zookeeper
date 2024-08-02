@@ -18,13 +18,18 @@ import * as bcrypt from 'bcrypt'
 import { UsersService } from './users/users.service'
 import { ObjectId } from 'mongodb'
 import {
+  GrpcAlreadyExistsException,
   GrpcInvalidArgumentException,
   GrpcNotFoundException,
 } from 'nestjs-grpc-exceptions'
+import { randomUUID } from 'crypto'
+import { UserDto } from './users/dto/user.dto'
 
 @Injectable()
 export class AuthService implements OnModuleInit {
   private readonly logger = new Logger(AuthService.name)
+  private readonly otpMailQueue: string = 'otp_mail_queue'
+  private readonly resetPassswordQueue: string = 'reset_password_queue'
 
   constructor(
     private readonly jwtService: JwtService,
@@ -37,7 +42,7 @@ export class AuthService implements OnModuleInit {
   onModuleInit() { }
 
   async validateUser(dto: ValidateDto): Promise<UserResponse> {
-    const user = await this.userService.validateUser(dto.username)
+    const user = await this.userService.findOneByUsername(dto.username)
     if (user && await bcrypt.compare(dto.password, user.password)) {
       return {
         username: user.username,
@@ -48,10 +53,33 @@ export class AuthService implements OnModuleInit {
 
   async signin(dto: SigninDto): Promise<EmailResponse> {
     try {
-      const user = await this.userService.validateUser(dto.username)
-      await this.producerService.sendMsg(JSON.stringify(user))
+      const user = await this.userService.findOneByUsername(dto.username)
+      await this.producerService.handleSendTask(this.otpMailQueue, JSON.stringify(user))
       return {
         email: user.email
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async signup(dto: UserDto): Promise<EmailResponse> {
+    try {
+      const existUser = await this.userService.findOneByUsername(dto.username)
+      const existEmail = await this.userService.findOneByEmail(dto.email)
+      if (existUser) {
+        throw new GrpcAlreadyExistsException('User already exists.')
+      } else if (existEmail) {
+        throw new GrpcAlreadyExistsException('Email already exists.')
+      }
+
+      const user = await this.userService.createUser(dto)
+
+      await this.producerService.handleSendTask(this.otpMailQueue, JSON.stringify(user))
+
+      return {
+        email: dto.email,
+        userId: new ObjectId(user._id).toHexString()
       }
     } catch (error) {
       throw error
@@ -61,9 +89,13 @@ export class AuthService implements OnModuleInit {
   async confrimOTP(dto: ConfirmOTPDto): Promise<TokenResponse> {
     try {
       const user = JSON.parse(await this.redisService.getValue(dto.userId))
-      if (!user) throw new GrpcNotFoundException('User not found.')
+      if (!user) {
+        throw new GrpcNotFoundException('User not found.')
+      }
 
-      if (dto.otp !== user.otp) throw new GrpcInvalidArgumentException('OTP invalid.')
+      if (dto.otp !== user.otp) {
+        throw new GrpcInvalidArgumentException('OTP invalid.')
+      }
 
       const { accessToken, refreshToken } = await this.getTokens(dto.userId, user.user.username)
       return {
@@ -76,7 +108,7 @@ export class AuthService implements OnModuleInit {
   }
 
   async googleLogin(dto: GoogleLoginDto): Promise<TokenResponse> {
-    const user = await this.userService.validateEmail(dto.email)
+    const user = await this.userService.findOneByEmail(dto.email)
     if (user) {
       const { accessToken, refreshToken } = await this.getTokens(new ObjectId(user._id).toHexString(), user.email)
       return {
@@ -84,7 +116,7 @@ export class AuthService implements OnModuleInit {
         refreshToken,
       }
     }
-    const { email, userId } = await this.userService.signup({
+    const { email, userId } = await this.signup({
       email: dto.email,
       name: dto.name,
       picture: dto.picture,
@@ -134,5 +166,38 @@ export class AuthService implements OnModuleInit {
       accessToken: at,
       refreshToken: rt,
     }
+  }
+
+  async forgotPassword(email: string): Promise<void> {
+    const user = await this.userService.findOneByEmail(email)
+    if (!user) {
+      throw new GrpcNotFoundException('User not found')
+    }
+
+    const token = randomUUID()
+    user.resetPasswordToken = token
+    user.resetPasswordExpires = new Date(Date.now() + 3600000)
+    await this.userService.update(user)
+
+    // send mail
+    const payload = {
+      token,
+      email: user.email
+    }
+    await this.producerService.handleSendTask(this.resetPassswordQueue, JSON.stringify(payload))
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.userService.findOneByResetPasswordToken(token)
+    this.logger.debug(user)
+    if (!user || user.resetPasswordExpires < new Date()) {
+      throw new GrpcInvalidArgumentException('Password reset token is invalid or has expired')
+    }
+
+    user.password = await bcrypt.hash(newPassword, 12)
+    user.resetPasswordToken = null
+    user.resetPasswordExpires = null
+    await this.userService.update(user)
+
   }
 }

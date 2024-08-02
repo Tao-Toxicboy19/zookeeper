@@ -6,6 +6,7 @@
 
 /* eslint-disable */
 import { GrpcMethod, GrpcStreamMethod } from "@nestjs/microservices";
+import { Empty } from "google/protobuf/empty";
 import { Observable } from "rxjs";
 
 export const protobufPackage = "auth";
@@ -81,6 +82,15 @@ export interface GoogleLoginDto {
   googleId: string;
 }
 
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  password: string;
+}
+
 export const AUTH_PACKAGE_NAME = "auth";
 
 export interface AuthServiceClient {
@@ -99,6 +109,10 @@ export interface AuthServiceClient {
   getEmail(request: GetEmailDto): Observable<MailResponse>;
 
   googleLogin(request: GoogleLoginDto): Observable<TokenResponse>;
+
+  forgotPassword(request: ForgotPasswordDto): Observable<Empty>;
+
+  resetPassword(request: ResetPasswordDto): Observable<Empty>;
 }
 
 export interface AuthServiceController {
@@ -117,6 +131,10 @@ export interface AuthServiceController {
   getEmail(request: GetEmailDto): Promise<MailResponse> | Observable<MailResponse> | MailResponse;
 
   googleLogin(request: GoogleLoginDto): Promise<TokenResponse> | Observable<TokenResponse> | TokenResponse;
+
+  forgotPassword(request: ForgotPasswordDto): void;
+
+  resetPassword(request: ResetPasswordDto): void;
 }
 
 export function AuthServiceControllerMethods() {
@@ -130,6 +148,8 @@ export function AuthServiceControllerMethods() {
       "profile",
       "getEmail",
       "googleLogin",
+      "forgotPassword",
+      "resetPassword",
     ];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);

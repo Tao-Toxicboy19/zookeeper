@@ -29,6 +29,9 @@ export {
     ProfileResponse,
     GetEmailDto,
     GoogleLoginDto,
+    ResetPasswordDto,
+    ForgotPasswordDto,
+    MailResponse,
 } from './auth'
 
 export {
