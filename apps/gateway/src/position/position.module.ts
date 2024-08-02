@@ -6,6 +6,7 @@ import { EXCHANGE_PACKAGE_NAME } from '@app/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { join } from 'path'
 import { PositionService } from './position.service'
+import { KeyModule } from '../key/key.module'
 
 @Module({
   imports: [
@@ -24,11 +25,12 @@ import { PositionService } from './position.service'
         inject: [ConfigService],
       },
     ]),
+    KeyModule
   ],
   providers: [
     PositionGateway,
     PositionConsumer,
-    PositionService
+    PositionService,
   ],
 })
 export class PositionModule { }

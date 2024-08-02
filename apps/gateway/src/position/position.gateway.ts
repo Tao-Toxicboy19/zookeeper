@@ -1,4 +1,5 @@
 import {
+  CookieAuthGuard,
   JwtPayload,
   SocketAuthMiddleware,
   WsJwtGuard
@@ -15,11 +16,11 @@ import {
 } from 'socket.io'
 import { PositionService } from './position.service'
 import { Logger, UseGuards } from '@nestjs/common'
+import { SecretGuard } from '../key/secret.guard'
 
-@WebSocketGateway(8001, {
+@WebSocketGateway(9090, {
   cors: '*'
 })
-@UseGuards(WsJwtGuard)
 export class PositionGateway {
   private readonly logger = new Logger(PositionGateway.name)
 
@@ -35,17 +36,19 @@ export class PositionGateway {
   @WebSocketServer()
   server: Server
 
+  @UseGuards(SecretGuard)
+  @UseGuards(WsJwtGuard)
   @SubscribeMessage('position')
   handleMessage(
     @ConnectedSocket() client: Socket,
   ): void {
     const payload: JwtPayload = client['user']
+    const seed: string = client['seed']
     if (payload.sub) {
-
       client.join(payload.sub)
-
+      
       setInterval(async () => {
-        await this.positionService.sendUserId(payload.sub)
+        await this.positionService.sendUserId(payload.sub, seed)
       }, 1000)
 
       this.server.to(payload.sub).emit('position')

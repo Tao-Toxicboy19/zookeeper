@@ -24,7 +24,12 @@ export class PositionService implements OnModuleInit {
         this.exchangeServiceClient = this.client.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
     }
 
-    async sendUserId(userId: string): Promise<void> {
-        await this.exchangeServiceClient.sendUserId({ userId }).toPromise()
+    async sendUserId(userId: string, seed: string): Promise<void> {
+        new Promise<void>((resolve, reject) => {
+            this.exchangeServiceClient.sendUserId({ userId, seed }).subscribe({
+                next: () => resolve(),
+                error: (err) => reject(err)
+            })
+        })
     }
 }

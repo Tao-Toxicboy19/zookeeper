@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors, Get } from '@nestjs/common'
+import { Controller, Post, Body, HttpCode, HttpStatus, Logger, UseGuards, Req, Res, UseInterceptors, Get, Param } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { SignupDto } from './dto'
 import { GoogleAuthGuard, JwtAuthGuard, JwtPayload, LocalAuthGuard, RefreshJwtAuthGuard } from '@app/common'
@@ -7,6 +7,8 @@ import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 import { AuthService } from './auth.service'
 import { GooglePayload } from '@app/common/types/auth/google-payload.type'
 import { ConfigService } from '@nestjs/config'
+import { ForgotPasswordDto } from './dto/forgot-password.dto'
+import { ResetPasswordDto } from './dto/reset-password.dto'
 
 @Controller('auth')
 export class AuthController {
@@ -158,7 +160,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleAuth(@Req() req) {
+  async googleAuth(@Req() req: Request) {
     // Initiates the Google OAuth process
   }
 
@@ -183,5 +185,20 @@ export class AuthController {
     })
 
     res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body() dto: ForgotPasswordDto
+  ) {
+    // return this.authService.forgotPassword(forgotPasswordDto.email);
+  }
+
+  @Post('reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body() dto: ResetPasswordDto
+  ) {
+    // return this.authService.resetPassword(token, resetPasswordDto.password);
   }
 }

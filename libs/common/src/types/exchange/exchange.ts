@@ -42,6 +42,7 @@ export interface BalanceResponse {
 
 export interface SendUserIdDto {
   userId: string;
+  seed: string;
 }
 
 export const EXCHANGE_PACKAGE_NAME = "exchange";

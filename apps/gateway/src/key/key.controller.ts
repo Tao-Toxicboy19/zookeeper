@@ -7,7 +7,7 @@ import {
   UseGuards,
   UseInterceptors
 } from '@nestjs/common'
-import { Request, Response } from 'express'
+import { Response } from 'express'
 import { KeyService } from './key.service'
 import { KeyDto } from './dto'
 import { CookieAuthGuard, JwtAuthGuard, JwtPayload } from '@app/common'

@@ -16,7 +16,7 @@ import {
 import { JwtPayload, SocketAuthMiddleware, WsJwtGuard } from '@app/common'
 import { UseGuards } from '@nestjs/common'
 
-@WebSocketGateway(8002, {
+@WebSocketGateway(9090, {
   cors: '*'
 })
 export class NotificationGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -46,7 +46,7 @@ export class NotificationGateway implements OnGatewayInit, OnGatewayConnection, 
     @ConnectedSocket() client: Socket,
   ): void {
     const payload: JwtPayload = client['user']
-    console.log(payload)
+    // console.log(payload)
     if (payload.sub) {
       client.join(payload.sub)
     }

@@ -43,4 +43,5 @@ message BalanceResponse {
 
 message SendUserIdDto {
     string user_id = 1;
+    string seed = 2;
 }

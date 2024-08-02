@@ -36,12 +36,17 @@ export class KeyService implements OnModuleInit {
 
   async getKey(userId: string): Promise<KeyResponse> {
     try {
-      const key = await this.keysRepository.findOne({ userId })
-      if (!key) throw new GrpcInvalidArgumentException('Keys invalid.')
-
+      const secret = await this.keysRepository.findOne({ userId })
+      if (!secret) {
+        return {
+          statusCode: 404,
+          message: 'not found key'
+        }
+        // throw new GrpcInvalidArgumentException('Keys invalid.')
+      }
       return {
-        apiKey: key.apiKey,
-        secretKey: key.secretKey
+        apiKey: secret.apiKey,
+        secretKey: secret.secretKey
       }
     } catch (error) {
       throw error
@@ -61,7 +66,6 @@ export class KeyService implements OnModuleInit {
     try {
       const existKey = await this.keysRepository.findOne({ userId: dto.userId })
       if (existKey) {
-        console.log('hello world')
         throw new GrpcAlreadyExistsException('Keys already exist for this user.')
       }
 

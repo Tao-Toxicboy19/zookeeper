@@ -5,7 +5,7 @@ import {
   JwtStrategy,
   AUTH_PACKAGE_NAME,
   RefreshJwtStrategy,
-  GoogleStrategy
+  GoogleStrategy,
 } from '@app/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { PassportModule } from '@nestjs/passport'
@@ -14,7 +14,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { LocalStrategy } from './strategies'
 import { APP_FILTER } from '@nestjs/core'
 import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions'
-import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [

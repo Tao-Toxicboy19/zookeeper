@@ -16,7 +16,7 @@ export class ExchangeController implements ExchangeServiceController {
   constructor(private readonly exchangeService: ExchangeService) { }
 
   sendUserId(request: SendUserIdDto): void {
-    this.exchangeService.position(request.userId)
+    this.exchangeService.position(request)
   }
 
   validateKey(request: ValidateKeyDto) {

@@ -30,12 +30,16 @@ export class KeyService implements OnModuleInit {
         })
     }
 
-    async getKey(request: KeyUserId) {
+    async getKey(request: KeyUserId): Promise<KeyResponse> {
         return new Promise<KeyResponse>((resolve, reject) => {
             this.keyServiceClient.getKey(request).subscribe({
                 next: (response) => resolve(response),
                 error: (err) => reject(err)
             })
         })
+    }
+
+    async hello() {
+        console.log('hello world')
     }
 }

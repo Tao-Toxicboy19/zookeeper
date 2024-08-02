@@ -38,9 +38,11 @@ export class ConsumerService implements OnModuleInit {
         const connection = amqp.connect([this.configService.get<string>('RABBITMQ_URL')])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: ConfirmChannel) => {
-                await channel.assertQueue(this.notifyQueue, { durable: true })
-                await channel.assertQueue(this.orderFutureQueue, { durable: true })
-                await channel.assertQueue(this.positionQueue, { durable: true })
+                await Promise.all([
+                    channel.assertQueue(this.notifyQueue, { durable: true }),
+                    channel.assertQueue(this.orderFutureQueue, { durable: true }),
+                    channel.assertQueue(this.positionQueue, { durable: true })
+                ])
                 this.logger.debug('Queues set up successfully')
             },
         })

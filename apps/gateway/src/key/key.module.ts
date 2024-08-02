@@ -5,6 +5,7 @@ import { join } from 'path'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { KeyController } from './key.controller'
 import { KeyService } from './key.service'
+import { SecretGuard } from './secret.guard'
 
 @Module({
   imports: [
@@ -25,6 +26,10 @@ import { KeyService } from './key.service'
     ]),
   ],
   controllers: [KeyController],
-  providers: [KeyService],
+  providers: [
+    KeyService,
+    SecretGuard
+  ],
+  exports: [KeyService]
 })
 export class KeyModule { }

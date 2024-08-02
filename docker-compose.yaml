@@ -15,9 +15,9 @@ services:
       - KAFKA_BROKER_ID=1
       - KAFKA_LISTENERS=PLAINTEXT://:9092
       # dev
-      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+      # - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
       # production
-      # - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
@@ -66,105 +66,115 @@ services:
       - '4040:5432'
     restart: always
 
-  # key-service:
-  #   image: taotoxicboy/zookeeper-key-service:0.1
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/key/Dockerfile
-  #   environment:
-  #     GRPC_URL: key-service:5005
-  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-  #     EXCHANGE_SERVICE_URL: exchange:50052
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #     - zookeeper
-  #   ports:
-  #     - '5005:5005'
+  key-service:
+    image: taotoxicboy/zookeeper-key-service:0.2
+    # build:
+    #   context: .
+    #   dockerfile: ./apps/key/Dockerfile
+    environment:
+      GRPC_URL: key-service:5005
+      MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+      EXCHANGE_SERVICE_URL: exchange:50052
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+      - zookeeper
+    ports:
+      - '5005:5005'
 
-  # mail-queue:
-  #   image: taotoxicboy/zookeeper-mail-queue-service:0.2
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/mail-queue/Dockerfile
-  #   environment:
-  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
-  #     USERNAME_EMAIL: themanpoolbot@gmail.com
-  #     PASSWORD_EMAIL: jvpp fujd ecvy pifo
-  #     REDIS_URL: redis
-  #     REDIS_PORT: 6379
-  #   depends_on:
-  #     - zookeeper
-  #     - kafka
-  #     - rabbitmq
-  #   restart: always
+  mail-queue:
+    image: taotoxicboy/zookeeper-mail-queue-service:0.3
+    # build:
+    #   context: .
+    #   dockerfile: ./apps/mail-queue/Dockerfile
+    environment:
+      RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+      USERNAME_EMAIL: themanpoolbot@gmail.com
+      PASSWORD_EMAIL: jvpp fujd ecvy pifo
+      REDIS_URL: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - zookeeper
+      - kafka
+      - rabbitmq
+    restart: always
 
-  # auth-service:
-  #   image: taotoxicboy/zookeeper-auth-service:0.2
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/auth/Dockerfile
-  #   environment:
-  #     GRPC_URL: auth-service:50022
-  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
-  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
-  #     REDIS_URL: redis
-  #     REDIS_PORT: 6379
-  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
-  #   ports:
-  #     - '50022:50022'
-  #   depends_on:
-  #     - redis
-  #     - zookeeper
-  #     - kafka
-  #     - rabbitmq
-  #   restart: always
+  auth-service:
+    image: taotoxicboy/zookeeper-auth-service:0.3
+    # build:
+    #   context: .
+    #   dockerfile: ./apps/auth/Dockerfile
+    environment:
+      GRPC_URL: auth-service:50022
+      RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+      AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+      REDIS_URL: redis
+      REDIS_PORT: 6379
+      MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+      RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+    ports:
+      - '50022:50022'
+    depends_on:
+      - redis
+      - zookeeper
+      - kafka
+      - rabbitmq
+    restart: always
 
-  # exchange:
-  #   image: taotoxicboy/zookeeper-exchange:0.3
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/exchange/Dockerfile
-  #   environment:
-  #     GRPC_URL: exchange:50052
-  #     KEY_SERVICE_URL: key-service:5005
-  #     KAFKA_URL: kafka:9092
-  #   depends_on:
-  #     - zookeeper
-  #     - kafka
-  #   ports:
-  #     - '50052:50052'
-  #   restart: always
+  exchange:
+    image: taotoxicboy/zookeeper-exchange:0.4
+    # build:
+    #   context: .
+    #   dockerfile: ./apps/exchange/Dockerfile
+    environment:
+      GRPC_URL: exchange:50052
+      KEY_SERVICE_URL: key-service:5005
+      KAFKA_URL: kafka:9092
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - '50052:50052'
+    restart: always
 
-  # gateway:
-  #   # image: taotoxicboy/zookeeper-gateway-service:0.2
-  #   build:
-  #     context: .
-  #     dockerfile: ./apps/gateway/Dockerfile
-  #   environment:
-  #     NODE_ENV: production
-  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
-  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
-  #     PORT: 4040
-  #     AUTH_SERVICE_URL: auth-service:50022
-  #     CLIENT_URL: http://localhost:3000
-  #     KAFKA_URL: kafka:9092
-  #     EXCHANGE_SERVICE_URL: exchange:50052
-  #     WEB_SOCKET: 8031
-  #     RABBITMQ_QUEUE_TX: order_tx_queue
-  #     RABBITMQ_QUEUE_QUERY: order_query_queue
-  #     RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #     - zookeeper
-  #     - kafka
-  #   ports:
-  #     - '4000:4040'
-  #     - '8001:8001'
+  gateway:
+    image: taotoxicboy/zookeeper-gateway-service:0.3
+    # build:
+    #   context: .
+    #   dockerfile: ./apps/gateway/Dockerfile
+    environment:
+      NODE_ENV: production
+      RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+      AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+      PORT: 4000
+      AUTH_SERVICE_URL: auth-service:50022
+      KEY_SERVICE_URL: key-service:5005
+      # CLIENT_URL: http://localhost:3000
+      KAFKA_URL: kafka:9092
+      EXCHANGE_SERVICE_URL: exchange:50052
+      WEB_SOCKET: 8031
+      # PREDICT_SERVICE_URL:
+      RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
+      RABBITMQ_QUEUE_TX: order_tx_queue
+      RABBITMQ_QUEUE_QUERY: order_query_queue
+      GOOGLE_CLIENT_ID: 1085551212854-qt83lqnnsut8ljv5soifk8a1tcsm1nm7.apps.googleusercontent.com
+      GOOGLE_CLIENT_SECRET: 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
+      CALLBACK_URL: http://localhost:4000/api/auth/google/callback
+      SOCIAL_REDIRECT: http://localhost:3000/app
+      NOTIFY_QUEUE: notification_queue
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+      - zookeeper
+      - kafka
+    ports:
+      - '4000:4000'
+      - '8001:8001'
+
+volumes:
+  postgres_data:
 
   # order-tx-consumer:
   #   image: taotoxicboy/go-order-consumer-tx-service:0.1.1
@@ -207,6 +217,3 @@ services:
   #     - postgres
   #     - rabbitmq
   #   restart: always
-
-volumes:
-  postgres_data:

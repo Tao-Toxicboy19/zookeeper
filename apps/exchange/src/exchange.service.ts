@@ -5,6 +5,7 @@ import {
   KEY_PACKAGE_NAME,
   KEY_SERVICE_NAME,
   KeyServiceClient,
+  SendUserIdDto,
   ValidateKeyDto
 } from '@app/common';
 import {
@@ -21,6 +22,7 @@ import * as ccxt from 'ccxt'
 import { Key } from './type'
 import { createLimitOrderDto } from './dto/create-limit-order.dto'
 import { KafkaProducerService } from './producer/kafka-producer.service'
+import { verify } from 'jsonwebtoken'
 
 @Injectable()
 export class ExchangeService implements OnModuleInit {
@@ -40,17 +42,28 @@ export class ExchangeService implements OnModuleInit {
     this.keyServiceClient = this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
   }
 
-  async position(userId: string): Promise<void> {
+  async encypt(value: string, secret: string): Promise<string> {
+    return verify(value, secret) as string
+  }
+
+  async position({ userId, seed }: SendUserIdDto): Promise<void> {
     try {
       const { apiKey, secretKey } = await this.getApiKeys(userId)
-      await this.createExchange({ apiKey, secretKey })
+      const apiKeyDecode = await this.encypt(apiKey, seed)
+      const secretKeyDecode = await this.encypt(secretKey, seed)
+      await this.createExchange({ apiKey: apiKeyDecode, secretKey: secretKeyDecode })
       const position = await this.exchange.fetchPositions()
-      if (position.length !== 0) {
-        this.kafkaProducerService.publish(JSON.stringify({
-          user_id: userId,
-          position,
-        }))
-      }
+      console.log(position)
+      this.kafkaProducerService.publish(JSON.stringify({
+        user_id: userId,
+        position,
+      }))
+      // if (position.length !== 0) {
+      //   this.kafkaProducerService.publish(JSON.stringify({
+      //     user_id: userId,
+      //     position,
+      //   }))
+      // }
     } catch (error) {
       throw error
     }
@@ -68,8 +81,12 @@ export class ExchangeService implements OnModuleInit {
   }
 
   private async getApiKeys(userId: string): Promise<Key> {
-    const { apiKey, secretKey } = await this.keyServiceClient.getKey({ userId }).toPromise()
-    return { apiKey, secretKey }
+    return new Promise<Key>((resolve, reject) => {
+      this.keyServiceClient.getKey({ userId }).subscribe({
+        next: (response) => resolve({ apiKey: response.apiKey, secretKey: response.secretKey }),
+        error: (err) => reject(err)
+      })
+    })
   }
 
   async validateKey(dto: ValidateKeyDto): Promise<ExchangeResponse> {
