@@ -25,7 +25,7 @@ message ProfileResponse {
 }
 
 message ProfileDto {
-    string username = 1;
+    string user_id = 1;
 }
 
 message ConfirmOTPDto {

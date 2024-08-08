@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import amqp, { Channel, ChannelWrapper } from 'amqp-connection-manager';
-import { ConfirmChannel } from 'amqplib';
+import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import amqp, { Channel, ChannelWrapper } from 'amqp-connection-manager'
+import { ConfirmChannel } from 'amqplib'
 
 @Injectable()
 export class ProducerService {
@@ -9,16 +9,16 @@ export class ProducerService {
     private readonly otpMailQueue: string = 'otp_mail_queue'
     private readonly logger = new Logger(ProducerService.name)
 
-    constructor(
-        private readonly configService: ConfigService
-    ) {
-        const connection = amqp.connect([this.configService.get<string>('RABBIT_MQ_URL')])
+    constructor(private readonly configService: ConfigService) {
+        const connection = amqp.connect([
+            this.configService.get<string>('RABBIT_MQ_URL'),
+        ])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: Channel) => {
                 Promise.all([
-                    channel.assertQueue(this.otpMailQueue, { durable: true })
+                    channel.assertQueue(this.otpMailQueue, { durable: true }),
                 ])
-            }
+            },
         })
 
         connection.on('connect', () => {
@@ -32,7 +32,9 @@ export class ProducerService {
 
     async handleSendTask(queue: string, msg: string) {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
-            return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true, })
+            return channel.sendToQueue(queue, Buffer.from(msg), {
+                persistent: true,
+            })
         })
     }
 }

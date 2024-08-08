@@ -5,7 +5,10 @@ import { Request } from 'express'
 import { JwtPayload } from '@app/common'
 
 @Injectable()
-export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
+export class RefreshJwtStrategy extends PassportStrategy(
+    Strategy,
+    'jwt-refresh',
+) {
     constructor() {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([

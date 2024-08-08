@@ -7,30 +7,26 @@ import { NotificationController } from './notification.controller'
 import { ConsumerService } from './conusmer/consumer.service'
 
 @Module({
-  imports: [
-    ClientsModule.registerAsync([
-      {
-        name: 'NOTIFICATION_SERVICE',
-        imports: [ConfigModule],
-        useFactory: async (configService: ConfigService) => ({
-          transport: Transport.RMQ,
-          options: {
-            urls: [configService.get<string>('RABBITMQ_URL')],
-            queue: configService.get<string>('NOTIFY_QUEUE'),
-            queueOptions: {
-              durable: true,
+    imports: [
+        ClientsModule.registerAsync([
+            {
+                name: 'NOTIFICATION_SERVICE',
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [configService.get<string>('RABBITMQ_URL')],
+                        queue: configService.get<string>('NOTIFY_QUEUE'),
+                        queueOptions: {
+                            durable: true,
+                        },
+                    },
+                }),
+                inject: [ConfigService],
             },
-          },
-        }),
-        inject: [ConfigService],
-      },
-    ]),
-  ],
-  controllers: [NotificationController],
-  providers: [
-    NotificationGateway,
-    NotificationService,
-    ConsumerService,
-  ],
+        ]),
+    ],
+    controllers: [NotificationController],
+    providers: [NotificationGateway, NotificationService, ConsumerService],
 })
 export class NotificationModule {}

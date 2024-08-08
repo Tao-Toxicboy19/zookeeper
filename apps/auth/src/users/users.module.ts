@@ -6,14 +6,11 @@ import { UsersRepository } from './user.repository'
 import { ProducerModule } from '../producer/producer.module'
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    ProducerModule,
-  ],
-  providers: [
-    UsersService,
-    UsersRepository,
-  ],
-  exports: [UsersService],
+    imports: [
+        MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+        ProducerModule,
+    ],
+    providers: [UsersService, UsersRepository],
+    exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class OrderDto {
     @IsNotEmpty()

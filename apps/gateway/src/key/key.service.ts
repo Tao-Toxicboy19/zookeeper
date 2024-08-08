@@ -4,7 +4,7 @@ import {
     KEY_SERVICE_NAME,
     CreateKeyDto,
     KeyUserId,
-    KeyResponse
+    KeyResponse,
 } from '@app/common'
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
@@ -13,19 +13,18 @@ import { ClientGrpc } from '@nestjs/microservices'
 export class KeyService implements OnModuleInit {
     private keyServiceClient: KeyServiceClient
 
-    constructor(
-        @Inject(KEY_PACKAGE_NAME) private keyClient: ClientGrpc,
-    ) { }
+    constructor(@Inject(KEY_PACKAGE_NAME) private keyClient: ClientGrpc) {}
 
     onModuleInit() {
-        this.keyServiceClient = this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
+        this.keyServiceClient =
+            this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
     }
 
     async create(request: CreateKeyDto) {
         return new Promise<KeyResponse>((resolve, reject) => {
             this.keyServiceClient.createKey(request).subscribe({
                 next: (response) => resolve(response),
-                error: (err) => reject(err)
+                error: (err) => reject(err),
             })
         })
     }
@@ -34,7 +33,7 @@ export class KeyService implements OnModuleInit {
         return new Promise<KeyResponse>((resolve, reject) => {
             this.keyServiceClient.getKey(request).subscribe({
                 next: (response) => resolve(response),
-                error: (err) => reject(err)
+                error: (err) => reject(err),
             })
         })
     }

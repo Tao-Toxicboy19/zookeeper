@@ -5,7 +5,7 @@ import { Observable } from 'rxjs'
 @Injectable()
 export class CookieAuthGuard implements CanActivate {
     canActivate(
-        context: ExecutionContext
+        context: ExecutionContext,
     ): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest<Request>()
 

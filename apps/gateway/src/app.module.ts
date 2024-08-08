@@ -1,6 +1,4 @@
-import {
-  Module,
-} from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { AuthModule } from './auth/auth.module'
 import { OrdersModule } from './orders/orders.module'
 import { ConfigModule } from '@nestjs/config'
@@ -10,20 +8,19 @@ import { PredictModule } from './predict/predict.module'
 import { NotificationModule } from './notification/notification.module'
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: './apps/gateway/.env',
-    }),
-    AuthModule,
-    OrdersModule,
-    KeyModule,
-    PositionModule,
-    PredictModule,
-    NotificationModule,
-  ],
-  controllers: [],
-  providers: [],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: './apps/gateway/.env',
+        }),
+        AuthModule,
+        OrdersModule,
+        KeyModule,
+        PositionModule,
+        PredictModule,
+        NotificationModule,
+    ],
+    controllers: [],
+    providers: [],
 })
-
-export class AppModule { }
+export class AppModule {}

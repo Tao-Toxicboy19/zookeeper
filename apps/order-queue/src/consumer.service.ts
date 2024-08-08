@@ -1,26 +1,16 @@
 // order.consumer.ts
-import { ClientGrpc } from '@nestjs/microservices'
+import { ClientGrpc, ClientProxy } from '@nestjs/microservices'
 import { ConfigService } from '@nestjs/config'
-import {
-    Inject,
-    Injectable,
-    Logger,
-    OnModuleInit
-} from '@nestjs/common'
-import amqp, {
-    ChannelWrapper
-} from 'amqp-connection-manager'
-import {
-    ConfirmChannel,
-    ConsumeMessage
-} from 'amqplib'
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import amqp, { ChannelWrapper } from 'amqp-connection-manager'
+import { ConfirmChannel, ConsumeMessage } from 'amqplib'
 import {
     BalanceResponse,
     EXCHANGE_PACKAGE_NAME,
     EXCHANGE_SERVICE_NAME,
-    ExchangeServiceClient
+    ExchangeServiceClient,
 } from '@app/common'
-import { CreateLimit } from './types/createLimit.type'
+import { CreateLimit, UpdateOrder } from './types/createLimit.type'
 
 @Injectable()
 export class ConsumerService implements OnModuleInit {
@@ -34,14 +24,19 @@ export class ConsumerService implements OnModuleInit {
     constructor(
         private readonly configService: ConfigService,
         @Inject(EXCHANGE_PACKAGE_NAME) private clientEx: ClientGrpc,
+        @Inject('ORDERS_SERVICE') private readonly client: ClientProxy,
     ) {
-        const connection = amqp.connect([this.configService.get<string>('RABBITMQ_URL')])
+        const connection = amqp.connect([
+            this.configService.get<string>('RABBITMQ_URL'),
+        ])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: ConfirmChannel) => {
                 await Promise.all([
                     channel.assertQueue(this.notifyQueue, { durable: true }),
-                    channel.assertQueue(this.orderFutureQueue, { durable: true }),
-                    channel.assertQueue(this.positionQueue, { durable: true })
+                    channel.assertQueue(this.orderFutureQueue, {
+                        durable: true,
+                    }),
+                    channel.assertQueue(this.positionQueue, { durable: true }),
                 ])
                 this.logger.debug('Queues set up successfully')
             },
@@ -57,14 +52,19 @@ export class ConsumerService implements OnModuleInit {
     }
 
     async onModuleInit() {
-        this.exchangeServiceClient = this.clientEx.getService<ExchangeServiceClient>(EXCHANGE_SERVICE_NAME)
+        this.exchangeServiceClient =
+            this.clientEx.getService<ExchangeServiceClient>(
+                EXCHANGE_SERVICE_NAME,
+            )
         this.channelWrapper.addSetup((channel: ConfirmChannel) => {
             // Handle positionQueue
             channel.consume(this.positionQueue, async (msg: ConsumeMessage) => {
                 if (msg) {
-                    const order: CreateLimit = JSON.parse(msg.content.toString())
-                    this.logger.debug('hello close position')
-                    // process Close position task
+                    const order: CreateLimit = JSON.parse(
+                        msg.content.toString(),
+                    )
+                    this.logger.debug(order)
+                    // // process Close position task
                     await this.handleClosePositionTask('')
 
                     channel.ack(msg)
@@ -86,13 +86,15 @@ export class ConsumerService implements OnModuleInit {
 
     async sendTask(queue: string, msg: string) {
         await this.channelWrapper.addSetup(async (channel: ConfirmChannel) => {
-            return channel.sendToQueue(queue, Buffer.from(msg), { persistent: true })
+            return channel.sendToQueue(queue, Buffer.from(msg), {
+                persistent: true,
+            })
         })
     }
 
     async handleClosePositionTask(task: string): Promise<void> {
         // Simulate task processing with delay
-        console.log("Close Position Task:", task)
+        console.log('Close Position Task:', task)
         await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
@@ -106,7 +108,9 @@ export class ConsumerService implements OnModuleInit {
                 while (true) {
                     const msg = await channel.get(this.orderFutureQueue)
                     if (msg) {
-                        const order: CreateLimit = JSON.parse(msg.content.toString())
+                        const order: CreateLimit = JSON.parse(
+                            msg.content.toString(),
+                        )
                         // this.logger.debug(msg)
                         // this.logger.debug('Processing order from order_future_queue:', order)
                         this.logger.debug('hello future from close')
@@ -126,15 +130,27 @@ export class ConsumerService implements OnModuleInit {
         }
     }
 
+    async handleUpdatePositionTask(dto: UpdateOrder): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this.client.send<string>('update_order', dto).subscribe({
+                next: () => resolve(),
+                error: (err) => reject(err),
+            })
+        })
+    }
 
     async handleOrderFutureTasks(dto: CreateLimit): Promise<void> {
         try {
-            const { usdt } = await new Promise<BalanceResponse>((resolve, reject) => {
-                this.exchangeServiceClient.balance({ userId: dto.order.user_id }).subscribe({
-                    next: (response) => resolve(response),
-                    error: (err) => reject(err),
-                })
-            })
+            const { usdt } = await new Promise<BalanceResponse>(
+                (resolve, reject) => {
+                    this.exchangeServiceClient
+                        .balance({ userId: dto.order.user_id })
+                        .subscribe({
+                            next: (response) => resolve(response),
+                            error: (err) => reject(err),
+                        })
+                },
+            )
 
             if (+usdt < dto.order.quantity) {
                 this.logger.debug('Insufficient funds')
@@ -151,19 +167,25 @@ export class ConsumerService implements OnModuleInit {
                 }
                 await Promise.all([
                     new Promise<void>((resolve, reject) => {
-                        this.exchangeServiceClient.createLimitBuy({
-                            id: dto.order.id,
-                            symbol: dto.order.symbol,
-                            leverage: dto.order.leverage,
-                            quantity: dto.order.quantity,
-                            userId: dto.order.user_id,
-                            position: 'LONG',
-                        }).subscribe({
-                            next: () => resolve(),
-                            error: (err) => reject(err),
-                        })
+                        this.exchangeServiceClient
+                            .createLimitBuy({
+                                id: dto.order.id,
+                                symbol: dto.order.symbol,
+                                leverage: dto.order.leverage,
+                                quantity: dto.order.quantity,
+                                userId: dto.order.user_id,
+                                position: 'LONG',
+                            })
+                            .subscribe({
+                                next: () => resolve(),
+                                error: (err) => reject(err),
+                            })
                     }),
-                    this.sendTask(this.notifyQueue, JSON.stringify(message))
+                    this.sendTask(this.notifyQueue, JSON.stringify(message)),
+                    this.handleUpdatePositionTask({
+                        id: dto.order.id,
+                        position: dto.position,
+                    }),
                 ])
             } else if (dto.position === 'Short') {
                 const message = {
@@ -172,19 +194,25 @@ export class ConsumerService implements OnModuleInit {
                 }
                 await Promise.all([
                     new Promise<void>((resolve, reject) => {
-                        this.exchangeServiceClient.createLimitSell({
-                            id: dto.order.id,
-                            symbol: dto.order.symbol,
-                            leverage: dto.order.leverage,
-                            quantity: dto.order.quantity,
-                            userId: dto.order.user_id,
-                            position: 'SHORT',
-                        }).subscribe({
-                            next: () => resolve(),
-                            error: (err) => reject(err),
-                        })
+                        this.exchangeServiceClient
+                            .createLimitSell({
+                                id: dto.order.id,
+                                symbol: dto.order.symbol,
+                                leverage: dto.order.leverage,
+                                quantity: dto.order.quantity,
+                                userId: dto.order.user_id,
+                                position: 'SHORT',
+                            })
+                            .subscribe({
+                                next: () => resolve(),
+                                error: (err) => reject(err),
+                            })
                     }),
-                    this.sendTask(this.notifyQueue, JSON.stringify(message))
+                    this.sendTask(this.notifyQueue, JSON.stringify(message)),
+                    this.handleUpdatePositionTask({
+                        id: dto.order.id,
+                        position: dto.position,
+                    }),
                 ])
             }
         } catch (error) {

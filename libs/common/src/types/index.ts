@@ -1,4 +1,5 @@
 export * from './notifications'
+export * from './status'
 
 export {
     OrdersDto,

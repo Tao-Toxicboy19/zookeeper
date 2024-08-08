@@ -9,28 +9,24 @@ import { PositionService } from './position.service'
 import { KeyModule } from '../key/key.module'
 
 @Module({
-  imports: [
-    ClientsModule.registerAsync([
-      {
-        name: EXCHANGE_PACKAGE_NAME,
-        imports: [ConfigModule],
-        useFactory: async (configService: ConfigService) => ({
-          transport: Transport.GRPC,
-          options: {
-            package: EXCHANGE_PACKAGE_NAME,
-            protoPath: join(__dirname, '../exchange.proto'),
-            url: configService.get<string>('EXCHANGE_SERVICE_URL'),
-          },
-        }),
-        inject: [ConfigService],
-      },
-    ]),
-    KeyModule
-  ],
-  providers: [
-    PositionGateway,
-    PositionConsumer,
-    PositionService,
-  ],
+    imports: [
+        ClientsModule.registerAsync([
+            {
+                name: EXCHANGE_PACKAGE_NAME,
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.GRPC,
+                    options: {
+                        package: EXCHANGE_PACKAGE_NAME,
+                        protoPath: join(__dirname, '../exchange.proto'),
+                        url: configService.get<string>('EXCHANGE_SERVICE_URL'),
+                    },
+                }),
+                inject: [ConfigService],
+            },
+        ]),
+        KeyModule,
+    ],
+    providers: [PositionGateway, PositionConsumer, PositionService],
 })
-export class PositionModule { }
+export class PositionModule {}

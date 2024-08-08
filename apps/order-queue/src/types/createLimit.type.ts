@@ -17,3 +17,8 @@ export type Order = {
     user_id: string
     status: null
 }
+
+export type UpdateOrder = {
+    id: string
+    position: string
+}

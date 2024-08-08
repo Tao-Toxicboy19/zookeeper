@@ -1,6 +1,11 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import { Types } from 'mongoose'
 
 export class UserDto {
+    @IsObjectId()
+    @IsOptional()
+    _id?: Types.ObjectId
+
     @IsString()
     @IsOptional()
     username?: string
@@ -24,4 +29,7 @@ export class UserDto {
     @IsString()
     @IsOptional()
     googleId?: string
+}
+function IsObjectId(): (target: UserDto, propertyKey: '_id') => void {
+    throw new Error('Function not implemented.')
 }

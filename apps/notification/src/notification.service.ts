@@ -1,20 +1,18 @@
-
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
 import { MailDto } from './dto/notification.dto'
-import { NotificationRepository } from './notification.repository';
-import { Nofitication } from './types/notification.type';
-import { NotificationMsg } from '@app/common';
+import { NotificationRepository } from './notification.repository'
+import { Nofitication } from './types/notification.type'
+import { NotificationMsg } from '@app/common'
 
 @Injectable()
 export class NotificationService {
-
     constructor(
         private readonly mailerService: MailerService,
         private readonly notificationRepository: NotificationRepository,
-    ) { }
+    ) {}
 
-    async sendMail(dto: MailDto) {
+    async sendMail(dto: MailDto): Promise<void> {
         try {
             const options = {
                 to: dto.email,
@@ -29,47 +27,43 @@ export class NotificationService {
 
     async notifications(userId: string): Promise<Nofitication[]> {
         try {
-            return await this.notificationRepository.find({ user_id: userId }) as Nofitication[]
+            return (await this.notificationRepository.find({
+                user_id: userId,
+            })) as Nofitication[]
         } catch (error) {
             throw error
         }
     }
 
-    async updateIsRead(userId: string): Promise<string> {
+    async updateIsRead(userId: string): Promise<void> {
         try {
             await this.notificationRepository.updateMany(
                 { user_id: userId },
                 {
                     isRead: true,
-                    readedAt: new Date()
-                }
+                    readedAt: new Date(),
+                },
             )
-
-            return 'OK'
         } catch (error) {
             throw error
         }
     }
 
-    async deleteNotification(id: string): Promise<string> {
+    async deleteNotification(id: string): Promise<void> {
         try {
-            console.log(id)
             await this.notificationRepository.deleteOne({ _id: id })
-            return 'OK'
         } catch (error) {
             throw error
         }
     }
 
-    async createNotification({ user_id, msg }: NotificationMsg): Promise<string> {
+    async createNotification({ user_id, msg }: NotificationMsg): Promise<void> {
         try {
             await this.notificationRepository.create({
                 user_id,
                 msg,
                 createdAt: new Date(),
             })
-            console.log('create succ')
-            return 'OK'
         } catch (error) {
             throw error
         }

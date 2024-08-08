@@ -8,16 +8,11 @@ export class KafkaProducerService {
     private readonly kafkaInstance: Kafka
     private producer: Producer
 
-    constructor(
-        private readonly configService: ConfigService
-    ) {
+    constructor(private readonly configService: ConfigService) {
         this.kafkaInstance = new Kafka({
             clientId: 'position-client',
-            brokers: [
-                configService.get<string>('KAFKA_URL')
-            ],
+            brokers: [configService.get<string>('KAFKA_URL')],
         })
-
 
         this.producer = this.kafkaInstance.producer()
 
