@@ -7,7 +7,6 @@ export class PredictController {
 
     @Post()
     async predict() {
-        console.log('ok')
-        return this.predictService.debug()
+        return this.predictService.createPrddict()
     }
 }

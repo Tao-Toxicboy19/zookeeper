@@ -126,8 +126,8 @@ export class AuthController {
 
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
             maxAge: 1 * 24 * 60 * 60 * 1000, // 3d
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
         })
         res.cookie('refresh_token', refreshToken, {
@@ -170,7 +170,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Get('profile')
     profile(@Req() req: { user: JwtPayload }): Promise<ProfileResponse> {
-        return this.authService.profile({ userId: req.user.sub })
+        return this.authService.profile({ username: req.user.username })
     }
 
     @Get('google')
@@ -187,20 +187,22 @@ export class AuthController {
     ) {
         const { accessToken, refreshToken } =
             await this.authService.googleLogin(req)
+
         res.cookie('access_token', accessToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
             maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
         })
         res.cookie('refresh_token', refreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
             maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+            secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
         })
 
-        res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
+        // res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
+        res.redirect('/api/auth/profile')
     }
 
     @Post('forgot-password')

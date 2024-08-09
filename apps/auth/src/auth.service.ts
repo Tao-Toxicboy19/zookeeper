@@ -163,10 +163,13 @@ export class AuthService implements OnModuleInit {
                 refreshToken,
             }
         }
+        const _id: Types.ObjectId = new Types.ObjectId()
         const { email, userId } = await this.signup({
+            _id,
             email: dto.email,
             name: dto.name,
             picture: dto.picture,
+            username: dto.email,
             googleId: dto.googleId,
         })
 

@@ -53,7 +53,8 @@ export class AuthController implements AuthServiceController {
     }
 
     async profile(request: ProfileDto): Promise<ProfileResponse> {
-        const user = await this.userService.findOneById(request.userId)
+        const user = await this.userService.findOneByUsername(request.username)
+        console.log(user)
         return {
             userId: new ObjectId(user._id).toHexString(),
             username: user.username,
