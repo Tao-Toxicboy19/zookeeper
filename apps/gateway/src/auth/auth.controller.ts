@@ -201,8 +201,7 @@ export class AuthController {
             sameSite: 'strict',
         })
 
-        // res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
-        res.redirect('/api/auth/profile')
+        res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
     }
 
     @Post('forgot-password')
