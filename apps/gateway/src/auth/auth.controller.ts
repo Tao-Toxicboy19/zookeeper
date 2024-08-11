@@ -42,6 +42,35 @@ export class AuthController {
         @Inject(Logger) private readonly logger: LoggerService,
     ) {}
 
+    private handleSuccess(message: string, req: Request, userId?: string) {
+        this.logger.log(message, AuthController.name, {
+            ip: req.ip,
+            httpMethod: req.method,
+            url: req.url,
+            user_id: userId,
+        })
+    }
+
+    private handleError(
+        message: string,
+        error: any,
+        req: Request,
+        userId?: string,
+    ) {
+        this.logger.error(message, error.stack, AuthController.name, {
+            ip: req.ip,
+            httpMethod: req.method,
+            url: req.url,
+            statusCode: 500,
+            user_id: userId,
+            error: {
+                name: error.name,
+                message: error.message,
+                stack: error.stack,
+            },
+        })
+    }
+
     @Post('signup/local')
     @HttpCode(HttpStatus.CREATED)
     async signupLocal(
@@ -59,33 +88,13 @@ export class AuthController {
                 sameSite: 'strict',
             })
 
-            this.logger.log('sign up ok', AuthController.name, {
-                ip: req.ip,
-                httpMethod: req.method,
-                url: req.url,
-                user_id: userId,
-            })
+            this.handleSuccess('Sign up successful', req, userId)
 
             return {
                 email,
             }
         } catch (error) {
-            this.logger.error(
-                'Failed to create user',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: req.ip,
-                    httpMethod: req.method,
-                    url: req.url,
-                    statusCode: 500,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
-            )
+            this.handleError('Failed to create user', error, req)
             throw error
         }
     }
@@ -105,34 +114,15 @@ export class AuthController {
                 maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
                 sameSite: 'strict',
             })
-            this.logger.log('sign in ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: req.user.sub,
-            })
+
+            this.handleSuccess('Sign in successful', request, req.user.sub)
+
             return this.authService.signin({
                 username: req.user.username,
                 userId: req.user.sub,
             })
         } catch (error) {
-            this.logger.error(
-                'Failed sign in',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: req.user.sub,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
-            )
+            this.handleError('Failed to sign in', error, request, req.user.sub)
             throw error
         }
     }
@@ -165,35 +155,20 @@ export class AuthController {
                 sameSite: 'strict',
             })
 
-            this.logger.log('refresh ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: req.user.sub,
-            })
+            this.handleSuccess('Token refreshed', request, req.user.sub)
 
             return {
                 message: 'OK',
                 statusCode: 200,
             }
         } catch (error) {
-            this.logger.error(
-                'Failed refresh',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: req.user.sub,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
+            this.handleError(
+                'Failed to refresh token',
+                error,
+                request,
+                req.user.sub,
             )
+
             throw error
         }
     }
@@ -231,35 +206,24 @@ export class AuthController {
                 sameSite: 'strict',
             })
 
-            this.logger.log('confirm/otp ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: request.cookies.user_id,
-            })
+            this.handleSuccess(
+                'OTP confirmed',
+                request,
+                request.cookies.user_id,
+            )
 
             return {
                 message: 'OK',
                 statusCode: 200,
             }
         } catch (error) {
-            this.logger.error(
-                'Failed confirm/otp',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: request.cookies.user_id,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
+            this.handleError(
+                'Failed to confirm OTP',
+                error,
+                request,
+                request.cookies.user_id,
             )
+
             throw error
         }
     }
@@ -284,36 +248,20 @@ export class AuthController {
                     sameSite: 'strict',
                 })
             }
-
-            this.logger.log('logout ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: request.cookies.user_id,
-            })
+            this.handleSuccess('Logged out', request, request.cookies.user_id)
 
             return {
                 message: 'OK',
                 statusCode: 200,
             }
         } catch (error) {
-            this.logger.error(
-                'Failed logout',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: request.cookies.user_id,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
+            this.handleError(
+                'Failed to logout',
+                error,
+                request,
+                request.cookies.user_id,
             )
+
             throw error
         }
     }
@@ -325,31 +273,21 @@ export class AuthController {
         @Req() request: Request,
     ): Promise<ProfileResponse> {
         try {
-            this.logger.log('profile ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: request.cookies.user_id,
-            })
+            this.handleSuccess(
+                'Profile retrieved',
+                request,
+                request.cookies.user_id,
+            )
+
             return this.authService.profile({ username: req.user.username })
         } catch (error) {
-            this.logger.error(
-                'Failed profile',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: request.cookies.user_id,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
+            this.handleError(
+                'Failed to retrieve profile',
+                error,
+                request,
+                request.cookies.user_id,
             )
+
             throw error
         }
     }
@@ -384,32 +322,21 @@ export class AuthController {
                 sameSite: 'strict',
             })
 
-            this.logger.log('profile ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: request.cookies.user_id,
-            })
+            this.handleSuccess(
+                'Google login successful',
+                request,
+                request.cookies.user_id,
+            )
 
             res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
         } catch (error) {
-            this.logger.error(
-                'Failed profile',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: request.cookies.user_id,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
+            this.handleError(
+                'Failed Google login',
+                error,
+                request,
+                request.cookies.user_id,
             )
+
             throw error
         }
     }
@@ -420,31 +347,16 @@ export class AuthController {
         @Req() request: Request,
     ): Promise<void> {
         try {
-            this.logger.log('profile ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: request.cookies.user_id,
-            })
+            this.handleSuccess('Forgot password request processed', request)
+
             return this.authService.forgotPassword(dto.email)
         } catch (error) {
-            this.logger.error(
-                'Failed forgot-password',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: request.cookies.user_id,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
+            this.handleError(
+                'Failed to process forgot password',
+                error,
+                request,
             )
+
             throw error
         }
     }
@@ -456,33 +368,12 @@ export class AuthController {
         @Req() request: Request,
     ): Promise<void> {
         try {
-            this.logger.log('reset-password ok', AuthController.name, {
-                ip: request.ip,
-                httpMethod: request.method,
-                url: request.url,
-                user_id: request.cookies.user_id,
-                token: token,
-            })
+            this.handleSuccess('Password reset successful', request)
+
             return this.authService.resetPassword(dto.password, token)
         } catch (error) {
-            this.logger.error(
-                'Failed reset-password',
-                error.stack,
-                AuthController.name,
-                {
-                    ip: request.ip,
-                    httpMethod: request.method,
-                    url: request.url,
-                    statusCode: 500,
-                    user_id: request.cookies.user_id,
-                    token: token,
-                    error: {
-                        name: error.name,
-                        message: error.message,
-                        stack: error.stack,
-                    },
-                },
-            )
+            this.handleError('Failed to reset password', error, request)
+
             throw error
         }
     }
