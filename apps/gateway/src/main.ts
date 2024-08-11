@@ -4,6 +4,7 @@ import * as cookieParser from 'cookie-parser'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as dotenv from 'dotenv'
+import { ThrottlerExceptionFilter } from './throttler-exception.filter'
 
 async function bootstrap() {
     const configApp = await NestFactory.create(AppModule)
@@ -18,6 +19,7 @@ async function bootstrap() {
         origin: true,
         credentials: true,
     })
+    app.useGlobalFilters(new ThrottlerExceptionFilter())
     app.setGlobalPrefix('api')
     app.useGlobalPipes(new ValidationPipe())
     app.use(cookieParser())

@@ -28,8 +28,10 @@ import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 import { AuthService } from './auth.service'
 import { GooglePayload } from '@app/common/types/auth/google-payload.type'
 import { ConfigService } from '@nestjs/config'
+import { Throttle } from '@nestjs/throttler'
 
 @Controller('auth')
+@Throttle({ default: { limit: 3, ttl: 6000 } })
 @UseInterceptors(GrpcToHttpInterceptor)
 export class AuthController {
     private readonly logger = new Logger(AuthController.name)
