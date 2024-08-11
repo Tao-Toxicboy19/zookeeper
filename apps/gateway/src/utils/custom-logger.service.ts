@@ -1,12 +1,15 @@
 import { Injectable, LoggerService } from '@nestjs/common'
 import { Client } from '@elastic/elasticsearch'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class CustomLoggerService implements LoggerService {
     private readonly client: Client
 
-    constructor() {
-        this.client = new Client({ node: 'http://localhost:9200' })
+    constructor(private readonly configService: ConfigService) {
+        this.client = new Client({
+            node: configService.get<string>('ELASTICSEARCH_NODE'),
+        })
     }
 
     log(message: any, context?: string, extra?: any) {
