@@ -72,8 +72,9 @@ export class AuthService implements OnModuleInit {
             const existUser = await this.userService.findOneByUsername(
                 dto.username,
             )
+            const userInRedis = await this.redisService.getValue(dto.name)
             const existEmail = await this.userService.findOneByEmail(dto.email)
-            if (existEmail) {
+            if (existEmail || userInRedis) {
                 throw new GrpcAlreadyExistsException('Email already exists.')
             } else if (existUser) {
                 throw new GrpcAlreadyExistsException('User already exists.')

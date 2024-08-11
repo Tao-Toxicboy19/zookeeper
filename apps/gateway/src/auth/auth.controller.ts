@@ -11,6 +11,8 @@ import {
     UseInterceptors,
     Get,
     Param,
+    Inject,
+    LoggerService,
 } from '@nestjs/common'
 import { Request, Response } from 'express'
 import { ForgotPasswordDto, OtpDto, ResetPasswordDto, SignupDto } from './dto'
@@ -34,27 +36,57 @@ import { Throttle } from '@nestjs/throttler'
 @Throttle({ default: { limit: 3, ttl: 6000 } })
 @UseInterceptors(GrpcToHttpInterceptor)
 export class AuthController {
-    private readonly logger = new Logger(AuthController.name)
-
     constructor(
         private readonly authService: AuthService,
         private readonly configService: ConfigService,
+        @Inject(Logger) private readonly logger: LoggerService,
     ) {}
 
     @Post('signup/local')
+    @HttpCode(HttpStatus.CREATED)
     async signupLocal(
         @Body() dto: SignupDto,
         @Res({ passthrough: true }) res: Response,
+        @Req() req: Request,
     ): Promise<EmailResponse> {
-        const { email, userId } = await this.authService.signup(dto)
-        res.cookie('user_id', userId, {
-            secure: process.env.NODE_ENV === 'production',
-            httpOnly: true,
-            maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
-            sameSite: 'strict',
-        })
-        return {
-            email,
+        try {
+            const { email, userId } = await this.authService.signup(dto)
+
+            res.cookie('user_id', userId, {
+                secure: process.env.NODE_ENV === 'production',
+                httpOnly: true,
+                maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+                sameSite: 'strict',
+            })
+
+            this.logger.log('sign up ok', AuthController.name, {
+                ip: req.ip,
+                httpMethod: req.method,
+                url: req.url,
+                user_id: userId,
+            })
+
+            return {
+                email,
+            }
+        } catch (error) {
+            this.logger.error(
+                'Failed to create user',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: req.ip,
+                    httpMethod: req.method,
+                    url: req.url,
+                    statusCode: 500,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
         }
     }
 
@@ -64,17 +96,45 @@ export class AuthController {
     async signinLocal(
         @Req() req: { user: JwtPayload },
         @Res({ passthrough: true }) res: Response,
+        @Req() request: Request,
     ): Promise<EmailResponse> {
-        res.cookie('user_id', req.user.sub, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
-            sameSite: 'strict',
-        })
-        return this.authService.signin({
-            username: req.user.username,
-            userId: req.user.sub,
-        })
+        try {
+            res.cookie('user_id', req.user.sub, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+                sameSite: 'strict',
+            })
+            this.logger.log('sign in ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: req.user.sub,
+            })
+            return this.authService.signin({
+                username: req.user.username,
+                userId: req.user.sub,
+            })
+        } catch (error) {
+            this.logger.error(
+                'Failed sign in',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: req.user.sub,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
+        }
     }
 
     @UseGuards(RefreshJwtAuthGuard)
@@ -83,29 +143,58 @@ export class AuthController {
     async refreshToken(
         @Req() req: { user: JwtPayload },
         @Res({ passthrough: true }) res: Response,
+        @Req() request: Request,
     ): Promise<OK> {
-        const { accessToken, refreshToken } =
-            await this.authService.refreshToken({
-                userId: req.user.sub,
-                username: req.user.username,
+        try {
+            const { accessToken, refreshToken } =
+                await this.authService.refreshToken({
+                    userId: req.user.sub,
+                    username: req.user.username,
+                })
+
+            res.cookie('access_token', accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+                sameSite: 'strict',
+            })
+            res.cookie('refresh_token', refreshToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+                sameSite: 'strict',
             })
 
-        res.cookie('access_token', accessToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
-            sameSite: 'strict',
-        })
-        res.cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
-            sameSite: 'strict',
-        })
+            this.logger.log('refresh ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: req.user.sub,
+            })
 
-        return {
-            message: 'OK',
-            statusCode: 200,
+            return {
+                message: 'OK',
+                statusCode: 200,
+            }
+        } catch (error) {
+            this.logger.error(
+                'Failed refresh',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: req.user.sub,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
         }
     }
 
@@ -113,34 +202,65 @@ export class AuthController {
     @Post('confirm/otp')
     async handleOtp(
         @Body() dto: OtpDto,
-        @Req() req: Request,
+        @Req() request: Request,
         @Res({ passthrough: true }) res: Response,
     ): Promise<OK> {
-        const { accessToken, refreshToken } = await this.authService.confirmOtp(
-            { otp: dto.otp, userId: req.cookies.user_id },
-        )
+        try {
+            const { accessToken, refreshToken } =
+                await this.authService.confirmOtp({
+                    otp: dto.otp,
+                    userId: request.cookies.user_id,
+                })
 
-        res.clearCookie('user_id', {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // ทำให้ cookie เป็น secure ใน production
-            sameSite: 'strict', // ใช้ sameSite เพื่อป้องกัน CSRF
-        })
+            res.clearCookie('user_id', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // ทำให้ cookie เป็น secure ใน production
+                sameSite: 'strict', // ใช้ sameSite เพื่อป้องกัน CSRF
+            })
 
-        res.cookie('access_token', accessToken, {
-            httpOnly: true,
-            maxAge: 1 * 24 * 60 * 60 * 1000, // 3d
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        })
-        res.cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 3d
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        })
-        return {
-            message: 'OK',
-            statusCode: 200,
+            res.cookie('access_token', accessToken, {
+                httpOnly: true,
+                maxAge: 1 * 24 * 60 * 60 * 1000, // 3d
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            })
+            res.cookie('refresh_token', refreshToken, {
+                httpOnly: true,
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 3d
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            })
+
+            this.logger.log('confirm/otp ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: request.cookies.user_id,
+            })
+
+            return {
+                message: 'OK',
+                statusCode: 200,
+            }
+        } catch (error) {
+            this.logger.error(
+                'Failed confirm/otp',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: request.cookies.user_id,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
         }
     }
 
@@ -148,31 +268,90 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('logout')
     async logout(
-        @Req() req: Request,
+        @Req() request: Request,
         @Res({ passthrough: true }) res: Response,
     ): Promise<OK> {
-        if (req.cookies.access_token || req.cookies.user_id) {
-            res.clearCookie('access_token', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+        try {
+            if (request.cookies.access_token || request.cookies.user_id) {
+                res.clearCookie('access_token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                })
+                res.clearCookie('refresh_token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict',
+                })
+            }
+
+            this.logger.log('logout ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: request.cookies.user_id,
             })
-            res.clearCookie('refresh_token', {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-            })
-        }
-        return {
-            message: 'OK',
-            statusCode: 200,
+
+            return {
+                message: 'OK',
+                statusCode: 200,
+            }
+        } catch (error) {
+            this.logger.error(
+                'Failed logout',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: request.cookies.user_id,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
         }
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('profile')
-    profile(@Req() req: { user: JwtPayload }): Promise<ProfileResponse> {
-        return this.authService.profile({ username: req.user.username })
+    profile(
+        @Req() req: { user: JwtPayload },
+        @Req() request: Request,
+    ): Promise<ProfileResponse> {
+        try {
+            this.logger.log('profile ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: request.cookies.user_id,
+            })
+            return this.authService.profile({ username: req.user.username })
+        } catch (error) {
+            this.logger.error(
+                'Failed profile',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: request.cookies.user_id,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
+        }
     }
 
     @Get('google')
@@ -186,36 +365,125 @@ export class AuthController {
     async googleAuthRedirect(
         @Req() req: { user: GooglePayload },
         @Res() res: Response,
+        @Req() request: Request,
     ) {
-        const { accessToken, refreshToken } =
-            await this.authService.googleLogin(req)
+        try {
+            const { accessToken, refreshToken } =
+                await this.authService.googleLogin(req)
 
-        res.cookie('access_token', accessToken, {
-            httpOnly: true,
-            maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        })
-        res.cookie('refresh_token', refreshToken, {
-            httpOnly: true,
-            maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-        })
+            res.cookie('access_token', accessToken, {
+                httpOnly: true,
+                maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            })
+            res.cookie('refresh_token', refreshToken, {
+                httpOnly: true,
+                maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+            })
 
-        res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
+            this.logger.log('profile ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: request.cookies.user_id,
+            })
+
+            res.redirect(this.configService.get<string>('SOCIAL_REDIRECT'))
+        } catch (error) {
+            this.logger.error(
+                'Failed profile',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: request.cookies.user_id,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
+        }
     }
 
     @Post('forgot-password')
-    async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
-        return this.authService.forgotPassword(dto.email)
+    async forgotPassword(
+        @Body() dto: ForgotPasswordDto,
+        @Req() request: Request,
+    ): Promise<void> {
+        try {
+            this.logger.log('profile ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: request.cookies.user_id,
+            })
+            return this.authService.forgotPassword(dto.email)
+        } catch (error) {
+            this.logger.error(
+                'Failed forgot-password',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: request.cookies.user_id,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
+        }
     }
 
     @Post('reset-password/:token')
     async resetPassword(
         @Param('token') token: string,
         @Body() dto: ResetPasswordDto,
+        @Req() request: Request,
     ): Promise<void> {
-        return this.authService.resetPassword(dto.password, token)
+        try {
+            this.logger.log('reset-password ok', AuthController.name, {
+                ip: request.ip,
+                httpMethod: request.method,
+                url: request.url,
+                user_id: request.cookies.user_id,
+                token: token,
+            })
+            return this.authService.resetPassword(dto.password, token)
+        } catch (error) {
+            this.logger.error(
+                'Failed reset-password',
+                error.stack,
+                AuthController.name,
+                {
+                    ip: request.ip,
+                    httpMethod: request.method,
+                    url: request.url,
+                    statusCode: 500,
+                    user_id: request.cookies.user_id,
+                    token: token,
+                    error: {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack,
+                    },
+                },
+            )
+            throw error
+        }
     }
 }

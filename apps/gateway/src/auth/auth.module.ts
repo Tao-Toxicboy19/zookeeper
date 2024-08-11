@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { AuthController } from './auth.controller'
 import {
@@ -14,6 +14,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { LocalStrategy } from './strategies'
 import { APP_FILTER } from '@nestjs/core'
 import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions'
+import { CustomLoggerService } from '../utils/custom-logger.service'
 
 @Module({
     imports: [
@@ -44,6 +45,10 @@ import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions'
         {
             provide: APP_FILTER,
             useClass: GrpcServerExceptionFilter,
+        },
+        {
+            provide: Logger,
+            useClass: CustomLoggerService,
         },
     ],
 })
