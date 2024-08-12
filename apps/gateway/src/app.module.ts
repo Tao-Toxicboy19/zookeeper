@@ -9,7 +9,6 @@ import { NotificationModule } from './notification/notification.module'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { APP_GUARD } from '@nestjs/core'
 import { ElasticsearchModule } from '@nestjs/elasticsearch'
-import { CustomLoggerService } from './utils/custom-logger.service'
 
 @Module({
     imports: [

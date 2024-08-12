@@ -33,7 +33,7 @@ import { ConfigService } from '@nestjs/config'
 import { Throttle } from '@nestjs/throttler'
 
 @Controller('auth')
-@Throttle({ default: { limit: 3, ttl: 6000 } })
+@Throttle({ default: { limit: 10, ttl: 1000 } })
 @UseInterceptors(GrpcToHttpInterceptor)
 export class AuthController {
     constructor(

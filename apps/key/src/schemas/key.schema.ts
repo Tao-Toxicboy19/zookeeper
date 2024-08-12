@@ -1,8 +1,12 @@
 import { AbstractDocument } from '@app/common'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Types } from 'mongoose'
 
 @Schema({ versionKey: false })
 export class Keys extends AbstractDocument {
+    @Prop()
+    _id: Types.ObjectId
+
     @Prop({ required: true, unique: true })
     userId: string
 
