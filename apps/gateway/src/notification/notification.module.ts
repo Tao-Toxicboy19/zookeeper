@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { NotificationService } from './notification.service'
 import { NotificationGateway } from './notification.gateway'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { NotificationController } from './notification.controller'
 import { ConsumerService } from './conusmer/consumer.service'
+import { CustomLoggerService } from '../utils/custom-logger.service'
 
 @Module({
     imports: [
@@ -27,6 +28,14 @@ import { ConsumerService } from './conusmer/consumer.service'
         ]),
     ],
     controllers: [NotificationController],
-    providers: [NotificationGateway, NotificationService, ConsumerService],
+    providers: [
+        NotificationGateway,
+        NotificationService,
+        ConsumerService,
+        {
+            provide: Logger,
+            useClass: CustomLoggerService,
+        },
+    ],
 })
 export class NotificationModule {}

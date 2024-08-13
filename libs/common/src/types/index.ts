@@ -1,5 +1,6 @@
 export * from './notifications'
 export * from './status'
+export * from './response.type'
 
 export {
     OrdersDto,

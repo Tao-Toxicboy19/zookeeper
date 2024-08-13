@@ -48,11 +48,13 @@ export class ConsumerService implements OnModuleInit {
                         const message: NotificationMsg = JSON.parse(
                             msg.content.toString(),
                         )
-                        this.notificationGateway.sendNotification(
-                            message.msg,
-                            message.user_id,
-                        )
-                        this.notificationService.createMsg(message)
+                        await Promise.all([
+                            this.notificationGateway.sendNotification(
+                                message.msg,
+                                message.user_id,
+                            ),
+                            this.notificationService.createMsg(message),
+                        ])
                         channel.ack(msg)
                     }
                 },

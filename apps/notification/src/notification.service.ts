@@ -1,9 +1,9 @@
 import { MailerService } from '@nestjs-modules/mailer'
 import { Injectable } from '@nestjs/common'
-import { MailDto } from './dto/notification.dto'
+import { MailDto } from './dto'
 import { NotificationRepository } from './notification.repository'
-import { Nofitication } from './types/notification.type'
-import { NotificationMsg } from '@app/common'
+import { Notifications } from './types'
+import { NotificationMsg, Response } from '@app/common'
 import { Types } from 'mongoose'
 
 @Injectable()
@@ -26,49 +26,107 @@ export class NotificationService {
         }
     }
 
-    async notifications(userId: string): Promise<Nofitication[]> {
+    async notifications(userId: string): Promise<Notifications> {
         try {
-            return (await this.notificationRepository.find({
-                user_id: userId,
-            })) as Nofitication[]
+            return (await this.notificationRepository.findOne({
+                userId: userId,
+            })) as Notifications
         } catch (error) {
             throw error
         }
     }
 
-    async updateIsRead(userId: string): Promise<void> {
+    // อัปเดตการทำงานเพื่อให้เหมาะสมกับการอัปเดตฟิลด์ใน array
+    async updateNotificationsAsRead(userId: string): Promise<Response> {
         try {
-            await this.notificationRepository.updateMany(
-                { user_id: userId },
+            const result = await this.notificationRepository.updateMany(
+                { userId: userId, 'notifications.isReaded': false }, // Filter query
                 {
-                    isReaded: true,
-                    readedAt: new Date(),
+                    $set: {
+                        'notifications.$[elem].isReaded': true, // Set isReaded to true
+                        'notifications.$[elem].readedAt': new Date(), // Set readedAt to current date
+                    },
+                },
+                {
+                    arrayFilters: [{ 'elem.isReaded': false }], // Array filters
+                    multi: true, // Apply the update to all matching elements
                 },
             )
+            if (!result.length) {
+                return {
+                    message: 'No documents found to update.',
+                    error: 'No Content.',
+                    statusCode: 204,
+                }
+            }
+            return {
+                message: 'OK',
+                statusCode: 200,
+            }
         } catch (error) {
-            throw error
+            throw error // สามารถโยนข้อผิดพลาดต่อไปหากต้องการ
         }
     }
 
-    async deleteNotification(id: string): Promise<void> {
+    async createNotification({
+        user_id,
+        msg,
+    }: NotificationMsg): Promise<Response> {
         try {
-            await this.notificationRepository.deleteOne({ _id: id })
-        } catch (error) {
-            throw error
-        }
-    }
-
-    async createNotification({ user_id, msg }: NotificationMsg): Promise<void> {
-        try {
-            console.log('hello world')
-            await this.notificationRepository.create({
+            const result = {
                 _id: new Types.ObjectId(),
-                user_id,
-                msg,
+                msg: msg,
+                isReaded: false,
                 createdAt: new Date(),
-            })
+                readedAt: null,
+                deletedAt: null,
+            }
+
+            // ขั้นตอนที่ 1: สร้างเอกสารใหม่ถ้ายังไม่มี
+            await this.notificationRepository.upsert(
+                { userId: user_id },
+                {
+                    $set: { userId: user_id }, // อัปเดตฟิลด์ที่มีอยู่
+                    $push: {
+                        notifications: result,
+                    }, // เพิ่ม notification ใหม่
+                },
+            )
+
+            return {
+                message: 'OK',
+                statusCode: 200,
+            }
         } catch (error) {
             throw error
+        }
+    }
+
+    async deleteNotificationItem(
+        userId: string,
+        notificationItemId: string,
+    ): Promise<Response> {
+        const result = await this.notificationRepository.updateMany(
+            { userId: userId }, // Filter query
+            {
+                $pull: {
+                    notifications: {
+                        _id: new Types.ObjectId(notificationItemId),
+                    },
+                },
+            },
+        )
+
+        if (!result.length) {
+            return {
+                message: 'NotificationItem not found to delete.',
+                error: 'NOT FOUND',
+                statusCode: 404,
+            }
+        }
+        return {
+            message: 'OK',
+            statusCode: 200,
         }
     }
 }
