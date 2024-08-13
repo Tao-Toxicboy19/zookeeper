@@ -1,10 +1,136 @@
-version: '4'
+# version: '4'
+
+# services:
+#   zookeeper:
+#     image: wurstmeister/zookeeper:latest
+#     ports:
+#       - '2181:2181'
+#     environment:
+#       ZOOKEEPER_CLIENT_PORT: 2181
+#     restart: always
+
+#   kafka:
+#     image: wurstmeister/kafka:latest
+#     environment:
+#       - KAFKA_BROKER_ID=1
+#       - KAFKA_LISTENERS=PLAINTEXT://:9092
+#       # dev
+#       - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
+#       # production
+#       # - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+#       - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+#       - ALLOW_PLAINTEXT_LISTENER=yes
+#     depends_on:
+#       - zookeeper
+#     ports:
+#       - '9092:9092'
+#     restart: always
+
+#   mongo:
+#     image: mongo
+#     restart: always
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: root
+#       MONGO_INITDB_ROOT_PASSWORD: example
+#     ports:
+#       - '27017:27017'
+#     volumes:
+#       - mongo_data:/data/db
+
+#   rabbitmq:
+#     image: rabbitmq:management-alpine
+#     environment:
+#       RABBITMQ_DEFAULT_USER: mikelopster
+#       RABBITMQ_DEFAULT_PASS: password
+#     ports:
+#       - '15672:15672'
+#       - '5672:5672'
+#     restart: always
+
+#   redis:
+#     image: redis:latest
+#     ports:
+#       - '6378:6379'
+#     restart: always
+
+#   postgres:
+#     image: postgres:latest
+#     container_name: postgres
+#     environment:
+#       POSTGRES_DB: mydatabase
+#       POSTGRES_USER: myuser
+#       POSTGRES_PASSWORD: mypassword
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+#     ports:
+#       - '4040:5432'
+#     restart: always
+
+#   predict-service:
+#     image: lindermand/predict-service:0.5
+#     command: predict-service
+#     environment:
+#       MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+#       HOST_REDIS: localhost
+#       PORT_REDIS: 6378
+#       PORT: 50051
+#       API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
+#       SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
+#     depends_on:
+#       - mongo
+#       - postgres
+#       - redis
+#     ports:
+#       - 50055:50051
+#     restart: always
+
+# volumes:
+#   postgres_data:
+#   mongo_data:
+
+version: '3.9'
 
 services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:latest
+    ports:
+    - '6379:6379'
+    restart: always
+
+  predict-service:
+    image: lindermand/predict-service:0.6
+    # build:
+    #   context: .
+    #   dockerfile: ./Dockerfile
+    command: python main.py
+    environment:
+      MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+      HOST_REDIS: redis
+      PORT_REDIS: 6379
+      PORT: 50051
+      API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
+      SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
+    depends_on:
+      - mongo
+      - redis
+    ports:
+      - "50055:50051"
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     ports:
-      - '2181:2181'
+    - '2181:2181'
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
     restart: always
@@ -26,17 +152,6 @@ services:
       - '9092:9092'
     restart: always
 
-  mongo:
-    image: mongo
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongo_data:/data/db
-
   rabbitmq:
     image: rabbitmq:management-alpine
     environment:
@@ -45,12 +160,6 @@ services:
     ports:
       - '15672:15672'
       - '5672:5672'
-    restart: always
-
-  redis:
-    image: redis:latest
-    ports:
-      - '6379:6379'
     restart: always
 
   postgres:
@@ -66,132 +175,7 @@ services:
       - '4040:5432'
     restart: always
 
-  predict-service:
-    image: lindermand/predict-service:0.3
-    command: predict-service
-    environment:
-      MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-      HOST_REDIS: localhost
-      PORT_REDIS: 6379
-      PORT: 50051
-      API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
-      SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
-    depends_on:
-      - mongo
-      - postgres
-      - redis
-    ports:
-      - 50055:50051
-    restart: always
-
 volumes:
-  postgres_data:
   mongo_data:
-
-  # apiKey-service:
-  #   image: taotoxicboy/zookeeper-key-service:0.3
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/key/Dockerfile
-  #   environment:
-  #     GRPC_URL: key-service:5005
-  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-  #     EXCHANGE_SERVICE_URL: exchange:50052
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #     - zookeeper
-  #   ports:
-  #     - '5005:5005'
-
-  # mail-service:
-  #   image: taotoxicboy/zookeeper-mail-queue-service:0.4
-  #   # build:
-  #     # context: .
-  #     # dockerfile: ./apps/mail-queue/Dockerfile
-  #   environment:
-  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
-  #     USERNAME_EMAIL: themanpoolbot@gmail.com
-  #     PASSWORD_EMAIL: jvpp fujd ecvy pifo
-  #     REDIS_URL: redis
-  #     REDIS_PORT: 6379
-  #   depends_on:
-  #     - zookeeper
-  #     - kafka
-  #     - rabbitmq
-  #   restart: always
-
-  # auth-service:
-  #   image: taotoxicboy/zookeeper-auth-service:0.4
-  #   # build:
-  #     # context: .
-  #     # dockerfile: ./apps/auth/Dockerfile
-  #   environment:
-  #     GRPC_URL: auth-service:50022
-  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
-  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
-  #     REDIS_URL: redis
-  #     REDIS_PORT: 6379
-  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
-  #   ports:
-  #     - '50022:50022'
-  #   depends_on:
-  #     - redis
-  #     - zookeeper
-  #     - kafka
-  #     - rabbitmq
-  #   restart: always
-
-  # exchange:
-  #   image: taotoxicboy/zookeeper-exchange:0.4
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/exchange/Dockerfile
-  #   environment:
-  #     GRPC_URL: exchange:50052
-  #     KEY_SERVICE_URL: key-service:5005
-  #     KAFKA_URL: kafka:9092
-  #   depends_on:
-  #     - zookeeper
-  #     - kafka
-  #   ports:
-  #     - '50052:50052'
-  #   restart: always
-
-  # gateway:
-  #   image: taotoxicboy/zookeeper-gateway-service:0.4
-  #   # build:
-  #   #   context: .
-  #   #   dockerfile: ./apps/gateway/Dockerfile
-  #   environment:
-  #     NODE_ENV: production
-  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
-  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
-  #     PORT: 4000
-  #     AUTH_SERVICE_URL: auth-service:50022
-  #     KEY_SERVICE_URL: key-service:5005
-  #     # CLIENT_URL: http://localhost:3000
-  #     KAFKA_URL: kafka:9092
-  #     EXCHANGE_SERVICE_URL: exchange:50052
-  #     WEB_SOCKET: 8031
-  #     # PREDICT_SERVICE_URL:
-  #     RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
-  #     RABBITMQ_QUEUE_TX: order_tx_queue
-  #     RABBITMQ_QUEUE_QUERY: order_query_queue
-  #     GOOGLE_CLIENT_ID: 1085551212854-qt83lqnnsut8ljv5soifk8a1tcsm1nm7.apps.googleusercontent.com
-  #     GOOGLE_CLIENT_SECRET: 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
-  #     GOOGLE_CALLBACK_URL: http://localhost:4000/api/auth/google/callback
-  #     SOCIAL_REDIRECT: http://localhost:3000/app
-  #     NOTIFY_QUEUE: notification_queue
-  #     # RESET_PASSWORD_URL: # url app
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #     - rabbitmq
-  #     - zookeeper
-  #     - kafka
-  #   ports:
-  #     - '4000:4000'
-  #     - '8001:8001'
+    driver: local
+  postgres_data:

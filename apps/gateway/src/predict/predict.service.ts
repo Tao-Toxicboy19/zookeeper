@@ -29,4 +29,17 @@ export class PredictService implements OnModuleInit {
             })
         })
     }
+
+    async deleteData(): Promise<void> {
+        const today = new Date();
+        const timestamp = Math.floor(today.getTime() / 1000);
+        return new Promise<void>((resolve, reject) => {
+            this.predictServiceClient.deleteall({ timeStamp: timestamp }).subscribe({
+                next: () => resolve(),
+                error: (err) => reject(err),
+            });
+        });
+    }
+    
+    
 }
