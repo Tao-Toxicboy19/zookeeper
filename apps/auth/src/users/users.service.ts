@@ -45,10 +45,6 @@ export class UsersService {
         return await this.usersRepository.findOne({ username })
     }
 
-    async findOneById(userId: string): Promise<any> {
-        return await this.usersRepository.findOne({ _id: userId })
-    }
-
     async update({
         _id,
         resetPasswordToken,

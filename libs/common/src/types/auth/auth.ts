@@ -20,7 +20,7 @@ export interface ProfileResponse {
 }
 
 export interface ProfileDto {
-  userId: string;
+  username: string;
 }
 
 export interface ConfirmOTPDto {

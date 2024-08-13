@@ -40,11 +40,15 @@ export class NotificationService {
     }
 
     async createMsg(dto: NotificationMsg): Promise<void> {
-        new Promise<void>((resolve, reject) => {
-            this.client.send<void>('create_msg_notify', dto).subscribe({
-                next: (response) => resolve(response),
-                error: (err) => reject(err),
+        try {
+            new Promise<void>((resolve, reject) => {
+                this.client.send<void>('create_msg_notify', dto).subscribe({
+                    next: (response) => resolve(response),
+                    error: (err) => reject(err),
+                })
             })
-        })
+        } catch (error) {
+            throw error
+        }
     }
 }

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # version: '4'
 
 # services:
@@ -90,6 +91,8 @@
 
 version: '3.9'
 
+=======
+>>>>>>> e02d3b6d2d07b2b108822ba120f0da75770ccefb
 services:
   mongo:
     image: mongo
@@ -175,7 +178,170 @@ services:
       - '4040:5432'
     restart: always
 
+<<<<<<< HEAD
 volumes:
   mongo_data:
     driver: local
   postgres_data:
+=======
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  # predict-service:
+  #   image: lindermand/predict-service:0.6
+  #   command: python main.py
+  #   environment:
+  #     MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+  #     HOST_REDIS: localhost
+  #     PORT_REDIS: 6379
+  #     PORT: 50051
+  #     API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
+  #     SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
+  #   depends_on:
+  #     - mongo
+  #     - postgres
+  #     - redis
+  #   ports:
+  #     - 50055:50051
+  #   restart: always
+
+  # apikey-service:
+  #   # image: taotoxicboy/zookeeper-key-service:0.3
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/key/Dockerfile
+  #   environment:
+  #     GRPC_URL: apikey-service:5005
+  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+  #     EXCHANGE_SERVICE_URL: exchange:50052
+  #   depends_on:
+  #     - mongo
+  #     - redis
+  #     - rabbitmq
+  #     - zookeeper
+  #   ports:
+  #     - '5005:5005'
+
+  # mail-service:
+  #   # image: taotoxicboy/zookeeper-mail-queue-service:0.4
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/mail-queue/Dockerfile
+  #   environment:
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     USERNAME_EMAIL: themanpoolbot@gmail.com
+  #     PASSWORD_EMAIL: jvpp fujd ecvy pifo
+  #     REDIS_URL: redis
+  #     REDIS_PORT: 6379
+  #     RESET_PASSWORD_URL: http://localhost:3000/new-password
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #     - rabbitmq
+  #   restart: always
+
+  # auth-service:
+  #   # image: taotoxicboy/zookeeper-auth-service:0.4
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/auth/Dockerfile
+  #   environment:
+  #     GRPC_URL: auth-service:50022
+  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+  #     REDIS_URL: redis
+  #     REDIS_PORT: 6379
+  #     MONGODB_URI: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+  #     RABBIT_MQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #   ports:
+  #     - '50022:50022'
+  #   depends_on:
+  #     - redis
+  #     - zookeeper
+  #     - kafka
+  #     - rabbitmq
+  #   restart: always
+
+  # exchange:
+  #   # image: taotoxicboy/zookeeper-exchange:0.4
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/exchange/Dockerfile
+  #   environment:
+  #     GRPC_URL: exchange:50052
+  #     KEY_SERVICE_URL: key-service:5005
+  #     KAFKA_URL: kafka:9092
+  #   depends_on:
+  #     - zookeeper
+  #     - kafka
+  #   ports:
+  #     - '50052:50052'
+  #   restart: always
+
+  # gateway:
+  #   # image: taotoxicboy/zookeeper-gateway-service:0.4
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/gateway/Dockerfile
+  #   environment:
+  #     NODE_ENV: production
+  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+  #     PORT: 4000
+  #     AUTH_SERVICE_URL: auth-service:50022
+  #     KEY_SERVICE_URL: key-service:5005
+  #     # CLIENT_URL: http://localhost:3000
+  #     KAFKA_URL: kafka:9092
+  #     EXCHANGE_SERVICE_URL: exchange:50052
+  #     WEB_SOCKET: 8031
+  #     PREDICT_SERVICE_URL: predict-service:50055
+  #     RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     RABBITMQ_QUEUE_TX: order_tx_queue
+  #     RABBITMQ_QUEUE_QUERY: order_query_queue
+  #     GOOGLE_CLIENT_ID: 1085551212854-qt83lqnnsut8ljv5soifk8a1tcsm1nm7.apps.googleusercontent.com
+  #     GOOGLE_CLIENT_SECRET: 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
+  #     GOOGLE_CALLBACK_URL: http://localhost:4000/api/auth/google/callback
+  #     SOCIAL_REDIRECT: http://localhost:3000/app
+  #     NOTIFY_QUEUE: notification_queue
+  #   depends_on:
+  #     - mongo
+  #     - redis
+  #     - rabbitmq
+  #     - zookeeper
+  #     - kafka
+  #     - predict-service
+  #   ports:
+  #     - '4000:4000'
+  #     - '8001:8001'
+
+volumes:
+  postgres_data:
+  mongo_data:
+  es-data:
+>>>>>>> e02d3b6d2d07b2b108822ba120f0da75770ccefb

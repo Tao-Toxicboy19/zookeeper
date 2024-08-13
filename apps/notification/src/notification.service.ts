@@ -4,6 +4,7 @@ import { MailDto } from './dto/notification.dto'
 import { NotificationRepository } from './notification.repository'
 import { Nofitication } from './types/notification.type'
 import { NotificationMsg } from '@app/common'
+import { Types } from 'mongoose'
 
 @Injectable()
 export class NotificationService {
@@ -40,7 +41,7 @@ export class NotificationService {
             await this.notificationRepository.updateMany(
                 { user_id: userId },
                 {
-                    isRead: true,
+                    isReaded: true,
                     readedAt: new Date(),
                 },
             )
@@ -59,7 +60,9 @@ export class NotificationService {
 
     async createNotification({ user_id, msg }: NotificationMsg): Promise<void> {
         try {
+            console.log('hello world')
             await this.notificationRepository.create({
+                _id: new Types.ObjectId(),
                 user_id,
                 msg,
                 createdAt: new Date(),

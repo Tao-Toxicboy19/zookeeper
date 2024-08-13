@@ -72,8 +72,9 @@ export class AuthService implements OnModuleInit {
             const existUser = await this.userService.findOneByUsername(
                 dto.username,
             )
+            const userInRedis = await this.redisService.getValue(dto.name)
             const existEmail = await this.userService.findOneByEmail(dto.email)
-            if (existEmail) {
+            if (existEmail || userInRedis) {
                 throw new GrpcAlreadyExistsException('Email already exists.')
             } else if (existUser) {
                 throw new GrpcAlreadyExistsException('User already exists.')
@@ -163,10 +164,13 @@ export class AuthService implements OnModuleInit {
                 refreshToken,
             }
         }
+        const _id: Types.ObjectId = new Types.ObjectId()
         const { email, userId } = await this.signup({
+            _id,
             email: dto.email,
             name: dto.name,
             picture: dto.picture,
+            username: dto.email,
             googleId: dto.googleId,
         })
 
