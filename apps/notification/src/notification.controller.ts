@@ -9,7 +9,7 @@ export class NotificationController {
     constructor(private readonly notificationService: NotificationService) {}
 
     @EventPattern('notifications')
-    handleNotifications(dto: userId): Promise<Notifications> {
+    handleNotifications(dto: userId): Promise<Notifications | Response> {
         return this.notificationService.notifications(dto.user_id)
     }
 

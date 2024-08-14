@@ -2,7 +2,7 @@ import { Types } from 'mongoose'
 
 export type Notifications = {
     _id: string | Types.ObjectId
-    userId: string
+    userId: string | Types.ObjectId
     notifications: Notification[]
 }
 

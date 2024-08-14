@@ -20,10 +20,7 @@ export class WsJwtGuard implements CanActivate {
         const { authorization } = client.handshake.headers
         const { seed } = client.handshake.query
         const token: string = authorization.split(' ')[1]
-        const payload = verify(
-            token,
-            'VgmBOirkrV6x179MeyStIN8jr2xWQVWx' || process.env.AT_SECRET,
-        )
+        const payload = verify(token, 'VgmBOirkrV6x179MeyStIN8jr2xWQVWx')
         client['user'] = payload
         client['seed'] = seed
         return payload

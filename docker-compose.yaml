@@ -1,4 +1,17 @@
 services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - '4040:5432'
+    restart: always
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     ports:
@@ -51,19 +64,6 @@ services:
       - '6379:6379'
     restart: always
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - '4040:5432'
-    restart: always
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
     container_name: elasticsearch
@@ -97,7 +97,7 @@ services:
     image: taotoxicboy/go-order-consumer-tx-service:latest
     environment:
       DB_HOST: postgres
-      DB_PORT: 4040
+      DB_PORT: 5432
       DB_USER: myuser
       DB_PASSWORD: mypassword
       DB_NAME: mydatabase
@@ -105,6 +105,8 @@ services:
     depends_on:
       - redis
       - rabbitmq
+      - postgres
+    restart: always
 
   # predict-service:
   #   image: lindermand/predict-service:0.6

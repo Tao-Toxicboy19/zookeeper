@@ -1,25 +1,23 @@
-import {
-    ConnectedSocket,
-    OnGatewayConnection,
-    OnGatewayDisconnect,
-    OnGatewayInit,
-    SubscribeMessage,
-    WebSocketGateway,
-    WebSocketServer,
-} from '@nestjs/websockets'
-import { NotificationService } from './notification.service'
-import { Server, Socket } from 'socket.io'
 import { JwtPayload, SocketAuthMiddleware, WsJwtGuard } from '@app/common'
 import { UseGuards } from '@nestjs/common'
+import {
+    WebSocketGateway,
+    WebSocketServer,
+    SubscribeMessage,
+    OnGatewayInit,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+} from '@nestjs/websockets'
+import { Server, Socket } from 'socket.io'
 
-@WebSocketGateway({
-    cors: '*',
+@WebSocketGateway(8001, {
+    cors: {
+        origin: '*',
+    },
 })
 export class NotificationGateway
     implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-    constructor(private readonly notificationService: NotificationService) {}
-
     @WebSocketServer()
     server: Server
 
@@ -38,18 +36,17 @@ export class NotificationGateway
 
     @UseGuards(WsJwtGuard)
     @SubscribeMessage('notification')
-    handleMessage(@ConnectedSocket() client: Socket): void {
+    handleMessage(client: Socket, msg: string): void {
+        console.log('Received message:', msg)
         const payload: JwtPayload = client['user']
-        // console.log(payload)
+        console.log(payload)
         if (payload.sub) {
+            console.log(`join: ${payload.sub}`)
             client.join(payload.sub)
         }
     }
 
     sendNotification(msg: string, userId: string) {
-        console.log('send ok')
-        console.log(msg)
-        console.log(`user id: ${userId}`)
         this.server.to(userId).emit('notification', msg)
     }
 }

@@ -1,5 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer'
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { MailDto } from './dto'
 import { NotificationRepository } from './notification.repository'
 import { Notifications } from './types'
@@ -26,11 +26,27 @@ export class NotificationService {
         }
     }
 
-    async notifications(userId: string): Promise<Notifications> {
+    // ObjectID('66b8dcf36d2663812c6ba82c')
+    // ObjectID('66bc0b4115dc6b42e98a5951')
+    async notifications(userId: string): Promise<Notifications | Response> {
         try {
-            return (await this.notificationRepository.findOne({
-                userId: userId,
+            // แปลง userId จาก string เป็น ObjectId
+            const objectId = new Types.ObjectId(userId)
+
+            const result = (await this.notificationRepository.findOne({
+                userId: objectId,
             })) as Notifications
+
+            console.log(result)
+            if (!result) {
+                return {
+                    message: 'No documents found to read.',
+                    error: 'No Content.',
+                    statusCode: HttpStatus.NO_CONTENT,
+                }
+            }
+
+            return result
         } catch (error) {
             throw error
         }
@@ -56,12 +72,12 @@ export class NotificationService {
                 return {
                     message: 'No documents found to update.',
                     error: 'No Content.',
-                    statusCode: 204,
+                    statusCode: HttpStatus.NO_CONTENT,
                 }
             }
             return {
                 message: 'OK',
-                statusCode: 200,
+                statusCode: HttpStatus.OK,
             }
         } catch (error) {
             throw error // สามารถโยนข้อผิดพลาดต่อไปหากต้องการ
@@ -121,12 +137,12 @@ export class NotificationService {
             return {
                 message: 'NotificationItem not found to delete.',
                 error: 'NOT FOUND',
-                statusCode: 404,
+                statusCode: HttpStatus.NOT_FOUND,
             }
         }
         return {
             message: 'OK',
-            statusCode: 200,
+            statusCode: HttpStatus.OK,
         }
     }
 }

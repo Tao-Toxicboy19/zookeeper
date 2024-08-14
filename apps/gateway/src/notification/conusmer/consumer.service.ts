@@ -44,10 +44,10 @@ export class ConsumerService implements OnModuleInit {
                 this.notificationOrderQueue,
                 async (msg: ConsumeMessage) => {
                     if (msg) {
-                        // this.logger.debug(JSON.parse(msg.content.toString()))
                         const message: NotificationMsg = JSON.parse(
                             msg.content.toString(),
                         )
+                        console.log(message)
                         await Promise.all([
                             this.notificationGateway.sendNotification(
                                 message.msg,
