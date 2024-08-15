@@ -29,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: ./apps/key/Dockerfile
+          file: ./apps/key/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-key-service:latest
 
@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: ./apps/mail-queue/Dockerfile
+          file: ./apps/mail-queue/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-mail-queue-service:latest
       
@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: ./apps/auth/Dockerfile
+          file: ./apps/auth/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-auth-service:latest
 
@@ -53,7 +53,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: ./apps/exchange/Dockerfile
+          file: ./apps/exchange/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-exchange:latest
       
@@ -61,6 +61,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          dockerfile: ./apps/gateway/Dockerfile
+          file: ./apps/gateway/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-gateway-service:latest
