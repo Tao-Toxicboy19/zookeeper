@@ -28,7 +28,7 @@ jobs:
       - name: Build and Push Docker Image apikey-service
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./apps/key
           file: ./apps/key/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-key-service:latest
@@ -36,7 +36,7 @@ jobs:
       - name: Build and Push Docker Image mail-service
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./apps/mail-queue
           file: ./apps/mail-queue/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-mail-queue-service:latest
@@ -44,7 +44,7 @@ jobs:
       - name: Build and Push Docker Image auth-service
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./apps/auth
           file: ./apps/auth/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-auth-service:latest
@@ -52,7 +52,7 @@ jobs:
       - name: Build and Push Docker Image exchange-service
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./apps/exchange
           file: ./apps/exchange/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-exchange:latest
@@ -60,7 +60,7 @@ jobs:
       - name: Build and Push Docker Image gateway-service
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./apps/gateway
           file: ./apps/gateway/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-gateway-service:latest
