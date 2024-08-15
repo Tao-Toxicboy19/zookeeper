@@ -7,8 +7,10 @@ import {
     SaveOptions,
     Connection,
     ClientSession,
+    AnyBulkWriteOperation,
 } from 'mongoose'
 import { AbstractDocument } from './abstract.schema'
+import { BulkWriteOptions, BulkWriteResult, UpdateOptions } from 'mongodb'
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     protected abstract readonly logger: Logger
@@ -83,14 +85,25 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
     async upsert(
         filterQuery: FilterQuery<TDocument>,
-        document: Partial<TDocument>,
+        updateQuery: UpdateQuery<TDocument>,
     ) {
-        return this.model.findOneAndUpdate(filterQuery, document, {
+        return this.model.findOneAndUpdate(filterQuery, updateQuery, {
             lean: true,
             upsert: true,
             new: true,
         })
     }
+
+    // async upsert(
+    //     filterQuery: FilterQuery<TDocument>,
+    //     document: Partial<TDocument>,
+    // ) {
+    //     return this.model.findOneAndUpdate(filterQuery, document, {
+    //         lean: true,
+    //         upsert: true,
+    //         new: true,
+    //     })
+    // }
 
     async find(filterQuery: FilterQuery<TDocument>) {
         return this.model.find(filterQuery, {}, { lean: true })
@@ -105,9 +118,11 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     async updateMany(
         filterQuery: FilterQuery<TDocument>,
         update: UpdateQuery<TDocument>,
+        options?: { arrayFilters?: object[]; multi?: boolean },
     ): Promise<TDocument[]> {
         const result = await this.model.updateMany(filterQuery, update, {
             lean: true,
+            ...options, // รวม options อื่น ๆ ที่มี
         })
 
         if (result.modifiedCount === 0) {
@@ -115,7 +130,8 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
                 `No documents were updated with filterQuery:`,
                 filterQuery,
             )
-            throw new NotFoundException('No documents found to update.')
+            return []
+            // throw new NotFoundException('No documents found to update.')
         }
 
         return this.model.find(
@@ -124,6 +140,30 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             { lean: true },
         ) as unknown as TDocument[]
     }
+
+    // async updateMany(
+    //     filterQuery: FilterQuery<TDocument>,
+    //     update: UpdateQuery<TDocument>,
+    //     options?: UpdateOptions,
+    // ): Promise<TDocument[]> {
+    //     const result = await this.model.updateMany(filterQuery, update, {
+    //         lean: true,
+    //     })
+
+    //     if (result.modifiedCount === 0) {
+    //         this.logger.warn(
+    //             `No documents were updated with filterQuery:`,
+    //             filterQuery,
+    //         )
+    //         throw new NotFoundException('No documents found to update.')
+    //     }
+
+    //     return this.model.find(
+    //         filterQuery,
+    //         {},
+    //         { lean: true },
+    //     ) as unknown as TDocument[]
+    // }
 
     async deleteOne(filterQuery: FilterQuery<TDocument>): Promise<void> {
         const result = await this.model.deleteOne(filterQuery).exec()

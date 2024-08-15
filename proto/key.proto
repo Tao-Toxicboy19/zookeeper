@@ -11,7 +11,6 @@ message CreateKeyDto {
     string user_id = 1;
     string api_key = 2;
     string secret_key = 3;
-    string seed_phrase = 4;
 }
 
 message Key_user_id {

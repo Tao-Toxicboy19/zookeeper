@@ -10,30 +10,18 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  redis:
-    image: redis:latest
-    ports:
-    - '6379:6379'
-    restart: always
-
-  predict-service:
-    image: lindermand/predict-service:0.6
-    # build:
-    #   context: .
-    #   dockerfile: ./Dockerfile
-    command: python main.py
+  postgres:
+    image: postgres:latest
+    container_name: postgres
     environment:
-      MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-      HOST_REDIS: redis
-      PORT_REDIS: 6379
-      PORT: 50051
-      API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
-      SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
-    depends_on:
-      - mongo
-      - redis
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "50055:50051"
+      - '4040:5432'
+    restart: always
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
@@ -70,17 +58,10 @@ services:
       - '5672:5672'
     restart: always
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres
-    environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+  redis:
+    image: redis:latest
     ports:
-      - '4040:5432'
+      - '6379:6379'
     restart: always
 
   elasticsearch:
@@ -111,6 +92,21 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
+
+  order-tx-service:
+    image: taotoxicboy/go-order-consumer-tx-service:latest
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: mydatabase
+      RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
+    depends_on:
+      - redis
+      - rabbitmq
+      - postgres
+    restart: always
 
   # predict-service:
   #   image: lindermand/predict-service:0.6

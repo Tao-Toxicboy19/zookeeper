@@ -14,7 +14,6 @@ export interface CreateKeyDto {
   userId: string;
   apiKey: string;
   secretKey: string;
-  seedPhrase: string;
 }
 
 export interface KeyUserId {

@@ -45,29 +45,29 @@ export class ExchangeService implements OnModuleInit {
         return verify(value, secret) as string
     }
 
-    async position({ userId, seed }: SendUserIdDto): Promise<void> {
+    async position({ userId }: SendUserIdDto): Promise<void> {
         try {
             const { apiKey, secretKey } = await this.getApiKeys(userId)
-            const apiKeyDecode = await this.encypt(apiKey, seed)
-            const secretKeyDecode = await this.encypt(secretKey, seed)
             await this.createExchange({
-                apiKey: apiKeyDecode,
-                secretKey: secretKeyDecode,
+                apiKey,
+                secretKey,
             })
             const position = await this.exchange.fetchPositions()
             console.log(position)
-            this.kafkaProducerService.publish(
-                JSON.stringify({
-                    user_id: userId,
-                    position,
-                }),
-            )
-            // if (position.length !== 0) {
-            //   this.kafkaProducerService.publish(JSON.stringify({
-            //     user_id: userId,
-            //     position,
-            //   }))
-            // }
+            // this.kafkaProducerService.publish(
+            //     JSON.stringify({
+            //         user_id: userId,
+            //         position,
+            //     }),
+            // )
+            if (position.length !== 0) {
+                this.kafkaProducerService.publish(
+                    JSON.stringify({
+                        user_id: userId,
+                        position,
+                    }),
+                )
+            }
         } catch (error) {
             throw error
         }

@@ -1,9 +1,16 @@
-export type Nofitication = {
-    _id: any
+import { Types } from 'mongoose'
+
+export type Notifications = {
+    _id: string | Types.ObjectId
+    userId: string | Types.ObjectId
+    notifications: Notification[]
+}
+
+export type Notification = {
+    _id: string | Types.ObjectId
     msg: string
-    isRead?: boolean
-    readedAt?: Date | null
+    isReaded: boolean
     createdAt: Date
-    deletedAt?: Date | null
-    user_id: string
+    readedAt: null
+    deletedAt: null
 }

@@ -35,12 +35,11 @@ export class PositionGateway {
     @SubscribeMessage('position')
     handleMessage(@ConnectedSocket() client: Socket): void {
         const payload: JwtPayload = client['user']
-        const seed: string = client['seed']
         if (payload.sub) {
             client.join(payload.sub)
 
             setInterval(async () => {
-                await this.positionService.sendUserId(payload.sub, seed)
+                await this.positionService.sendUserId(payload.sub)
             }, 1000)
 
             this.server.to(payload.sub).emit('position')
