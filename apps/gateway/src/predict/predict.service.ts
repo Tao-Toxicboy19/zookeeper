@@ -5,6 +5,7 @@ import {
 } from '@app/common'
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common'
 import { ClientGrpc } from '@nestjs/microservices'
+import { Cron } from '@nestjs/schedule'
 
 @Injectable()
 export class PredictService implements OnModuleInit {
@@ -21,6 +22,9 @@ export class PredictService implements OnModuleInit {
         this.predictServiceClient.predict({})
     }
 
+    @Cron('0 */5 * * * *', {
+        timeZone: 'Asia/Bangkok',
+    })
     async createPrddict(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.predictServiceClient.predict({}).subscribe({
@@ -31,15 +35,15 @@ export class PredictService implements OnModuleInit {
     }
 
     async deleteData(): Promise<void> {
-        const today = new Date();
-        const timestamp = Math.floor(today.getTime() / 1000);
+        const today = new Date()
+        const timestamp = Math.floor(today.getTime() / 1000)
         return new Promise<void>((resolve, reject) => {
-            this.predictServiceClient.deleteall({ timeStamp: timestamp }).subscribe({
-                next: () => resolve(),
-                error: (err) => reject(err),
-            });
-        });
+            this.predictServiceClient
+                .deleteall({ timeStamp: timestamp })
+                .subscribe({
+                    next: () => resolve(),
+                    error: (err) => reject(err),
+                })
+        })
     }
-    
-    
 }

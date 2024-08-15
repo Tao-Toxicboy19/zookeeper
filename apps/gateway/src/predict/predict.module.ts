@@ -5,9 +5,11 @@ import { PREDICT_PACKAGE_NAME } from '@app/common/types/predict/predict'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { join } from 'path'
+import { ScheduleModule } from '@nestjs/schedule'
 
 @Module({
     imports: [
+        ScheduleModule.forRoot(),
         ClientsModule.registerAsync([
             {
                 name: PREDICT_PACKAGE_NAME,
