@@ -64,3 +64,11 @@ jobs:
           file: ./apps/gateway/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-gateway-service:latest
+
+      - name: Build and Push Docker Image notification-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/notification/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-notification-service:latest
