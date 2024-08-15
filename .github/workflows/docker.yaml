@@ -1,4 +1,4 @@
-name: next14 Pipeline
+name: nestjs Pipeline
 
 on:
   push:
