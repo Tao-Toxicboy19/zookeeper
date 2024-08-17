@@ -22,9 +22,9 @@ export class PredictService implements OnModuleInit {
         this.predictServiceClient.predict({})
     }
 
-    @Cron('0 */5 * * * *', {
-        timeZone: 'Asia/Bangkok',
-    })
+    // @Cron('0 */5 * * * *', {
+    //     timeZone: 'Asia/Bangkok',
+    // })
     async createPrddict(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.predictServiceClient.predict({}).subscribe({

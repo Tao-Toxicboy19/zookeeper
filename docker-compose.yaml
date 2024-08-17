@@ -108,23 +108,23 @@ services:
       - postgres
     restart: always
 
-  # predict-service:
-  #   image: lindermand/predict-service:0.6
-  #   command: python main.py
-  #   environment:
-  #     MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
-  #     HOST_REDIS: localhost
-  #     PORT_REDIS: 6379
-  #     PORT: 50051
-  #     API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
-  #     SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
-  #   depends_on:
-  #     - mongo
-  #     - postgres
-  #     - redis
-  #   ports:
-  #     - 50055:50051
-  #   restart: always
+  predict-service:
+    image: lindermand/predict-service:0.6
+    command: python main.py
+    environment:
+      MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+      HOST_REDIS: localhost
+      PORT_REDIS: 6379
+      PORT: 50051
+      API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
+      SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
+    depends_on:
+      - mongo
+      - postgres
+      - redis
+    ports:
+      - 50055:50051
+    restart: always
 
   # apikey-service:
   #   # image: taotoxicboy/zookeeper-key-service:0.3
@@ -239,3 +239,42 @@ volumes:
   postgres_data:
   mongo_data:
   es-data:
+
+# services:
+#   mongodb:
+#     image: mongo:latest
+#     container_name: mongo_container
+#     ports:
+#       - "27017:27017"
+#     environment:
+#       MONGO_INITDB_ROOT_USERNAME: root
+#       MONGO_INITDB_ROOT_PASSWORD: example
+#     # volumes:
+#       # - mongo_data:/data/db
+
+#   redis:
+#     image: redis:latest
+#     ports:
+#       - '6380:6379'
+#     restart: always
+
+#   predict-service:
+#     image: lindermand/predict-service:1.0
+#     platform: linux/amd64
+#     command: python main.py
+#     environment:
+#       MONGO_URL: mongodb://root:example@mongodb:27017/zookeeper?authSource=admin
+#       HOST_REDIS: redis
+#       PORT_REDIS: 6379
+#       PORT: 50051
+#       API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
+#       SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
+#     depends_on:
+#       - mongodb
+#       - redis
+#     ports:
+#       - "50051:50051"
+
+# # volumes:
+# #   mongo_data:
+# #     driver: local

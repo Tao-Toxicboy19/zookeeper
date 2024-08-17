@@ -131,7 +131,10 @@ export class AuthService implements OnModuleInit {
 
             // create user
             if (userCache) {
-                await this.userService.createUser(userCache)
+                await this.userService.createUser({
+                    ...userCache,
+                    _id: new Types.ObjectId(userCache._id),
+                })
             }
 
             const { accessToken, refreshToken } = await this.getTokens(
