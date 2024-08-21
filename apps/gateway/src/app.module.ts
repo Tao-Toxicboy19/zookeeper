@@ -19,7 +19,7 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch'
         ThrottlerModule.forRoot([
             {
                 ttl: 1000,
-                limit: 20,
+                limit: 15,
             },
         ]),
         ElasticsearchModule.registerAsync({
