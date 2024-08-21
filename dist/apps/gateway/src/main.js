@@ -41,7 +41,7 @@ exports.AppModule = AppModule = __decorate([
             throttler_1.ThrottlerModule.forRoot([
                 {
                     ttl: 1000,
-                    limit: 20,
+                    limit: 15,
                 },
             ]),
             elasticsearch_1.ElasticsearchModule.registerAsync({
@@ -955,6 +955,11 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], KeyDto.prototype, "secretKey", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], KeyDto.prototype, "seed_phrase", void 0);
 
 
 /***/ }),
@@ -991,7 +996,6 @@ let KeyController = class KeyController {
         this.keyService = keyService;
     }
     create(dto, req) {
-        console.log('hello world');
         return this.keyService.create({
             ...dto,
             userId: req.user.sub,
@@ -1014,6 +1018,7 @@ __decorate([
 ], KeyController.prototype, "create", null);
 __decorate([
     (0, common_1.UseGuards)(common_2.JwtAuthGuard),
+    (0, common_1.UseGuards)(common_2.CookieAuthGuard),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -1130,6 +1135,9 @@ let KeyService = class KeyService {
                 error: (err) => reject(err),
             });
         });
+    }
+    async hello() {
+        console.log('hello world');
     }
 };
 exports.KeyService = KeyService;
@@ -2075,7 +2083,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var PositionGateway_1;
-var _a, _b, _c, _d;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PositionGateway = void 0;
 const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
@@ -2083,6 +2091,7 @@ const websockets_1 = __webpack_require__(/*! @nestjs/websockets */ "@nestjs/webs
 const socket_io_1 = __webpack_require__(/*! socket.io */ "socket.io");
 const position_service_1 = __webpack_require__(/*! ./position.service */ "./apps/gateway/src/position/position.service.ts");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const secret_guard_1 = __webpack_require__(/*! ../key/secret.guard */ "./apps/gateway/src/key/secret.guard.ts");
 let PositionGateway = PositionGateway_1 = class PositionGateway {
     constructor(positionService) {
         this.positionService = positionService;
@@ -2105,16 +2114,6 @@ let PositionGateway = PositionGateway_1 = class PositionGateway {
         console.log(msg);
         this.server.to(userId).emit('position', msg);
     }
-    handleFindWallet(client, msg) {
-        const payload = client['user'];
-        if (payload.sub) {
-            client.join(payload.sub);
-            setInterval(async () => {
-                const { usdt } = await this.positionService.handleWallet(payload.sub);
-                this.server.to(payload.sub).emit('wallet', usdt);
-            }, 1000);
-        }
-    }
 };
 exports.PositionGateway = PositionGateway;
 __decorate([
@@ -2122,6 +2121,7 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof socket_io_1.Server !== "undefined" && socket_io_1.Server) === "function" ? _b : Object)
 ], PositionGateway.prototype, "server", void 0);
 __decorate([
+    (0, common_2.UseGuards)(secret_guard_1.SecretGuard),
     (0, common_2.UseGuards)(common_1.WsJwtGuard),
     (0, websockets_1.SubscribeMessage)('position'),
     __param(0, (0, websockets_1.ConnectedSocket)()),
@@ -2129,14 +2129,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_c = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _c : Object]),
     __metadata("design:returntype", void 0)
 ], PositionGateway.prototype, "handleMessage", null);
-__decorate([
-    (0, common_2.UseGuards)(common_1.WsJwtGuard),
-    (0, websockets_1.SubscribeMessage)('wallet'),
-    __param(0, (0, websockets_1.ConnectedSocket)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _d : Object, String]),
-    __metadata("design:returntype", void 0)
-], PositionGateway.prototype, "handleFindWallet", null);
 exports.PositionGateway = PositionGateway = PositionGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: '*',
@@ -2241,19 +2233,6 @@ let PositionService = class PositionService {
                 error: (err) => reject(err),
             });
         });
-    }
-    async handleWallet(userId) {
-        try {
-            return new Promise((resolve, reject) => {
-                this.exchangeServiceClient.balance({ userId }).subscribe({
-                    next: (response) => resolve(response),
-                    error: (err) => reject(err),
-                });
-            });
-        }
-        catch (error) {
-            throw error;
-        }
     }
 };
 exports.PositionService = PositionService;
