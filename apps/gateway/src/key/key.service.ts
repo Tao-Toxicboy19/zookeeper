@@ -37,8 +37,4 @@ export class KeyService implements OnModuleInit {
             })
         })
     }
-
-    async hello() {
-        console.log('hello world')
-    }
 }

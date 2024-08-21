@@ -1,9 +1,4 @@
-import {
-    CookieAuthGuard,
-    JwtPayload,
-    SocketAuthMiddleware,
-    WsJwtGuard,
-} from '@app/common'
+import { JwtPayload, SocketAuthMiddleware, WsJwtGuard } from '@app/common'
 import {
     SubscribeMessage,
     WebSocketGateway,
@@ -13,7 +8,6 @@ import {
 import { Server, Socket } from 'socket.io'
 import { PositionService } from './position.service'
 import { Logger, UseGuards } from '@nestjs/common'
-import { SecretGuard } from '../key/secret.guard'
 
 @WebSocketGateway({
     cors: '*',
@@ -30,7 +24,7 @@ export class PositionGateway {
     @WebSocketServer()
     server: Server
 
-    @UseGuards(SecretGuard)
+    // @UseGuards(SecretGuard)
     @UseGuards(WsJwtGuard)
     @SubscribeMessage('position')
     handleMessage(@ConnectedSocket() client: Socket): void {
@@ -49,5 +43,20 @@ export class PositionGateway {
     emitMessage(msg: string, userId: string): void {
         console.log(msg)
         this.server.to(userId).emit('position', msg)
+    }
+
+    @UseGuards(WsJwtGuard)
+    @SubscribeMessage('wallet')
+    handleFindWallet(@ConnectedSocket() client: Socket, msg: string): void {
+        const payload: JwtPayload = client['user']
+        if (payload.sub) {
+            client.join(payload.sub)
+            setInterval(async () => {
+                const { usdt } = await this.positionService.handleWallet(
+                    payload.sub,
+                )
+                this.server.to(payload.sub).emit('wallet', usdt)
+            }, 1000)
+        }
     }
 }

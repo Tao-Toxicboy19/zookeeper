@@ -1,9 +1,10 @@
-import { Module } from '@nestjs/common'
+import { Logger, Module } from '@nestjs/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { GrpcToHttpInterceptor } from 'nestjs-grpc-exceptions'
 import { OrdersController } from './orders.controller'
 import { OrdersService } from './orders.service'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { CustomLoggerService } from '../utils/custom-logger.service'
 
 @Module({
     imports: [
@@ -26,6 +27,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
         ]),
     ],
     controllers: [OrdersController],
-    providers: [OrdersService, GrpcToHttpInterceptor],
+    providers: [
+        OrdersService,
+        GrpcToHttpInterceptor,
+        {
+            provide: Logger,
+            useClass: CustomLoggerService,
+        },
+    ],
 })
 export class OrdersModule {}

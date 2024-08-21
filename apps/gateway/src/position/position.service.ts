@@ -1,4 +1,5 @@
 import {
+    BalanceResponse,
     EXCHANGE_PACKAGE_NAME,
     EXCHANGE_SERVICE_NAME,
     ExchangeServiceClient,
@@ -24,5 +25,18 @@ export class PositionService implements OnModuleInit {
                 error: (err) => reject(err),
             })
         })
+    }
+
+    async handleWallet(userId: string): Promise<BalanceResponse> {
+        try {
+            return new Promise<BalanceResponse>((resolve, reject) => {
+                this.exchangeServiceClient.balance({ userId }).subscribe({
+                    next: (response) => resolve(response),
+                    error: (err) => reject(err),
+                })
+            })
+        } catch (error) {
+            throw error
+        }
     }
 }

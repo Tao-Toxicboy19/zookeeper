@@ -30,6 +30,7 @@ export class KeyController {
         //     secure: process.env.NODE_ENV === 'production',
         //     sameSite: 'strict',
         // })
+        console.log('hello world')
         return this.keyService.create({
             ...dto,
             userId: req.user.sub,
@@ -38,7 +39,7 @@ export class KeyController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @UseGuards(CookieAuthGuard)
+    // @UseGuards(CookieAuthGuard)
     @Post()
     getKey(@Req() req: { user: JwtPayload }) {
         return this.keyService.getKey({ userId: req.user.sub })
