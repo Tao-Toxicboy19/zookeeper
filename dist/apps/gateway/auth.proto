@@ -1,0 +1,97 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+package auth;
+
+service AuthService {
+    rpc Signin (SigninDto) returns (EmailResponse) {}
+    rpc Signup (SignupDto) returns (EmailResponse) {}
+    rpc Validate (ValidateDto) returns (UserResponse) {}
+    rpc ConfirmOTP (ConfirmOTPDto) returns (TokenResponse) {}
+    rpc RefreshToken (SigninDto) returns (TokenResponse) {}
+    rpc Profile (ProfileDto) returns (ProfileResponse) {} 
+    rpc GetEmail (GetEmailDto) returns (MailResponse) {} 
+    rpc GoogleLogin (GoogleLoginDto) returns (TokenResponse){}
+    rpc ForgotPassword (ForgotPasswordDto) returns (google.protobuf.Empty) {}
+    rpc ResetPassword (ResetPasswordDto) returns (google.protobuf.Empty) {}
+}
+
+message ProfileResponse {
+    string user_id = 1;
+    string username = 2;
+    string email = 3;
+    optional string picture = 4;
+    optional string name = 5;
+}
+
+message ProfileDto {
+    string username = 1;
+}
+
+message ConfirmOTPDto {
+    optional string message = 1;
+    optional int32 statusCode = 2;
+    optional int32 otp = 3;
+    optional string user_id = 4;
+}
+
+message EmailResponse {
+    optional string email = 1;
+    optional int32 statusCode = 2;
+    optional string message = 3;
+    optional string user_id = 4;
+}
+
+message TokenResponse {
+    optional string accessToken = 1;
+    optional string refreshToken = 2;
+    optional string message = 3;
+    optional int32 statusCode = 4;
+}
+
+message UserResponse {
+    optional string username = 1;
+    optional string sub = 2;
+    optional string message = 3;
+    optional int32 statusCode = 4;
+}
+
+message SigninDto {
+    string username = 1;
+    string user_id = 2;
+}
+
+message SignupDto {
+    string username = 1;
+    string password = 2;
+    string email = 3;
+}
+
+message ValidateDto {
+    string username = 1;
+    string password = 2;
+}
+
+message GetEmailDto {
+    string user_id = 1;
+}
+
+message MailResponse {
+    string email = 1;
+}
+
+message GoogleLoginDto {
+    string email = 1;
+    string name = 2;
+    string picture = 3;
+    string googleId = 4;
+}
+
+message ForgotPasswordDto {
+    string email = 1;
+}
+
+message ResetPasswordDto {
+    string token = 1;
+    string password = 2;
+}
