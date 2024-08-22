@@ -80,7 +80,6 @@ export class AuthController {
     ): Promise<EmailResponse> {
         try {
             const { email, userId } = await this.authService.signup(dto)
-
             res.cookie('user_id', userId, {
                 secure: process.env.NODE_ENV === 'production',
                 httpOnly: true,
