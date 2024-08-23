@@ -416,7 +416,7 @@ let ProducerService = ProducerService_1 = class ProducerService {
         this.otpMailQueue = 'otp_mail_queue';
         this.logger = new common_1.Logger(ProducerService_1.name);
         const connection = amqp_connection_manager_1.default.connect([
-            this.configService.get('RABBIT_MQ_URL'),
+            this.configService.get('RABBITMQ_URL'),
         ]);
         this.channelWrapper = connection.createChannel({
             setup: async (channel) => {
