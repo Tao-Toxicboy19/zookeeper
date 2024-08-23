@@ -11,7 +11,7 @@ export class ProducerService {
 
     constructor(private readonly configService: ConfigService) {
         const connection = amqp.connect([
-            this.configService.get<string>('RABBIT_MQ_URL'),
+            this.configService.get<string>('RABBITMQ_URL'),
         ])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: Channel) => {

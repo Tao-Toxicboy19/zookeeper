@@ -20,7 +20,7 @@ export class ConsumerService implements OnModuleInit {
         private readonly mailerService: MailerService,
         private readonly redisService: RedisService,
     ) {
-        const connection = amqp.connect([this.configService.get<string>('RABBIT_MQ_URL')])
+        const connection = amqp.connect([this.configService.get<string>('RABBITMQ_URL')])
         this.channelWrapper = connection.createChannel({
             setup: async (channel: ConfirmChannel) => {
                 await Promise.all([
