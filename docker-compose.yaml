@@ -1,35 +1,35 @@
 services:
-  gateway:
-    image: taotoxicboy/zookeeper-gateway-service:latest
-    environment:
-      NODE_ENV: production
-      RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
-      AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
-      PORT: 4000
-      AUTH_SERVICE_URL: auth-service:50022
-      KEY_SERVICE_URL: key-service:5005
-      KAFKA_URL: kafka:9092
-      EXCHANGE_SERVICE_URL: exchange:50052
-      WEB_SOCKET: 8031
-      PREDICT_SERVICE_URL: predict-service:50055
-      RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
-      RABBITMQ_QUEUE_TX: order_tx_queue
-      RABBITMQ_QUEUE_QUERY: order_query_queue
-      GOOGLE_CLIENT_ID: 1085551212854-qt83lqnnsut8ljv5soifk8a1tcsm1nm7.apps.googleusercontent.com
-      GOOGLE_CLIENT_SECRET: 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
-      GOOGLE_CALLBACK_URL: http://localhost:4000/api/auth/google/callback
-      SOCIAL_REDIRECT: http://localhost:3000/app
-      NOTIFY_QUEUE: notification_queue
-      ELASTICSEARCH_NODE: http://elasticsearch:9200
-    depends_on:
-      - redis
-      - rabbitmq
-      - zookeeper
-      - kafka
-      - elasticsearch
-    ports:
-      - '4000:4000'
-      - '8001:8001'
+  # gateway:
+  #   image: taotoxicboy/zookeeper-gateway-service:latest
+  #   environment:
+  #     NODE_ENV: production
+  #     RT_SECRET: JiZrdW9x2eYdPw3WXsmpbeL9ufCAcjig
+  #     AT_SECRET: VgmBOirkrV6x179MeyStIN8jr2xWQVWx
+  #     PORT: 4000
+  #     AUTH_SERVICE_URL: auth-service:50022
+  #     KEY_SERVICE_URL: key-service:5005
+  #     KAFKA_URL: kafka:9092
+  #     EXCHANGE_SERVICE_URL: exchange:50052
+  #     WEB_SOCKET: 8031
+  #     PREDICT_SERVICE_URL: predict-service:50055
+  #     RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
+  #     RABBITMQ_QUEUE_TX: order_tx_queue
+  #     RABBITMQ_QUEUE_QUERY: order_query_queue
+  #     GOOGLE_CLIENT_ID: 1085551212854-qt83lqnnsut8ljv5soifk8a1tcsm1nm7.apps.googleusercontent.com
+  #     GOOGLE_CLIENT_SECRET: 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
+  #     GOOGLE_CALLBACK_URL: http://localhost:4000/api/auth/google/callback
+  #     SOCIAL_REDIRECT: http://localhost:3000/app
+  #     NOTIFY_QUEUE: notification_queue
+  #     ELASTICSEARCH_NODE: http://elasticsearch:9200
+  #   depends_on:
+  #     - redis
+  #     - rabbitmq
+  #     - zookeeper
+  #     - kafka
+  #     - elasticsearch
+  #   ports:
+  #     - '4000:4000'
+  #     - '8001:8001'
 
   zookeeper:
     image: wurstmeister/zookeeper:latest

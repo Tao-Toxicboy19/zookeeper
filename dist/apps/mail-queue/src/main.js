@@ -91,7 +91,7 @@ let ConsumerService = ConsumerService_1 = class ConsumerService {
         this.otpMailQueue = 'otp_mail_queue';
         this.resetPassswordQueue = 'reset_password_queue';
         this.logger = new common_1.Logger(ConsumerService_1.name);
-        const connection = amqp_connection_manager_1.default.connect([this.configService.get('RABBIT_MQ_URL')]);
+        const connection = amqp_connection_manager_1.default.connect([this.configService.get('RABBITMQ_URL')]);
         this.channelWrapper = connection.createChannel({
             setup: async (channel) => {
                 await Promise.all([
@@ -1718,7 +1718,7 @@ async function bootstrap() {
     const app = await core_1.NestFactory.createMicroservice(consumer_module_1.ConsumerModule, {
         transport: microservices_1.Transport.RMQ,
         options: {
-            urls: [configService.get('RABBIT_MQ_URL')],
+            urls: [configService.get('RABBITMQ_URL')],
             queueOptions: {
                 durable: true,
             },
