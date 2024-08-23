@@ -30,10 +30,12 @@ export class ConsumerService implements OnModuleInit {
         })
 
         connection.on('connect', () => {
+            console.log('Connected to RabbitMQ')
             this.logger.debug('Connected to RabbitMQ')
         })
 
         connection.on('disconnect', (err) => {
+            console.log('Disconnected from RabbitMQ:', err)
             this.logger.debug('Disconnected from RabbitMQ:', err)
         })
     }
