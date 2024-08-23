@@ -1,0 +1,1 @@
+docker buildx build --platform linux/amd64 -f ./apps/mail-queue/Dockerfile -t taotoxicboy/zookeeper-mail-queue-service --push .-

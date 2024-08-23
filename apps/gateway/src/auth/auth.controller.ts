@@ -81,7 +81,7 @@ export class AuthController {
         try {
             const { email, userId } = await this.authService.signup(dto)
             res.cookie('user_id', userId, {
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 httpOnly: true,
                 maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
                 sameSite: 'strict',
@@ -109,7 +109,7 @@ export class AuthController {
         try {
             res.cookie('user_id', req.user.sub, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
                 sameSite: 'strict',
             })
@@ -143,13 +143,13 @@ export class AuthController {
 
             res.cookie('access_token', accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
                 sameSite: 'strict',
             })
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
                 sameSite: 'strict',
             })
@@ -195,13 +195,13 @@ export class AuthController {
             res.cookie('access_token', accessToken, {
                 httpOnly: true,
                 maxAge: 1 * 24 * 60 * 60 * 1000, // 3d
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             })
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 3d
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             })
 
@@ -238,12 +238,12 @@ export class AuthController {
             if (request.cookies.access_token || request.cookies.user_id) {
                 res.clearCookie('access_token', {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
+                    // secure: process.env.NODE_ENV === 'production',
                     sameSite: 'strict',
                 })
                 res.clearCookie('refresh_token', {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
+                    // secure: process.env.NODE_ENV === 'production',
                     sameSite: 'strict',
                 })
             }
@@ -311,13 +311,13 @@ export class AuthController {
             res.cookie('access_token', accessToken, {
                 httpOnly: true,
                 maxAge: 1 * 24 * 60 * 60 * 1000, // 1d
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             })
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
                 maxAge: 7 * 24 * 60 * 60 * 1000, // 7d
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             })
 
