@@ -133,7 +133,6 @@ let AuthController = AuthController_1 = class AuthController {
         try {
             const { email, userId } = await this.authService.signup(dto);
             res.cookie('user_id', userId, {
-                secure: process.env.NODE_ENV === 'production',
                 httpOnly: true,
                 maxAge: 1 * 24 * 60 * 60 * 1000,
                 sameSite: 'strict',
@@ -152,7 +151,6 @@ let AuthController = AuthController_1 = class AuthController {
         try {
             res.cookie('user_id', req.user.sub, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
                 maxAge: 1 * 24 * 60 * 60 * 1000,
                 sameSite: 'strict',
             });
@@ -175,13 +173,11 @@ let AuthController = AuthController_1 = class AuthController {
             });
             res.cookie('access_token', accessToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
                 maxAge: 1 * 24 * 60 * 60 * 1000,
                 sameSite: 'strict',
             });
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
                 maxAge: 7 * 24 * 60 * 60 * 1000,
                 sameSite: 'strict',
             });
@@ -210,13 +206,11 @@ let AuthController = AuthController_1 = class AuthController {
             res.cookie('access_token', accessToken, {
                 httpOnly: true,
                 maxAge: 1 * 24 * 60 * 60 * 1000,
-                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
                 maxAge: 7 * 24 * 60 * 60 * 1000,
-                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
             this.handleSuccess('OTP confirmed', request, request.cookies.user_id);
@@ -235,12 +229,10 @@ let AuthController = AuthController_1 = class AuthController {
             if (request.cookies.access_token || request.cookies.user_id) {
                 res.clearCookie('access_token', {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
                     sameSite: 'strict',
                 });
                 res.clearCookie('refresh_token', {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
                     sameSite: 'strict',
                 });
             }
@@ -273,13 +265,11 @@ let AuthController = AuthController_1 = class AuthController {
             res.cookie('access_token', accessToken, {
                 httpOnly: true,
                 maxAge: 1 * 24 * 60 * 60 * 1000,
-                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
             res.cookie('refresh_token', refreshToken, {
                 httpOnly: true,
                 maxAge: 7 * 24 * 60 * 60 * 1000,
-                secure: process.env.NODE_ENV === 'production',
                 sameSite: 'strict',
             });
             this.handleSuccess('Google login successful', request, request.cookies.user_id);
@@ -955,11 +945,6 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], KeyDto.prototype, "secretKey", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], KeyDto.prototype, "seed_phrase", void 0);
 
 
 /***/ }),
@@ -1018,7 +1003,6 @@ __decorate([
 ], KeyController.prototype, "create", null);
 __decorate([
     (0, common_1.UseGuards)(common_2.JwtAuthGuard),
-    (0, common_1.UseGuards)(common_2.CookieAuthGuard),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -1136,9 +1120,6 @@ let KeyService = class KeyService {
             });
         });
     }
-    async hello() {
-        console.log('hello world');
-    }
 };
 exports.KeyService = KeyService;
 exports.KeyService = KeyService = __decorate([
@@ -1252,11 +1233,9 @@ let ConsumerService = ConsumerService_1 = class ConsumerService {
             },
         });
         connection.on('connect', () => {
-            console.log('Connected to RabbitMQ');
             this.logger.debug('Connected to RabbitMQ');
         });
         connection.on('disconnect', (err) => {
-            console.log('Disconnected from RabbitMQ:', err);
             this.logger.debug('Disconnected from RabbitMQ:', err);
         });
     }
@@ -1265,7 +1244,7 @@ let ConsumerService = ConsumerService_1 = class ConsumerService {
             channel.consume(this.notificationOrderQueue, async (msg) => {
                 if (msg) {
                     const message = JSON.parse(msg.content.toString());
-                    console.log(message);
+                    this.logger.debug(message);
                     await Promise.all([
                         this.notificationGateway.sendNotification(message.msg, message.user_id),
                         this.notificationService.createMsg(message),
@@ -1737,7 +1716,7 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderDto.prototype, "quantity", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], OrderDto.prototype, "timeframe", void 0);
@@ -1748,7 +1727,9 @@ __decorate([
 ], OrderDto.prototype, "ema", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(['EMA', 'AI'], {
+        message: 'status must be either "EMA" or "AI"',
+    }),
     __metadata("design:type", String)
 ], OrderDto.prototype, "type", void 0);
 __decorate([
@@ -1756,6 +1737,13 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], OrderDto.prototype, "userId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(['Short', 'Long'], {
+        message: 'status must be either "Short" or "Long"',
+    }),
+    __metadata("design:type", String)
+], OrderDto.prototype, "status", void 0);
 
 
 /***/ }),
@@ -1780,7 +1768,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var OrdersController_1;
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrdersController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -1821,19 +1809,20 @@ let OrdersController = OrdersController_1 = class OrdersController {
                 ...dto,
                 userId: req.user.sub,
             });
-            this.handleSuccess('create order successful', request, req.user.sub);
             return {
                 message: msg,
                 statusCode: 200,
             };
         }
         catch (error) {
-            this.handleError('Failed to create order', error, request);
             throw error;
         }
     }
     async query(req, request) {
         try {
+            if (req.user.sub) {
+                throw new common_1.NotFoundException('Not found user.');
+            }
             this.handleSuccess('query order successful', request, req.user.sub);
             return await this.ordersService.query(req.user.sub);
         }
@@ -1842,7 +1831,16 @@ let OrdersController = OrdersController_1 = class OrdersController {
             throw error;
         }
     }
-    async balance() {
+    async closePosition(req, request, id) {
+        try {
+            return await this.ordersService.closePosition({
+                userId: req.user.sub,
+                orderId: id,
+            });
+        }
+        catch (error) {
+            throw error;
+        }
     }
 };
 exports.OrdersController = OrdersController;
@@ -1866,11 +1864,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "query", null);
 __decorate([
-    (0, common_1.Get)('balance'),
+    (0, common_1.UseGuards)(common_2.JwtAuthGuard),
+    (0, common_1.Post)('close-position'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Query)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object, typeof (_f = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _f : Object, String]),
     __metadata("design:returntype", Promise)
-], OrdersController.prototype, "balance", null);
+], OrdersController.prototype, "closePosition", null);
 exports.OrdersController = OrdersController = OrdersController_1 = __decorate([
     (0, common_1.Controller)('orders'),
     __param(1, (0, common_1.Inject)(common_1.Logger)),
@@ -1902,6 +1904,7 @@ const orders_controller_1 = __webpack_require__(/*! ./orders.controller */ "./ap
 const orders_service_1 = __webpack_require__(/*! ./orders.service */ "./apps/gateway/src/orders/orders.service.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const custom_logger_service_1 = __webpack_require__(/*! ../utils/custom-logger.service */ "./apps/gateway/src/utils/custom-logger.service.ts");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
@@ -1933,6 +1936,10 @@ exports.OrdersModule = OrdersModule = __decorate([
             {
                 provide: common_1.Logger,
                 useClass: custom_logger_service_1.CustomLoggerService,
+            },
+            {
+                provide: core_1.APP_FILTER,
+                useClass: nestjs_grpc_exceptions_1.GrpcServerExceptionFilter,
             },
         ],
     })
@@ -1979,7 +1986,22 @@ let OrdersService = class OrdersService {
     }
     async query(userId) {
         return new Promise((resolve, reject) => {
-            this.client.send('query_order', userId).subscribe({
+            this.client
+                .send('query_order', { user_id: userId })
+                .subscribe({
+                next: (response) => resolve(response),
+                error: (err) => reject(err),
+            });
+        });
+    }
+    async closePosition({ userId, orderId, }) {
+        return new Promise((resolve, reject) => {
+            this.client
+                .send('close-position', {
+                user_id: userId,
+                order_id: orderId,
+            })
+                .subscribe({
                 next: (response) => resolve(response),
                 error: (err) => reject(err),
             });
@@ -1992,75 +2014,6 @@ exports.OrdersService = OrdersService = __decorate([
     __param(0, (0, common_1.Inject)('ORDERS_SERVICE')),
     __metadata("design:paramtypes", [typeof (_a = typeof microservices_1.ClientProxy !== "undefined" && microservices_1.ClientProxy) === "function" ? _a : Object])
 ], OrdersService);
-
-
-/***/ }),
-
-/***/ "./apps/gateway/src/position/position.consumer.ts":
-/*!********************************************************!*\
-  !*** ./apps/gateway/src/position/position.consumer.ts ***!
-  \********************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var PositionConsumer_1;
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PositionConsumer = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const kafkajs_1 = __webpack_require__(/*! kafkajs */ "kafkajs");
-const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
-const position_gateway_1 = __webpack_require__(/*! ./position.gateway */ "./apps/gateway/src/position/position.gateway.ts");
-let PositionConsumer = PositionConsumer_1 = class PositionConsumer {
-    constructor(positionGateway, configService) {
-        this.positionGateway = positionGateway;
-        this.configService = configService;
-        this.logger = new common_1.Logger(PositionConsumer_1.name);
-        this.kafkaInstance = new kafkajs_1.Kafka({
-            clientId: 'position-client',
-            brokers: [configService.get('KAFKA_URL')],
-            connectionTimeout: 3000,
-            authenticationTimeout: 1000,
-            reauthenticationThreshold: 10000,
-        });
-        this.consumer = this.kafkaInstance.consumer({
-            groupId: 'position-group',
-        });
-        this.consumer.on('consumer.connect', () => {
-            this.logger.debug('Connected to Kafka');
-        });
-        this.consumer.on('consumer.disconnect', (err) => {
-            this.logger.debug('Disconnected from Kafka:', err);
-        });
-    }
-    async onModuleInit() {
-        await this.consumer.connect();
-        await this.consumer.subscribe({
-            topic: 'position-topic',
-            fromBeginning: false,
-        });
-        await this.consumer.run({
-            eachMessage: async ({ topic, partition, message }) => {
-                const msg = JSON.parse(message.value.toString());
-                this.positionGateway.emitMessage(JSON.stringify(msg.position), msg.user_id);
-            },
-        });
-    }
-};
-exports.PositionConsumer = PositionConsumer;
-exports.PositionConsumer = PositionConsumer = PositionConsumer_1 = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof position_gateway_1.PositionGateway !== "undefined" && position_gateway_1.PositionGateway) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object])
-], PositionConsumer);
 
 
 /***/ }),
@@ -2085,36 +2038,72 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var PositionGateway_1;
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PositionGateway = void 0;
 const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
 const websockets_1 = __webpack_require__(/*! @nestjs/websockets */ "@nestjs/websockets");
 const socket_io_1 = __webpack_require__(/*! socket.io */ "socket.io");
-const position_service_1 = __webpack_require__(/*! ./position.service */ "./apps/gateway/src/position/position.service.ts");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const secret_guard_1 = __webpack_require__(/*! ../key/secret.guard */ "./apps/gateway/src/key/secret.guard.ts");
+const rabbitmq_producer_service_1 = __webpack_require__(/*! ./rabbitmq/rabbitmq-producer.service */ "./apps/gateway/src/position/rabbitmq/rabbitmq-producer.service.ts");
 let PositionGateway = PositionGateway_1 = class PositionGateway {
-    constructor(positionService) {
-        this.positionService = positionService;
+    constructor(rabbitmqProducerService) {
+        this.rabbitmqProducerService = rabbitmqProducerService;
         this.logger = new common_2.Logger(PositionGateway_1.name);
+        this.positionIntervals = new Map();
+        this.usdtIntervals = new Map();
     }
     afterInit(clinet) {
         clinet.use((0, common_1.SocketAuthMiddleware)());
+    }
+    handleConnection(client) {
+        console.log('Client connected:', client.id);
+    }
+    handleDisconnect(client) {
+        console.log('Client disconnected:', client.id);
+        const payload = client['user'];
+        if (payload) {
+            if (this.positionIntervals.has(payload.sub)) {
+                clearInterval(this.positionIntervals.get(payload.sub));
+                this.positionIntervals.delete(payload.sub);
+            }
+            if (this.usdtIntervals.has(payload.sub)) {
+                clearInterval(this.usdtIntervals.get(payload.sub));
+                this.usdtIntervals.delete(payload.sub);
+            }
+        }
     }
     handleMessage(client) {
         const payload = client['user'];
         if (payload.sub) {
             client.join(payload.sub);
-            setInterval(async () => {
-                await this.positionService.sendUserId(payload.sub);
-            }, 1000);
-            this.server.to(payload.sub).emit('position');
+            if (!this.positionIntervals.has(payload.sub)) {
+                const interval = setInterval(async () => {
+                    this.rabbitmqProducerService.publish('position-queue', JSON.stringify({ userId: payload.sub }));
+                }, 1000);
+                this.positionIntervals.set(payload.sub, interval);
+            }
         }
     }
-    emitMessage(msg, userId) {
-        console.log(msg);
-        this.server.to(userId).emit('position', msg);
+    handleEvent(client) {
+        const payload = client['user'];
+        if (payload) {
+            client.join(payload.sub);
+            if (!this.usdtIntervals.has(payload.sub)) {
+                const interval = setInterval(async () => {
+                    this.rabbitmqProducerService.publish('usdt-queue', JSON.stringify({ userId: payload.sub }));
+                }, 2000);
+                this.usdtIntervals.set(payload.sub, interval);
+            }
+        }
+        else {
+            this.server
+                .to(payload.sub)
+                .emit('event-msg', { message: 'Not found user.' });
+        }
+    }
+    handleEmitEvent({ userId, event, msg }) {
+        this.server.to(userId).emit(event, msg);
     }
 };
 exports.PositionGateway = PositionGateway;
@@ -2123,19 +2112,25 @@ __decorate([
     __metadata("design:type", typeof (_b = typeof socket_io_1.Server !== "undefined" && socket_io_1.Server) === "function" ? _b : Object)
 ], PositionGateway.prototype, "server", void 0);
 __decorate([
-    (0, common_2.UseGuards)(secret_guard_1.SecretGuard),
-    (0, common_2.UseGuards)(common_1.WsJwtGuard),
-    (0, websockets_1.SubscribeMessage)('position'),
+    (0, websockets_1.SubscribeMessage)('event-position'),
     __param(0, (0, websockets_1.ConnectedSocket)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_c = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _c : Object]),
     __metadata("design:returntype", void 0)
 ], PositionGateway.prototype, "handleMessage", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)('event-usdt'),
+    __param(0, (0, websockets_1.ConnectedSocket)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _d : Object]),
+    __metadata("design:returntype", void 0)
+], PositionGateway.prototype, "handleEvent", null);
 exports.PositionGateway = PositionGateway = PositionGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: '*',
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof position_service_1.PositionService !== "undefined" && position_service_1.PositionService) === "function" ? _a : Object])
+    (0, common_2.UseGuards)(common_1.WsJwtGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof rabbitmq_producer_service_1.RabbitmqProducerService !== "undefined" && rabbitmq_producer_service_1.RabbitmqProducerService) === "function" ? _a : Object])
 ], PositionGateway);
 
 
@@ -2158,13 +2153,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PositionModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const position_gateway_1 = __webpack_require__(/*! ./position.gateway */ "./apps/gateway/src/position/position.gateway.ts");
-const position_consumer_1 = __webpack_require__(/*! ./position.consumer */ "./apps/gateway/src/position/position.consumer.ts");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
 const common_2 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const path_1 = __webpack_require__(/*! path */ "path");
 const position_service_1 = __webpack_require__(/*! ./position.service */ "./apps/gateway/src/position/position.service.ts");
 const key_module_1 = __webpack_require__(/*! ../key/key.module */ "./apps/gateway/src/key/key.module.ts");
+const rabbitmq_consumer_service_1 = __webpack_require__(/*! ./rabbitmq/rabbitmq-consumer.service */ "./apps/gateway/src/position/rabbitmq/rabbitmq-consumer.service.ts");
+const rabbitmq_producer_service_1 = __webpack_require__(/*! ./rabbitmq/rabbitmq-producer.service */ "./apps/gateway/src/position/rabbitmq/rabbitmq-producer.service.ts");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+const nestjs_grpc_exceptions_1 = __webpack_require__(/*! nestjs-grpc-exceptions */ "nestjs-grpc-exceptions");
 let PositionModule = class PositionModule {
 };
 exports.PositionModule = PositionModule;
@@ -2188,7 +2186,17 @@ exports.PositionModule = PositionModule = __decorate([
             ]),
             key_module_1.KeyModule,
         ],
-        providers: [position_gateway_1.PositionGateway, position_consumer_1.PositionConsumer, position_service_1.PositionService],
+        providers: [
+            position_gateway_1.PositionGateway,
+            position_service_1.PositionService,
+            rabbitmq_producer_service_1.RabbitmqProducerService,
+            rabbitmq_consumer_service_1.RabbitmqConsumerService,
+            {
+                provide: core_1.APP_FILTER,
+                useClass: nestjs_grpc_exceptions_1.GrpcServerExceptionFilter,
+            },
+        ],
+        exports: [position_gateway_1.PositionGateway],
     })
 ], PositionModule);
 
@@ -2214,35 +2222,214 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PositionService = void 0;
 const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+const key_service_1 = __webpack_require__(/*! ../key/key.service */ "./apps/gateway/src/key/key.service.ts");
 let PositionService = class PositionService {
-    constructor(client) {
+    constructor(keyService, client) {
+        this.keyService = keyService;
         this.client = client;
     }
     async onModuleInit() {
         this.exchangeServiceClient =
             this.client.getService(common_1.EXCHANGE_SERVICE_NAME);
     }
-    async sendUserId(userId) {
-        new Promise((resolve, reject) => {
-            this.exchangeServiceClient.sendUserId({ userId }).subscribe({
-                next: () => resolve(),
+    async getWallet(userId) {
+        return new Promise((resolve, reject) => {
+            this.exchangeServiceClient.balance({ userId }).subscribe({
+                next: (response) => resolve(response),
                 error: (err) => reject(err),
             });
         });
+    }
+    async getKey(userId) {
+        try {
+            return await this.keyService.getKey({ userId });
+        }
+        catch (error) {
+            throw error;
+        }
     }
 };
 exports.PositionService = PositionService;
 exports.PositionService = PositionService = __decorate([
     (0, common_2.Injectable)(),
-    __param(0, (0, common_2.Inject)(common_1.EXCHANGE_PACKAGE_NAME)),
-    __metadata("design:paramtypes", [typeof (_a = typeof microservices_1.ClientGrpc !== "undefined" && microservices_1.ClientGrpc) === "function" ? _a : Object])
+    __param(1, (0, common_2.Inject)(common_1.EXCHANGE_PACKAGE_NAME)),
+    __metadata("design:paramtypes", [typeof (_a = typeof key_service_1.KeyService !== "undefined" && key_service_1.KeyService) === "function" ? _a : Object, typeof (_b = typeof microservices_1.ClientGrpc !== "undefined" && microservices_1.ClientGrpc) === "function" ? _b : Object])
 ], PositionService);
+
+
+/***/ }),
+
+/***/ "./apps/gateway/src/position/rabbitmq/rabbitmq-consumer.service.ts":
+/*!*************************************************************************!*\
+  !*** ./apps/gateway/src/position/rabbitmq/rabbitmq-consumer.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var RabbitmqConsumerService_1;
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RabbitmqConsumerService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const amqp_connection_manager_1 = __webpack_require__(/*! amqp-connection-manager */ "amqp-connection-manager");
+const position_gateway_1 = __webpack_require__(/*! ../position.gateway */ "./apps/gateway/src/position/position.gateway.ts");
+let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumerService {
+    constructor(configService, positionGateway) {
+        this.configService = configService;
+        this.positionGateway = positionGateway;
+        this.logger = new common_1.Logger(RabbitmqConsumerService_1.name);
+        const connection = amqp_connection_manager_1.default.connect([
+            this.configService.get('RABBITMQ_URL'),
+        ]);
+        this.channelWrapper = connection.createChannel({
+            setup: async (channel) => {
+                await channel.assertExchange('usdt-exchange', 'direct');
+                await channel.assertQueue('usdt-queue');
+                await channel.bindQueue('usdt-queue', 'usdt-exchange', 'usdt-routing-key');
+                await channel.assertExchange('position-exchange', 'direct');
+                await channel.assertQueue('position-queue');
+                await channel.bindQueue('position-queue', 'position-exchange', 'position-routing-key');
+                this.logger.debug('Exchange and Queue set up successfully');
+            },
+        });
+        connection.on('connect', () => {
+            this.logger.debug('Connected to RabbitMQ');
+        });
+        connection.on('disconnect', (err) => {
+            this.logger.debug('Disconnected from RabbitMQ:', err);
+        });
+    }
+    async onModuleInit() {
+        this.channelWrapper.addSetup((channel) => {
+            channel.consume('usdt-queue', async (msg) => {
+                if (msg) {
+                    const content = JSON.parse(msg.content.toString());
+                    if (content.statusCode !== 400) {
+                        this.positionGateway.handleEmitEvent({
+                            userId: content.userId,
+                            msg: {
+                                message: 'OK',
+                                usdt: +content.usdt,
+                            },
+                            event: 'event-usdt',
+                        });
+                    }
+                    else {
+                        this.positionGateway.handleEmitEvent({
+                            userId: content.userId,
+                            msg: 'Not found API Key',
+                            event: 'event-usdt',
+                        });
+                    }
+                    channel.ack(msg);
+                }
+            });
+            channel.consume('position-queue', async (msg) => {
+                if (msg) {
+                    const content = JSON.parse(msg.content.toString());
+                    if (content.status === 'success') {
+                        this.positionGateway.handleEmitEvent({
+                            userId: content.userId,
+                            msg: {
+                                message: content.message,
+                            },
+                            event: 'event-position',
+                        });
+                    }
+                    else {
+                        this.positionGateway.handleEmitEvent({
+                            userId: content.userId,
+                            msg: 'Not found position.',
+                            event: 'event-position',
+                        });
+                    }
+                    channel.ack(msg);
+                }
+            });
+        });
+    }
+};
+exports.RabbitmqConsumerService = RabbitmqConsumerService;
+exports.RabbitmqConsumerService = RabbitmqConsumerService = RabbitmqConsumerService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object, typeof (_b = typeof position_gateway_1.PositionGateway !== "undefined" && position_gateway_1.PositionGateway) === "function" ? _b : Object])
+], RabbitmqConsumerService);
+
+
+/***/ }),
+
+/***/ "./apps/gateway/src/position/rabbitmq/rabbitmq-producer.service.ts":
+/*!*************************************************************************!*\
+  !*** ./apps/gateway/src/position/rabbitmq/rabbitmq-producer.service.ts ***!
+  \*************************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var RabbitmqProducerService_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RabbitmqProducerService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const amqp_connection_manager_1 = __webpack_require__(/*! amqp-connection-manager */ "amqp-connection-manager");
+let RabbitmqProducerService = RabbitmqProducerService_1 = class RabbitmqProducerService {
+    constructor(configService) {
+        this.configService = configService;
+        this.logger = new common_1.Logger(RabbitmqProducerService_1.name);
+        const connection = amqp_connection_manager_1.default.connect([
+            this.configService.get('RABBITMQ_URL'),
+        ]);
+        this.channelWrapper = connection.createChannel({
+            setup: async (channel) => {
+                await Promise.all([
+                    channel.assertQueue('usdt-queue'),
+                    channel.assertQueue('position-queue'),
+                ]);
+            },
+        });
+        connection.on('connect', () => {
+            this.logger.debug('Connected to RabbitMQ');
+        });
+        connection.on('disconnect', (err) => {
+            this.logger.debug('Disconnected from RabbitMQ:', err);
+        });
+    }
+    async publish(queue, msg) {
+        await this.channelWrapper.addSetup(async (channel) => {
+            return channel.sendToQueue(queue, Buffer.from(msg));
+        });
+    }
+};
+exports.RabbitmqProducerService = RabbitmqProducerService;
+exports.RabbitmqProducerService = RabbitmqProducerService = RabbitmqProducerService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object])
+], RabbitmqProducerService);
 
 
 /***/ }),
@@ -3429,14 +3616,7 @@ exports.protobufPackage = "exchange";
 exports.EXCHANGE_PACKAGE_NAME = "exchange";
 function ExchangeServiceControllerMethods() {
     return function (constructor) {
-        const grpcMethods = [
-            "validateKey",
-            "balance",
-            "createLimitBuy",
-            "createLimitSell",
-            "closePosition",
-            "sendUserId",
-        ];
+        const grpcMethods = ["validateKey", "balance", "createLimitBuy", "createLimitSell", "closePosition"];
         for (const method of grpcMethods) {
             const descriptor = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
             (0, microservices_1.GrpcMethod)("ExchangeService", method)(constructor.prototype[method], method, descriptor);
@@ -3503,8 +3683,8 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.KeyUserId = exports.KeyResponse = exports.CreateKeyDto = exports.PREDICT_PACKAGE_NAME = exports.PREDICT_SERVICE_NAME = exports.PredictServiceClient = exports.SendUserIdDto = exports.ExchangeServiceControllerMethods = exports.ExchangeServiceController = exports.ExchangeServiceClient = exports.EXCHANGE_SERVICE_NAME = exports.EXCHANGE_PACKAGE_NAME = exports.ExchangeResponse = exports.BalanceDto = exports.BalanceResponse = exports.ValidateKeyDto = exports.MAIL_PACKAGE_NAME = exports.MAIL_SERVICE_NAME = exports.MailServiceControllerMethods = exports.MailServiceController = exports.MailServiceClient = exports.SendMailDto = exports.MailResponse = exports.ForgotPasswordDto = exports.ResetPasswordDto = exports.GoogleLoginDto = exports.GetEmailDto = exports.ProfileResponse = exports.ProfileDto = exports.Tokens = exports.JwtPayload = exports.EmailResponse = exports.ConfirmOTPDto = exports.AUTH_PACKAGE_NAME = exports.AUTH_SERVICE_NAME = exports.AuthServiceControllerMethods = exports.AuthServiceController = exports.AuthServiceClient = exports.ValidateDto = exports.SignupDto = exports.SigninDto = exports.UserResponse = exports.TokenResponse = exports.ORDERS_SERVICE_NAME = exports.OrdersServiceControllerMethods = exports.OrdersServiceController = exports.OrdersServiceClient = exports.ORDERS_PACKAGE_NAME = exports.OrderResponse = exports.OrdersDto = void 0;
-exports.KeyServiceControllerMethods = exports.KeyServiceController = exports.KeyServiceClient = exports.KEY_SERVICE_NAME = exports.KEY_PACKAGE_NAME = void 0;
+exports.KEY_PACKAGE_NAME = exports.KeyUserId = exports.KeyResponse = exports.CreateKeyDto = exports.PREDICT_PACKAGE_NAME = exports.PREDICT_SERVICE_NAME = exports.PredictServiceClient = exports.ExchangeServiceControllerMethods = exports.ExchangeServiceController = exports.ExchangeServiceClient = exports.EXCHANGE_SERVICE_NAME = exports.EXCHANGE_PACKAGE_NAME = exports.ExchangeResponse = exports.BalanceDto = exports.BalanceResponse = exports.ValidateKeyDto = exports.MAIL_PACKAGE_NAME = exports.MAIL_SERVICE_NAME = exports.MailServiceControllerMethods = exports.MailServiceController = exports.MailServiceClient = exports.SendMailDto = exports.MailResponse = exports.ForgotPasswordDto = exports.ResetPasswordDto = exports.GoogleLoginDto = exports.GetEmailDto = exports.ProfileResponse = exports.ProfileDto = exports.Tokens = exports.JwtPayload = exports.EmailResponse = exports.ConfirmOTPDto = exports.AUTH_PACKAGE_NAME = exports.AUTH_SERVICE_NAME = exports.AuthServiceControllerMethods = exports.AuthServiceController = exports.AuthServiceClient = exports.ValidateDto = exports.SignupDto = exports.SigninDto = exports.UserResponse = exports.TokenResponse = exports.ORDERS_SERVICE_NAME = exports.OrdersServiceControllerMethods = exports.OrdersServiceController = exports.OrdersServiceClient = exports.ORDERS_PACKAGE_NAME = exports.OrderResponse = exports.OrdersDto = void 0;
+exports.KeyServiceControllerMethods = exports.KeyServiceController = exports.KeyServiceClient = exports.KEY_SERVICE_NAME = void 0;
 __exportStar(__webpack_require__(/*! ./notifications */ "./libs/common/src/types/notifications/index.ts"), exports);
 __exportStar(__webpack_require__(/*! ./status */ "./libs/common/src/types/status/index.ts"), exports);
 __exportStar(__webpack_require__(/*! ./response.type */ "./libs/common/src/types/response.type.ts"), exports);
@@ -3555,7 +3735,6 @@ Object.defineProperty(exports, "EXCHANGE_SERVICE_NAME", ({ enumerable: true, get
 Object.defineProperty(exports, "ExchangeServiceClient", ({ enumerable: true, get: function () { return exchange_1.ExchangeServiceClient; } }));
 Object.defineProperty(exports, "ExchangeServiceController", ({ enumerable: true, get: function () { return exchange_1.ExchangeServiceController; } }));
 Object.defineProperty(exports, "ExchangeServiceControllerMethods", ({ enumerable: true, get: function () { return exchange_1.ExchangeServiceControllerMethods; } }));
-Object.defineProperty(exports, "SendUserIdDto", ({ enumerable: true, get: function () { return exchange_1.SendUserIdDto; } }));
 var predict_1 = __webpack_require__(/*! ./predict */ "./libs/common/src/types/predict/index.ts");
 Object.defineProperty(exports, "PredictServiceClient", ({ enumerable: true, get: function () { return predict_1.PredictServiceClient; } }));
 Object.defineProperty(exports, "PREDICT_SERVICE_NAME", ({ enumerable: true, get: function () { return predict_1.PREDICT_SERVICE_NAME; } }));
@@ -4076,16 +4255,6 @@ module.exports = require("ioredis");
 /***/ ((module) => {
 
 module.exports = require("jsonwebtoken");
-
-/***/ }),
-
-/***/ "kafkajs":
-/*!**************************!*\
-  !*** external "kafkajs" ***!
-  \**************************/
-/***/ ((module) => {
-
-module.exports = require("kafkajs");
 
 /***/ }),
 

@@ -3,10 +3,8 @@ import { AppModule } from './app.module'
 import { ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ThrottlerExceptionFilter } from './utils/throttler-exception.filter'
-import { ElasticsearchTransport } from 'winston-elasticsearch'
 import * as dotenv from 'dotenv'
 import * as cookieParser from 'cookie-parser'
-import * as winston from 'winston'
 
 dotenv.config() // Load environment variables from .env file
 async function bootstrap() {

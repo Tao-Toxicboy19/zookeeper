@@ -23,22 +23,14 @@ export class KeyController {
     create(
         @Body() dto: KeyDto,
         @Req() req: { user: JwtPayload },
-        // @Res({ passthrough: true }) res: Response,
     ) {
-        // res.cookie('seed_phrase', dto.seed_phrase, {
-        //     httpOnly: true,
-        //     secure: process.env.NODE_ENV === 'production',
-        //     sameSite: 'strict',
-        // })
         return this.keyService.create({
             ...dto,
             userId: req.user.sub,
-            // seedPhrase: dto.seed_phrase,
         })
     }
 
     @UseGuards(JwtAuthGuard)
-    @UseGuards(CookieAuthGuard)
     @Post()
     getKey(@Req() req: { user: JwtPayload }) {
         return this.keyService.getKey({ userId: req.user.sub })

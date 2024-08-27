@@ -5,7 +5,6 @@ import {
     KEY_PACKAGE_NAME,
     KEY_SERVICE_NAME,
     KeyServiceClient,
-    SendUserIdDto,
     ValidateKeyDto,
 } from '@app/common'
 import {
@@ -15,12 +14,16 @@ import {
     Logger,
     OnModuleInit,
 } from '@nestjs/common'
-import { ClientGrpc } from '@nestjs/microservices'
+import { ClientGrpc, ClientProxy } from '@nestjs/microservices'
 import * as ccxt from 'ccxt'
 import { Key } from './type'
 import { createLimitOrderDto } from './dto/create-limit-order.dto'
-import { KafkaProducerService } from './producer/kafka-producer.service'
-import { verify } from 'jsonwebtoken'
+import { Orders } from './types/order.type'
+import { State } from './types/state.type'
+import {
+    GrpcAlreadyExistsException,
+    GrpcUnavailableException,
+} from 'nestjs-grpc-exceptions'
 
 @Injectable()
 export class ExchangeService implements OnModuleInit {
@@ -33,7 +36,7 @@ export class ExchangeService implements OnModuleInit {
 
     constructor(
         @Inject(KEY_PACKAGE_NAME) private keyClient: ClientGrpc,
-        private readonly kafkaProducerService: KafkaProducerService,
+        @Inject('ORDERS_SERVICE') private readonly client: ClientProxy,
     ) {}
 
     async onModuleInit() {
@@ -41,32 +44,45 @@ export class ExchangeService implements OnModuleInit {
             this.keyClient.getService<KeyServiceClient>(KEY_SERVICE_NAME)
     }
 
-    async encypt(value: string, secret: string): Promise<string> {
-        return verify(value, secret) as string
+    async query(userId: string): Promise<Orders[]> {
+        return new Promise<Orders[]>((resolve, reject) => {
+            this.client
+                .send<Orders[]>('query_order', { user_id: userId })
+                .subscribe({
+                    next: (response) => resolve(response),
+                    error: (err) => reject(err),
+                })
+        })
     }
 
-    async position({ userId }: SendUserIdDto): Promise<void> {
+    async position({ userId }: { userId: string }): Promise<State> {
         try {
+            const orders = await this.query(userId)
+            if (!orders || !orders.length) {
+                return {
+                    status: 'error',
+                    message: 'Not found orders.',
+                }
+            }
+
             const { apiKey, secretKey } = await this.getApiKeys(userId)
+            if (!apiKey || !secretKey) {
+                return {
+                    status: 'error',
+                    message: 'Not fond API key or secret key.',
+                }
+            }
             await this.createExchange({
                 apiKey,
                 secretKey,
             })
-            const position = await this.exchange.fetchPositions()
-            console.log(position)
-            // this.kafkaProducerService.publish(
-            //     JSON.stringify({
-            //         user_id: userId,
-            //         position,
-            //     }),
-            // )
-            if (position.length !== 0) {
-                this.kafkaProducerService.publish(
-                    JSON.stringify({
-                        user_id: userId,
-                        position,
-                    }),
-                )
+            const position = await this.exchange.fetchPositions(
+                orders.map((item) => item.symbol),
+            )
+
+            return {
+                status: 'success',
+                message: position,
             }
         } catch (error) {
             throw error
@@ -109,7 +125,7 @@ export class ExchangeService implements OnModuleInit {
         } catch (error) {
             return {
                 statusCode: HttpStatus.BAD_REQUEST,
-                message: 'api key and secret key invalid',
+                message: 'API key or Secret key invalid.',
             }
         }
     }
@@ -117,17 +133,22 @@ export class ExchangeService implements OnModuleInit {
     async balance(dto: BalanceDto): Promise<BalanceResponse> {
         try {
             const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+            if (!apiKey || !secretKey) {
+                return {
+                    statusCode: HttpStatus.BAD_REQUEST,
+                    message: 'not found API Key or Secret Key',
+                }
+            }
             await this.createExchange({ apiKey, secretKey })
 
             const accountInfo = await this.exchange.fetchBalance({
                 type: 'future',
             })
             const usdt = accountInfo.info['maxWithdrawAmount']
-
             return {
                 statusCode: HttpStatus.OK,
                 message: 'OK',
-                usdt: usdt,
+                usdt,
             }
         } catch (error) {
             return {
@@ -140,6 +161,9 @@ export class ExchangeService implements OnModuleInit {
     async createLimitBuyOrder(dto: createLimitOrderDto): Promise<void> {
         try {
             this.logger.debug('start long Process open position')
+            if (!dto.userId) {
+                throw new GrpcUnavailableException('Not found user.')
+            }
             const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
             await this.createExchange({ apiKey, secretKey })
             await this.exchange.setLeverage(dto.leverage, dto.symbol)
@@ -149,9 +173,9 @@ export class ExchangeService implements OnModuleInit {
                 dto.symbol,
                 quantity,
                 price.last,
-                // {
-                //   positionSide: 'LONG'
-                // }
+                {
+                    positionSide: 'LONG',
+                },
             )
             this.logger.debug('OPEN long Position')
         } catch (error) {
@@ -171,9 +195,9 @@ export class ExchangeService implements OnModuleInit {
                 dto.symbol,
                 quantity,
                 price.last,
-                // {
-                //   positionSide: 'SHORT'
-                // }
+                {
+                    positionSide: 'SHORT',
+                },
             )
             this.logger.debug('OPEN short Position')
         } catch (error) {
@@ -181,18 +205,30 @@ export class ExchangeService implements OnModuleInit {
         }
     }
 
-    async closePosition(dto: createLimitOrderDto): Promise<void> {
+    async newClosePostion(dto: createLimitOrderDto): Promise<State> {
         try {
             this.logger.debug('start Process close position')
-
+            if (!dto.userId) {
+                return {
+                    status: 'error',
+                    message: 'Not found user.',
+                }
+            }
             const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
-            await this.createExchange({ apiKey, secretKey })
-            const price = await this.exchange.fetchTicker(dto.symbol)
-            const quantity = (dto.quantity / price.last) * dto.leverage
+            if (!apiKey || !secretKey) {
+                return {
+                    status: 'error',
+                    message: 'Not found API key or secret key.',
+                }
+            }
+            console.log(apiKey, secretKey)
+            // await this.createExchange({ apiKey, secretKey })
+            // const price = await this.exchange.fetchTicker(dto.symbol)
+            // const quantity = (dto.quantity / price.last) * dto.leverage
 
-            await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
-                positionSide: 'SHORT',
-            })
+            // await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
+            //     positionSide: 'SHORT',
+            // })
 
             // if (dto.position === this.long) {
             //   // Close SHORT
@@ -201,6 +237,48 @@ export class ExchangeService implements OnModuleInit {
             //   // Close LONG
             //   await this.exchange.createMarketSellOrder(dto.symbol, quantity, { positionSide: this.long })
             // }
+            return {
+                message: 'OK',
+                status: 'success',
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async closePosition(dto: createLimitOrderDto): Promise<void> {
+        try {
+            this.logger.debug('start Process close position')
+            if (!dto.userId) {
+                throw new GrpcUnavailableException('Not found user.')
+            }
+            const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
+            if (!apiKey || !secretKey) {
+                throw new GrpcAlreadyExistsException(
+                    'Not found API key or secret key.',
+                )
+            }
+            await this.createExchange({ apiKey, secretKey })
+            const price = await this.exchange.fetchTicker(dto.symbol)
+            const quantity = (dto.quantity / price.last) * dto.leverage
+
+            // await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
+            //     positionSide: 'SHORT',
+            // })
+
+            if (dto.position === 'Short') {
+                // Close SHORT
+                await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
+                    positionSide: 'SHORT',
+                })
+            } else if (dto.position === 'Long') {
+                // Close LONG
+                await this.exchange.createMarketSellOrder(
+                    dto.symbol,
+                    quantity,
+                    { positionSide: 'LONG' },
+                )
+            }
             this.logger.debug('Close position OK')
         } catch (error) {
             throw error

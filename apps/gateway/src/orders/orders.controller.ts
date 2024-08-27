@@ -5,7 +5,10 @@ import {
     Inject,
     Logger,
     LoggerService,
+    NotFoundException,
+    Param,
     Post,
+    Query,
     Req,
     UseGuards,
 } from '@nestjs/common'
@@ -13,6 +16,7 @@ import { OrderDto } from './dto'
 import { JwtAuthGuard, JwtPayload } from '@app/common'
 import { OrdersService } from './orders.service'
 import { Request } from 'express'
+import { UserIdDto } from './dto/userId.dto'
 
 @Controller('orders')
 export class OrdersController {
@@ -63,13 +67,13 @@ export class OrdersController {
                 userId: req.user.sub,
             })
 
-            this.handleSuccess('create order successful', request, req.user.sub)
+            // this.handleSuccess('create order successful', request, req.user.sub)
             return {
                 message: msg,
                 statusCode: 200,
             }
         } catch (error) {
-            this.handleError('Failed to create order', error, request)
+            // this.handleError('Failed to create order', error, request)
             throw error
         }
     }
@@ -78,6 +82,9 @@ export class OrdersController {
     @Get('query')
     async query(@Req() req: { user: JwtPayload }, @Req() request: Request) {
         try {
+            if (req.user.sub) {
+                throw new NotFoundException('Not found user.')
+            }
             this.handleSuccess('query order successful', request, req.user.sub)
             return await this.ordersService.query(req.user.sub)
         } catch (error) {
@@ -86,9 +93,20 @@ export class OrdersController {
         }
     }
 
-    @Get('balance')
-    async balance(){
-        
+    @UseGuards(JwtAuthGuard)
+    @Post('close-position')
+    async closePosition(
+        @Req() req: { user: JwtPayload },
+        @Req() request: Request,
+        @Query('id') id: string,
+    ) {
+        try {
+            return await this.ordersService.closePosition({
+                userId: req.user.sub,
+                orderId: id,
+            })
+        } catch (error) {
+            throw error
+        }
     }
-
 }

@@ -1,0 +1,1 @@
+type UserId = { userId: string }

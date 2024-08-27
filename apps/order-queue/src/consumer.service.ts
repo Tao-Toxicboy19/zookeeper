@@ -169,7 +169,6 @@ export class ConsumerService implements OnModuleInit {
                     new Promise<void>((resolve, reject) => {
                         this.exchangeServiceClient
                             .createLimitBuy({
-                                id: dto.order.id,
                                 symbol: dto.order.symbol,
                                 leverage: dto.order.leverage,
                                 quantity: dto.order.quantity,
@@ -196,7 +195,6 @@ export class ConsumerService implements OnModuleInit {
                     new Promise<void>((resolve, reject) => {
                         this.exchangeServiceClient
                             .createLimitSell({
-                                id: dto.order.id,
                                 symbol: dto.order.symbol,
                                 leverage: dto.order.leverage,
                                 quantity: dto.order.quantity,

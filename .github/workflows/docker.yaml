@@ -78,3 +78,12 @@ jobs:
                   file: ./apps/notification/Dockerfile
                   push: true
                   tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-notification-service:latest
+
+            - name: Build and Push Docker Image order-queue-service
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  platforms: linux/amd64,linux/arm64
+                  file: ./apps/order-queue/Dockerfile
+                  push: true
+                  tags: ${{ secrets.DOCKER_USERNAME }}/zookeeper-order-queue-service:latest

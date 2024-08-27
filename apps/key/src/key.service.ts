@@ -21,6 +21,7 @@ import {
 } from 'nestjs-grpc-exceptions'
 import { JwtService } from '@nestjs/jwt'
 import { Types } from 'mongoose'
+import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class KeyService implements OnModuleInit {
@@ -42,6 +43,7 @@ export class KeyService implements OnModuleInit {
 
     async getKey(userId: string): Promise<KeyResponse> {
         try {
+            console.log(userId)
             const secret = await this.keysRepository.findOne({ userId })
             if (!secret) {
                 return {

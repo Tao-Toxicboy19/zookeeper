@@ -18,6 +18,7 @@ export interface ValidateKeyDto {
 
 export interface BalanceDto {
   userId: string;
+  display?: boolean | undefined;
 }
 
 export interface ExchangeResponse {
@@ -26,7 +27,6 @@ export interface ExchangeResponse {
 }
 
 export interface CreateLimit {
-  id: string;
   symbol: string;
   leverage: number;
   quantity: number;
@@ -38,10 +38,6 @@ export interface BalanceResponse {
   statusCode?: number | undefined;
   message?: string | undefined;
   usdt?: string | undefined;
-}
-
-export interface SendUserIdDto {
-  userId: string;
 }
 
 export const EXCHANGE_PACKAGE_NAME = "exchange";
@@ -56,8 +52,6 @@ export interface ExchangeServiceClient {
   createLimitSell(request: CreateLimit): Observable<Empty>;
 
   closePosition(request: CreateLimit): Observable<Empty>;
-
-  sendUserId(request: SendUserIdDto): Observable<Empty>;
 }
 
 export interface ExchangeServiceController {
@@ -70,20 +64,11 @@ export interface ExchangeServiceController {
   createLimitSell(request: CreateLimit): void;
 
   closePosition(request: CreateLimit): void;
-
-  sendUserId(request: SendUserIdDto): void;
 }
 
 export function ExchangeServiceControllerMethods() {
   return function (constructor: Function) {
-    const grpcMethods: string[] = [
-      "validateKey",
-      "balance",
-      "createLimitBuy",
-      "createLimitSell",
-      "closePosition",
-      "sendUserId",
-    ];
+    const grpcMethods: string[] = ["validateKey", "balance", "createLimitBuy", "createLimitSell", "closePosition"];
     for (const method of grpcMethods) {
       const descriptor: any = Reflect.getOwnPropertyDescriptor(constructor.prototype, method);
       GrpcMethod("ExchangeService", method)(constructor.prototype[method], method, descriptor);

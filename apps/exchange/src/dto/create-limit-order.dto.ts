@@ -3,10 +3,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator'
 export class createLimitOrderDto {
     @IsNotEmpty()
     @IsString()
-    id: string
-
-    @IsNotEmpty()
-    @IsString()
     symbol: string
 
     @IsNotEmpty()

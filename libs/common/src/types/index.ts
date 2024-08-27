@@ -55,7 +55,6 @@ export {
     ExchangeServiceClient,
     ExchangeServiceController,
     ExchangeServiceControllerMethods,
-    SendUserIdDto,
 } from './exchange'
 
 export {

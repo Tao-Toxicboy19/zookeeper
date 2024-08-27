@@ -5,7 +5,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { KEY_PACKAGE_NAME } from '@app/common'
 import { ClientsModule, Transport } from '@nestjs/microservices'
 import { join } from 'path'
-import { KafkaProducerModule } from './producer/kafka-producer.module'
+import { RabbitmqConsumerService } from './rabbitmq/rabbitmq-consumer.service'
+import { APP_FILTER } from '@nestjs/core'
+import { GrpcServerExceptionFilter } from 'nestjs-grpc-exceptions'
 
 @Module({
     imports: [
@@ -27,10 +29,31 @@ import { KafkaProducerModule } from './producer/kafka-producer.module'
                 }),
                 inject: [ConfigService],
             },
+            {
+                name: 'ORDERS_SERVICE',
+                imports: [ConfigModule],
+                useFactory: async (configService: ConfigService) => ({
+                    transport: Transport.RMQ,
+                    options: {
+                        urls: [configService.get<string>('RABBITMQ_URL')],
+                        queue: configService.get<string>('RABBITMQ_QUEUE_TX'),
+                        queueOptions: {
+                            durable: true,
+                        },
+                    },
+                }),
+                inject: [ConfigService],
+            },
         ]),
-        KafkaProducerModule,
     ],
     controllers: [ExchangeController],
-    providers: [ExchangeService],
+    providers: [
+        ExchangeService,
+        RabbitmqConsumerService,
+        {
+            provide: APP_FILTER,
+            useClass: GrpcServerExceptionFilter,
+        },
+    ],
 })
 export class ExchangeModule {}

@@ -20,5 +20,5 @@ export type Order = {
 
 export type UpdateOrder = {
     id: string
-    position: string
+    position: 'Long' | 'Short'
 }

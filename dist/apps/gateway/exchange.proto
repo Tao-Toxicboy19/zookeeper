@@ -9,7 +9,6 @@ service ExchangeService {
     rpc CreateLimitBuy (CreateLimit) returns (google.protobuf.Empty);
     rpc CreateLimitSell (CreateLimit) returns (google.protobuf.Empty);
     rpc ClosePosition (CreateLimit) returns (google.protobuf.Empty);
-    rpc SendUserId (SendUserIdDto) returns (google.protobuf.Empty);
 }
 
 message ValidateKeyDto {
@@ -19,6 +18,7 @@ message ValidateKeyDto {
 
 message BalanceDto {
     string user_id = 1;
+    optional bool display = 2;
 }
 
 message ExchangeResponse {
@@ -27,11 +27,10 @@ message ExchangeResponse {
 }
 
 message CreateLimit{
-    string id = 1;
-    string symbol = 2;
-    int32 leverage =3;
-    int32 quantity = 4;
-    string user_id = 5;
+    string symbol = 1;
+    int32 leverage = 2;
+    int32 quantity = 3;
+    string user_id = 4;
     optional string position = 6;
 }
 
@@ -39,8 +38,4 @@ message BalanceResponse {
     optional int32 statusCode = 1;
     optional string message = 2;
     optional string usdt = 3;
-}
-
-message SendUserIdDto {
-    string user_id = 1;
 }
