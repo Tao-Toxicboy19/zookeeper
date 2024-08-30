@@ -1,5 +1,5 @@
 export type CreateLimit = {
-    position: string
+    position: 'Long' | 'Short'
     order: Order
 }
 

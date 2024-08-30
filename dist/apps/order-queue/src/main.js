@@ -2,80 +2,10 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./apps/exchange/src/exchange.controller.ts":
-/*!**************************************************!*\
-  !*** ./apps/exchange/src/exchange.controller.ts ***!
-  \**************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ExchangeController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const exchange_service_1 = __webpack_require__(/*! ./exchange.service */ "./apps/exchange/src/exchange.service.ts");
-const common_2 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
-let ExchangeController = class ExchangeController {
-    constructor(exchangeService) {
-        this.exchangeService = exchangeService;
-    }
-    validateKey(request) {
-        return this.exchangeService.validateKey(request);
-    }
-    balance(request) {
-        return this.exchangeService.balance(request);
-    }
-    createLimitBuy(request) {
-        return this.exchangeService.createLimitBuyOrder({
-            symbol: request.symbol,
-            leverage: request.leverage,
-            quantity: request.quantity,
-            userId: request.userId,
-            position: request.position,
-        });
-    }
-    createLimitSell(request) {
-        return this.exchangeService.createLimitSellOrder({
-            symbol: request.symbol,
-            leverage: request.leverage,
-            quantity: request.quantity,
-            userId: request.userId,
-            position: request.position,
-        });
-    }
-    closePosition(request) {
-        return this.exchangeService.closePosition({
-            symbol: request.symbol,
-            leverage: request.leverage,
-            quantity: request.quantity,
-            userId: request.userId,
-            position: request.position,
-        });
-    }
-};
-exports.ExchangeController = ExchangeController;
-exports.ExchangeController = ExchangeController = __decorate([
-    (0, common_1.Controller)(),
-    (0, common_2.ExchangeServiceControllerMethods)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof exchange_service_1.ExchangeService !== "undefined" && exchange_service_1.ExchangeService) === "function" ? _a : Object])
-], ExchangeController);
-
-
-/***/ }),
-
-/***/ "./apps/exchange/src/exchange.module.ts":
-/*!**********************************************!*\
-  !*** ./apps/exchange/src/exchange.module.ts ***!
-  \**********************************************/
+/***/ "./apps/order-queue/src/consumer.module.ts":
+/*!*************************************************!*\
+  !*** ./apps/order-queue/src/consumer.module.ts ***!
+  \*************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -86,37 +16,33 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ExchangeModule = void 0;
+exports.ConsumerModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const exchange_controller_1 = __webpack_require__(/*! ./exchange.controller */ "./apps/exchange/src/exchange.controller.ts");
-const exchange_service_1 = __webpack_require__(/*! ./exchange.service */ "./apps/exchange/src/exchange.service.ts");
+const consumer_service_1 = __webpack_require__(/*! ./consumer.service */ "./apps/order-queue/src/consumer.service.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
-const common_2 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+const common_2 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
 const path_1 = __webpack_require__(/*! path */ "path");
-const rabbitmq_consumer_service_1 = __webpack_require__(/*! ./rabbitmq/rabbitmq-consumer.service */ "./apps/exchange/src/rabbitmq/rabbitmq-consumer.service.ts");
-const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const nestjs_grpc_exceptions_1 = __webpack_require__(/*! nestjs-grpc-exceptions */ "nestjs-grpc-exceptions");
-let ExchangeModule = class ExchangeModule {
+let ConsumerModule = class ConsumerModule {
 };
-exports.ExchangeModule = ExchangeModule;
-exports.ExchangeModule = ExchangeModule = __decorate([
+exports.ConsumerModule = ConsumerModule;
+exports.ConsumerModule = ConsumerModule = __decorate([
     (0, common_1.Module)({
         imports: [
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
-                envFilePath: './apps/exchange/.env',
+                envFilePath: './apps/order-queue/.env',
             }),
             microservices_1.ClientsModule.registerAsync([
                 {
-                    name: common_2.KEY_PACKAGE_NAME,
+                    name: common_2.EXCHANGE_PACKAGE_NAME,
                     imports: [config_1.ConfigModule],
                     useFactory: async (configService) => ({
                         transport: microservices_1.Transport.GRPC,
                         options: {
-                            package: common_2.KEY_PACKAGE_NAME,
-                            protoPath: (0, path_1.join)(__dirname, '../key.proto'),
-                            url: configService.get('KEY_SERVICE_URL'),
+                            package: common_2.EXCHANGE_PACKAGE_NAME,
+                            protoPath: (0, path_1.join)(__dirname, '../exchange.proto'),
+                            url: configService.get('EXCHANGE_SERVICE_URL'),
                         },
                     }),
                     inject: [config_1.ConfigService],
@@ -138,25 +64,17 @@ exports.ExchangeModule = ExchangeModule = __decorate([
                 },
             ]),
         ],
-        controllers: [exchange_controller_1.ExchangeController],
-        providers: [
-            exchange_service_1.ExchangeService,
-            rabbitmq_consumer_service_1.RabbitmqConsumerService,
-            {
-                provide: core_1.APP_FILTER,
-                useClass: nestjs_grpc_exceptions_1.GrpcServerExceptionFilter,
-            },
-        ],
+        providers: [consumer_service_1.ConsumerService],
     })
-], ExchangeModule);
+], ConsumerModule);
 
 
 /***/ }),
 
-/***/ "./apps/exchange/src/exchange.service.ts":
-/*!***********************************************!*\
-  !*** ./apps/exchange/src/exchange.service.ts ***!
-  \***********************************************/
+/***/ "./apps/order-queue/src/consumer.service.ts":
+/*!**************************************************!*\
+  !*** ./apps/order-queue/src/consumer.service.ts ***!
+  \**************************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -172,282 +90,37 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var ExchangeService_1;
-var _a, _b;
+var ConsumerService_1;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ExchangeService = void 0;
-const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
-const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+exports.ConsumerService = void 0;
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
-const ccxt = __webpack_require__(/*! ccxt */ "ccxt");
-const nestjs_grpc_exceptions_1 = __webpack_require__(/*! nestjs-grpc-exceptions */ "nestjs-grpc-exceptions");
-let ExchangeService = ExchangeService_1 = class ExchangeService {
-    constructor(keyClient, client) {
-        this.keyClient = keyClient;
-        this.client = client;
-        this.long = 'LONG';
-        this.short = 'SHORT';
-        this.logger = new common_2.Logger(ExchangeService_1.name);
-    }
-    async onModuleInit() {
-        this.keyServiceClient =
-            this.keyClient.getService(common_1.KEY_SERVICE_NAME);
-    }
-    async query(userId) {
-        return new Promise((resolve, reject) => {
-            this.client
-                .send('query_order', { user_id: userId })
-                .subscribe({
-                next: (response) => resolve(response),
-                error: (err) => reject(err),
-            });
-        });
-    }
-    async position({ userId }) {
-        try {
-            const orders = await this.query(userId);
-            if (!orders || !orders.length) {
-                return {
-                    status: 'error',
-                    message: 'Not found orders.',
-                };
-            }
-            const { apiKey, secretKey } = await this.getApiKeys(userId);
-            if (!apiKey || !secretKey) {
-                return {
-                    status: 'error',
-                    message: 'Not fond API key or secret key.',
-                };
-            }
-            await this.createExchange({
-                apiKey,
-                secretKey,
-            });
-            const position = await this.exchange.fetchPositions(orders.map((item) => item.symbol));
-            return {
-                status: 'success',
-                message: position,
-            };
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    async createExchange(dto) {
-        this.exchange = new ccxt.binance({
-            apiKey: dto.apiKey,
-            secret: dto.secretKey,
-            enableRateLimit: true,
-            options: {
-                defaultType: 'future',
-            },
-        });
-    }
-    async getApiKeys(userId) {
-        return new Promise((resolve, reject) => {
-            this.keyServiceClient.getKey({ userId }).subscribe({
-                next: (response) => resolve({
-                    apiKey: response.apiKey,
-                    secretKey: response.secretKey,
-                }),
-                error: (err) => reject(err),
-            });
-        });
-    }
-    async validateKey(dto) {
-        try {
-            await this.createExchange(dto);
-            await this.exchange.fetchBalance({ type: 'future' });
-            return {
-                statusCode: common_2.HttpStatus.OK,
-                message: 'OK',
-            };
-        }
-        catch (error) {
-            return {
-                statusCode: common_2.HttpStatus.BAD_REQUEST,
-                message: 'API key or Secret key invalid.',
-            };
-        }
-    }
-    async balance(dto) {
-        try {
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
-            if (!apiKey || !secretKey) {
-                return {
-                    statusCode: common_2.HttpStatus.BAD_REQUEST,
-                    message: 'not found API Key or Secret Key',
-                };
-            }
-            await this.createExchange({ apiKey, secretKey });
-            const accountInfo = await this.exchange.fetchBalance({
-                type: 'future',
-            });
-            const usdt = accountInfo.info['maxWithdrawAmount'];
-            return {
-                statusCode: common_2.HttpStatus.OK,
-                message: 'OK',
-                usdt,
-            };
-        }
-        catch (error) {
-            return {
-                statusCode: common_2.HttpStatus.BAD_REQUEST,
-                message: 'Invalid API Key or Secret Key',
-            };
-        }
-    }
-    async createLimitBuyOrder(dto) {
-        try {
-            this.logger.debug('start long Process open position');
-            if (!dto.userId) {
-                throw new nestjs_grpc_exceptions_1.GrpcUnavailableException('Not found user.');
-            }
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
-            await this.createExchange({ apiKey, secretKey });
-            await this.exchange.setLeverage(dto.leverage, dto.symbol);
-            const price = await this.exchange.fetchTicker(dto.symbol);
-            const quantity = (dto.quantity / price.last) * dto.leverage;
-            await this.exchange.createLimitBuyOrder(dto.symbol, quantity, price.last, {
-                positionSide: 'LONG',
-            });
-            this.logger.debug('OPEN long Position');
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    async createLimitSellOrder(dto) {
-        try {
-            this.logger.debug('start short Process open position');
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
-            await this.createExchange({ apiKey, secretKey });
-            await this.exchange.setLeverage(75, dto.symbol);
-            const price = await this.exchange.fetchTicker(dto.symbol);
-            const quantity = (dto.quantity / price.last) * dto.leverage;
-            await this.exchange.createLimitSellOrder(dto.symbol, quantity, price.last, {
-                positionSide: 'SHORT',
-            });
-            this.logger.debug('OPEN short Position');
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    async newClosePostion(dto) {
-        try {
-            this.logger.debug('start Process close position');
-            if (!dto.userId) {
-                return {
-                    status: 'error',
-                    message: 'Not found user.',
-                };
-            }
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
-            if (!apiKey || !secretKey) {
-                return {
-                    status: 'error',
-                    message: 'Not found API key or secret key.',
-                };
-            }
-            console.log(apiKey, secretKey);
-            return {
-                message: 'OK',
-                status: 'success',
-            };
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    async closePosition(dto) {
-        try {
-            this.logger.debug('start Process close position');
-            if (!dto.userId) {
-                throw new nestjs_grpc_exceptions_1.GrpcUnavailableException('Not found user.');
-            }
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
-            if (!apiKey || !secretKey) {
-                throw new nestjs_grpc_exceptions_1.GrpcAlreadyExistsException('Not found API key or secret key.');
-            }
-            await this.createExchange({ apiKey, secretKey });
-            const price = await this.exchange.fetchTicker(dto.symbol);
-            const quantity = (dto.quantity / price.last) * dto.leverage;
-            if (dto.position === 'Short') {
-                await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
-                    positionSide: 'SHORT',
-                });
-            }
-            else if (dto.position === 'Long') {
-                await this.exchange.createMarketSellOrder(dto.symbol, quantity, { positionSide: 'LONG' });
-            }
-            this.logger.debug('Close position OK');
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-};
-exports.ExchangeService = ExchangeService;
-exports.ExchangeService = ExchangeService = ExchangeService_1 = __decorate([
-    (0, common_2.Injectable)(),
-    __param(0, (0, common_2.Inject)(common_1.KEY_PACKAGE_NAME)),
-    __param(1, (0, common_2.Inject)('ORDERS_SERVICE')),
-    __metadata("design:paramtypes", [typeof (_a = typeof microservices_1.ClientGrpc !== "undefined" && microservices_1.ClientGrpc) === "function" ? _a : Object, typeof (_b = typeof microservices_1.ClientProxy !== "undefined" && microservices_1.ClientProxy) === "function" ? _b : Object])
-], ExchangeService);
-
-
-/***/ }),
-
-/***/ "./apps/exchange/src/rabbitmq/rabbitmq-consumer.service.ts":
-/*!*****************************************************************!*\
-  !*** ./apps/exchange/src/rabbitmq/rabbitmq-consumer.service.ts ***!
-  \*****************************************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var RabbitmqConsumerService_1;
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RabbitmqConsumerService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const amqp_connection_manager_1 = __webpack_require__(/*! amqp-connection-manager */ "amqp-connection-manager");
-const exchange_service_1 = __webpack_require__(/*! ../exchange.service */ "./apps/exchange/src/exchange.service.ts");
-let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumerService {
-    constructor(configService, exchangeService) {
+const common_2 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
+let ConsumerService = ConsumerService_1 = class ConsumerService {
+    constructor(configService, clientEx, client) {
         this.configService = configService;
-        this.exchangeService = exchangeService;
-        this.logger = new common_1.Logger(RabbitmqConsumerService_1.name);
+        this.clientEx = clientEx;
+        this.client = client;
+        this.orderFutureQueue = 'order_future_queue';
+        this.notifyQueue = 'notification_order_queue';
+        this.positionQueue = 'close_position_queue';
+        this.logger = new common_1.Logger(ConsumerService_1.name);
         const connection = amqp_connection_manager_1.default.connect([
             this.configService.get('RABBITMQ_URL'),
         ]);
         this.channelWrapper = connection.createChannel({
             setup: async (channel) => {
                 await Promise.all([
-                    channel.assertQueue('open-position-queue', {
+                    channel.assertQueue(this.notifyQueue, { durable: true }),
+                    channel.assertQueue(this.orderFutureQueue, {
                         durable: true,
                     }),
-                    channel.assertQueue('close-position', {
-                        durable: true,
-                    }),
-                    channel.assertExchange('usdt-exchange', 'direct'),
-                    channel.assertQueue('usdt-queue'),
-                    channel.bindQueue('usdt-queue', 'usdt-exchange', 'usdt-routing-key'),
-                    channel.assertExchange('position-exchange', 'direct'),
-                    channel.assertQueue('position-queue'),
-                    channel.bindQueue('position-queue', 'position-exchange', 'position-routing-key'),
+                    channel.assertQueue(this.positionQueue, { durable: true }),
                 ]);
-                this.logger.debug('Exchange and Queue set up successfully');
+                this.logger.debug('Queues set up successfully');
             },
         });
         connection.on('connect', () => {
@@ -458,102 +131,137 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
         });
     }
     async onModuleInit() {
+        this.exchangeServiceClient =
+            this.clientEx.getService(common_2.EXCHANGE_SERVICE_NAME);
         this.channelWrapper.addSetup((channel) => {
-            channel.consume('usdt-queue', async (msg) => {
-                try {
-                    if (msg) {
-                        const content = JSON.parse(msg.content.toString());
-                        const wallet = await this.exchangeService.balance({
-                            userId: content.userId,
-                        });
-                        this.logger.debug('hello from usdt-queue', content);
-                        channel.publish('usdt-exchange', 'usdt-routing-key', Buffer.from(JSON.stringify({
-                            userId: content.userId,
-                            ...wallet,
-                        })));
-                        channel.ack(msg);
-                    }
-                }
-                catch (error) {
-                    this.logger.error('Error consuming message from usdt-queue:', error);
+            channel.consume(this.positionQueue, async (msg) => {
+                if (msg) {
+                    const order = JSON.parse(msg.content.toString());
+                    this.logger.debug('close position');
+                    await this.handleClosePositionTask('');
+                    channel.ack(msg);
                 }
             });
-            channel.consume('position-queue', async (msg) => {
-                try {
-                    if (msg) {
-                        const content = JSON.parse(msg.content.toString());
-                        const position = await this.exchangeService.position({
-                            userId: content.userId,
-                        });
-                        this.logger.debug('hello from position-queue', content);
-                        if (position.status === 'success') {
-                            channel.publish('position-exchange', 'position-routing-key', Buffer.from(JSON.stringify({
-                                userId: content.userId,
-                                ...position,
-                            })));
-                        }
-                        channel.ack(msg);
-                    }
-                }
-                catch (error) {
-                    this.logger.error('Error consuming message from position-queue:', error);
-                }
-            });
-            channel.consume('open-position-queue', async (msg) => {
-                try {
-                    if (msg) {
-                        const content = JSON.parse(msg.content.toString());
-                        this.logger.debug('hello from open-position-queue', content);
-                        if (content.status === 'Long') {
-                            await this.exchangeService.createLimitBuyOrder({
-                                userId: content.userId,
-                                symbol: content.symbol,
-                                quantity: content.quantity,
-                                leverage: content.leverage,
-                            });
-                        }
-                        else if (content.status === 'Short') {
-                            await this.exchangeService.createLimitSellOrder({
-                                userId: content.userId,
-                                symbol: content.symbol,
-                                quantity: content.quantity,
-                                leverage: content.leverage,
-                            });
-                        }
-                        channel.ack(msg);
-                    }
-                }
-                catch (error) {
-                    this.logger.error('Error consuming message from open-position-queue:', error);
-                }
-            });
-            channel.consume('close-position', async (msg) => {
-                try {
-                    if (msg) {
-                        const content = JSON.parse(msg.content.toString());
-                        this.logger.debug('hello from close-position-queue', content);
-                        await this.exchangeService.closePosition({
-                            userId: content.userId,
-                            leverage: content.leverage,
-                            quantity: content.quantity,
-                            symbol: content.symbol,
-                            position: content.status,
+            channel.consume(this.orderFutureQueue, async (msg) => {
+                if (msg) {
+                    const content = JSON.parse(msg.content.toString());
+                    const closePositionCount = await channel.checkQueue(this.positionQueue);
+                    if (closePositionCount.messageCount === 0) {
+                        console.log('open position-queue');
+                        await this.handleUpdatePositionTask({
+                            id: content.order.id,
+                            position: content.position,
                         });
                         channel.ack(msg);
                     }
-                }
-                catch (error) {
-                    this.logger.error('Error consuming message from open-position-queue:', error);
                 }
             });
         });
     }
+    async sendTask(queue, msg) {
+        await this.channelWrapper.addSetup(async (channel) => {
+            return channel.sendToQueue(queue, Buffer.from(msg), {
+                persistent: true,
+            });
+        });
+    }
+    async handleClosePositionTask(task) {
+        console.log('Close Position Task:', task);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    async handleUpdatePositionTask(dto) {
+        return new Promise((resolve, reject) => {
+            this.client.send('update_order', dto).subscribe({
+                next: () => resolve(),
+                error: (err) => reject(err),
+            });
+        });
+    }
+    async handleOrderFutureTasks(dto) {
+        try {
+            const { usdt } = await new Promise((resolve, reject) => {
+                this.exchangeServiceClient
+                    .balance({ userId: dto.order.user_id })
+                    .subscribe({
+                    next: (response) => resolve(response),
+                    error: (err) => reject(err),
+                });
+            });
+            if (+usdt < dto.order.quantity) {
+                this.logger.debug('Insufficient funds');
+                const message = {
+                    msg: `Insufficient funds ==> open position: ${dto.position} ==> ${dto.order.symbol}`,
+                    user_id: dto.order.user_id,
+                };
+                await this.sendTask(this.notifyQueue, JSON.stringify(message));
+            }
+            else if (dto.position === 'Long') {
+                const message = {
+                    msg: `open position: ${dto.position} ==> ${dto.order.symbol}`,
+                    user_id: dto.order.user_id,
+                };
+                await Promise.all([
+                    new Promise((resolve, reject) => {
+                        this.exchangeServiceClient
+                            .createLimitBuy({
+                            symbol: dto.order.symbol,
+                            leverage: dto.order.leverage,
+                            quantity: dto.order.quantity,
+                            userId: dto.order.user_id,
+                            position: 'LONG',
+                        })
+                            .subscribe({
+                            next: () => resolve(),
+                            error: (err) => reject(err),
+                        });
+                    }),
+                    this.sendTask(this.notifyQueue, JSON.stringify(message)),
+                    this.handleUpdatePositionTask({
+                        id: dto.order.id,
+                        position: dto.position,
+                    }),
+                ]);
+            }
+            else if (dto.position === 'Short') {
+                const message = {
+                    msg: `open position: ${dto.position} ==> ${dto.order.symbol}`,
+                    user_id: dto.order.user_id,
+                };
+                await Promise.all([
+                    new Promise((resolve, reject) => {
+                        this.exchangeServiceClient
+                            .createLimitSell({
+                            symbol: dto.order.symbol,
+                            leverage: dto.order.leverage,
+                            quantity: dto.order.quantity,
+                            userId: dto.order.user_id,
+                            position: 'SHORT',
+                        })
+                            .subscribe({
+                            next: () => resolve(),
+                            error: (err) => reject(err),
+                        });
+                    }),
+                    this.sendTask(this.notifyQueue, JSON.stringify(message)),
+                    this.handleUpdatePositionTask({
+                        id: dto.order.id,
+                        position: dto.position,
+                    }),
+                ]);
+            }
+        }
+        catch (error) {
+            this.logger.error('Error handler order future tasks', error);
+        }
+    }
 };
-exports.RabbitmqConsumerService = RabbitmqConsumerService;
-exports.RabbitmqConsumerService = RabbitmqConsumerService = RabbitmqConsumerService_1 = __decorate([
+exports.ConsumerService = ConsumerService;
+exports.ConsumerService = ConsumerService = ConsumerService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object, typeof (_b = typeof exchange_service_1.ExchangeService !== "undefined" && exchange_service_1.ExchangeService) === "function" ? _b : Object])
-], RabbitmqConsumerService);
+    __param(1, (0, common_1.Inject)(common_2.EXCHANGE_PACKAGE_NAME)),
+    __param(2, (0, common_1.Inject)('ORDERS_SERVICE')),
+    __metadata("design:paramtypes", [typeof (_a = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _a : Object, typeof (_b = typeof microservices_1.ClientGrpc !== "undefined" && microservices_1.ClientGrpc) === "function" ? _b : Object, typeof (_c = typeof microservices_1.ClientProxy !== "undefined" && microservices_1.ClientProxy) === "function" ? _c : Object])
+], ConsumerService);
 
 
 /***/ }),
@@ -1980,16 +1688,6 @@ module.exports = require("amqp-connection-manager");
 
 /***/ }),
 
-/***/ "ccxt":
-/*!***********************!*\
-  !*** external "ccxt" ***!
-  \***********************/
-/***/ ((module) => {
-
-module.exports = require("ccxt");
-
-/***/ }),
-
 /***/ "ioredis":
 /*!**************************!*\
   !*** external "ioredis" ***!
@@ -2017,16 +1715,6 @@ module.exports = require("jsonwebtoken");
 /***/ ((module) => {
 
 module.exports = require("mongoose");
-
-/***/ }),
-
-/***/ "nestjs-grpc-exceptions":
-/*!*****************************************!*\
-  !*** external "nestjs-grpc-exceptions" ***!
-  \*****************************************/
-/***/ ((module) => {
-
-module.exports = require("nestjs-grpc-exceptions");
 
 /***/ }),
 
@@ -2091,26 +1779,25 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 var exports = __webpack_exports__;
-/*!***********************************!*\
-  !*** ./apps/exchange/src/main.ts ***!
-  \***********************************/
+/*!**************************************!*\
+  !*** ./apps/order-queue/src/main.ts ***!
+  \**************************************/
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const exchange_module_1 = __webpack_require__(/*! ./exchange.module */ "./apps/exchange/src/exchange.module.ts");
-const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
-const path_1 = __webpack_require__(/*! path */ "path");
-const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
+const consumer_module_1 = __webpack_require__(/*! ./consumer.module */ "./apps/order-queue/src/consumer.module.ts");
 const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
+const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
 async function bootstrap() {
-    const configApp = await core_1.NestFactory.create(exchange_module_1.ExchangeModule);
+    const configApp = await core_1.NestFactory.create(consumer_module_1.ConsumerModule);
     let configService = configApp.get(config_1.ConfigService);
-    const app = await core_1.NestFactory.createMicroservice(exchange_module_1.ExchangeModule, {
-        transport: microservices_1.Transport.GRPC,
+    const app = await core_1.NestFactory.createMicroservice(consumer_module_1.ConsumerModule, {
+        transport: microservices_1.Transport.RMQ,
         options: {
-            protoPath: (0, path_1.join)(__dirname, '../exchange.proto'),
-            package: common_1.EXCHANGE_PACKAGE_NAME,
-            url: configService.get('GRPC_URL'),
+            urls: [configService.get('RABBITMQ_URL')],
+            queueOptions: {
+                durable: true,
+            },
         },
     });
     await app.listen();

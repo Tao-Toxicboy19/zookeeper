@@ -68,6 +68,7 @@ export class RabbitmqConsumerService {
                         const wallet = await this.exchangeService.balance({
                             userId: content.userId,
                         })
+                        this.logger.debug('hello from usdt-queue', content)
 
                         // ส่งข้อความไปยัง exchange
                         channel.publish(
@@ -99,6 +100,7 @@ export class RabbitmqConsumerService {
                         const position = await this.exchangeService.position({
                             userId: content.userId,
                         })
+                        this.logger.debug('hello from position-queue', content)
 
                         if (position.status === 'success') {
                             channel.publish(
@@ -130,6 +132,8 @@ export class RabbitmqConsumerService {
                             const content: OpenPosition = JSON.parse(
                                 msg.content.toString(),
                             )
+                            this.logger.debug('hello from open-position-queue', content)
+
                             if (content.status === 'Long') {
                                 await this.exchangeService.createLimitBuyOrder({
                                     userId: content.userId,
@@ -164,6 +168,8 @@ export class RabbitmqConsumerService {
                         const content: OpenPosition = JSON.parse(
                             msg.content.toString(),
                         )
+                        this.logger.debug('hello from close-position-queue', content)
+
                         await this.exchangeService.closePosition({
                             userId: content.userId,
                             leverage: content.leverage,

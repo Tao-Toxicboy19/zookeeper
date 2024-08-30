@@ -63,24 +63,39 @@ export class ConsumerService implements OnModuleInit {
                     const order: CreateLimit = JSON.parse(
                         msg.content.toString(),
                     )
-                    this.logger.debug(order)
+                    this.logger.debug('close position')
                     // // process Close position task
                     await this.handleClosePositionTask('')
 
                     channel.ack(msg)
 
-                    await this.processOrderFutureTasks(channel)
+                    // await this.processOrderFutureTasks(channel)
                 }
             })
 
             // Handle orderFutureQueue separately
-            // channel.consume(this.orderFutureQueue, async (msg: ConsumeMessage) => {
-            //     if (msg) {
-            //         // this.pendingOrders.push(JSON.parse(msg.content.toString())); // เก็บ order ไว้ใน pendingOrders
-            //         this.logger.debug('hello from future')
-            //         channel.ack(msg)
-            //     }
-            // });
+            channel.consume(
+                this.orderFutureQueue,
+                async (msg: ConsumeMessage) => {
+                    if (msg) {
+                        const content: CreateLimit = JSON.parse(
+                            msg.content.toString(),
+                        )
+                        const closePositionCount = await channel.checkQueue(
+                            this.positionQueue,
+                        )
+                        if (closePositionCount.messageCount === 0) {
+                            // this.logger.debug('open position-queue')
+                            console.log('open position-queue')
+                            await this.handleUpdatePositionTask({
+                                id: content.order.id,
+                                position: content.position,
+                            })
+                            channel.ack(msg)
+                        }
+                    }
+                },
+            )
         })
     }
 
@@ -98,37 +113,39 @@ export class ConsumerService implements OnModuleInit {
         await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
-    async processOrderFutureTasks(channel: ConfirmChannel): Promise<void> {
-        try {
-            // Check if positionQueue is empty
-            const positionStatus = await channel.checkQueue(this.positionQueue)
+    // async processOrderFutureTasks(channel: ConfirmChannel): Promise<void> {
+    //     try {
+    //         // Check if positionQueue is empty
+    //         const positionStatus = await channel.checkQueue(this.positionQueue)
+    //         console.log('processOrderFutureTasks')
+    //         if (positionStatus.messageCount === 0) {
+    //             // Process all pending orders in orderFutureQueue
+    //             while (true) {
+    //                 const msg = await channel.get(this.orderFutureQueue)
+    //                 if (msg) {
+    //                     const order: CreateLimit = JSON.parse(
+    //                         msg.content.toString(),
+    //                     )
+    //                     this.logger.debug(
+    //                         'Processing order from order_future_queue:',
+    //                         order,
+    //                     )
+    //                     this.logger.debug('hello future from close')
+    //                     // Call your function to handle the order
+    //                     // await this.handleOrderFutureTasks(order)
 
-            if (positionStatus.messageCount === 0) {
-                // Process all pending orders in orderFutureQueue
-                while (true) {
-                    const msg = await channel.get(this.orderFutureQueue)
-                    if (msg) {
-                        const order: CreateLimit = JSON.parse(
-                            msg.content.toString(),
-                        )
-                        // this.logger.debug(msg)
-                        // this.logger.debug('Processing order from order_future_queue:', order)
-                        this.logger.debug('hello future from close')
-                        // Call your function to handle the order
-                        // await this.handleOrderFutureTasks(order)
-
-                        // Acknowledge the message
-                        channel.ack(msg)
-                    } else {
-                        // No more messages in order_future_queue
-                        break
-                    }
-                }
-            }
-        } catch (error) {
-            this.logger.error('Error processing order future tasks', error)
-        }
-    }
+    //                     // Acknowledge the message
+    //                     channel.ack(msg)
+    //                 } else {
+    //                     // No more messages in order_future_queue
+    //                     break
+    //                 }
+    //             }
+    //         }
+    //     } catch (error) {
+    //         this.logger.error('Error processing order future tasks', error)
+    //     }
+    // }
 
     async handleUpdatePositionTask(dto: UpdateOrder): Promise<void> {
         return new Promise<void>((resolve, reject) => {
