@@ -246,7 +246,6 @@ let NotificationService = class NotificationService {
             const result = (await this.notificationRepository.findOne({
                 userId: objectId,
             }));
-            console.log(result);
             if (!result) {
                 return {
                     message: 'No documents found to read.',

@@ -1,5 +1,5 @@
 import { NotificationMsg } from '@app/common'
-import { Injectable, Inject, NotFoundException } from '@nestjs/common'
+import { Injectable, Inject } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { Response } from '@app/common'
 

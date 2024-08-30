@@ -198,7 +198,6 @@ let KeyService = KeyService_1 = class KeyService {
     }
     async getKey(userId) {
         try {
-            console.log(userId);
             const secret = await this.keysRepository.findOne({ userId });
             if (!secret) {
                 return {

@@ -1485,7 +1485,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], NotificationGateway.prototype, "handleMessage", null);
 exports.NotificationGateway = NotificationGateway = __decorate([
-    (0, websockets_1.WebSocketGateway)(8001, {
+    (0, websockets_1.WebSocketGateway)({
         cors: {
             origin: '*',
         },

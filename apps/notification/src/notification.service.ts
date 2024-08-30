@@ -35,7 +35,6 @@ export class NotificationService {
                 userId: objectId,
             })) as Notifications
 
-            console.log(result)
             if (!result) {
                 return {
                     message: 'No documents found to read.',

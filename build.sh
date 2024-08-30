@@ -1,1 +1,1 @@
-docker buildx build --platform linux/amd64 -f ./apps/exchange/Dockerfile -t taotoxicboy/zookeeper-exchange --push .
+docker buildx build --platform linux/amd64 -f ./apps/gateway/Dockerfile -t taotoxicboy/zookeeper-gateway-service --push .

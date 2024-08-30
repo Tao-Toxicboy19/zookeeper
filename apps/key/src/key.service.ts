@@ -43,7 +43,6 @@ export class KeyService implements OnModuleInit {
 
     async getKey(userId: string): Promise<KeyResponse> {
         try {
-            console.log(userId)
             const secret = await this.keysRepository.findOne({ userId })
             if (!secret) {
                 return {
