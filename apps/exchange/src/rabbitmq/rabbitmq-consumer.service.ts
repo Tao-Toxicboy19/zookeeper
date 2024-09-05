@@ -27,21 +27,21 @@ export class RabbitmqConsumerService {
                         durable: true,
                     }),
 
-                    channel.assertExchange('usdt-exchange', 'direct'), // สร้าง exchange
+                    // channel.assertExchange('usdt-exchange', 'direct'), // สร้าง exchange
                     channel.assertQueue('usdt-queue'), // สร้างคิวและ bind กับ exchange ด้วย routing key
-                    channel.bindQueue(
-                        'usdt-queue',
-                        'usdt-exchange',
-                        'usdt-routing-key',
-                    ),
+                    // channel.bindQueue(
+                    //     'usdt-queue',
+                    //     'usdt-exchange',
+                    //     'usdt-routing-key',
+                    // ),
 
-                    channel.assertExchange('position-exchange', 'direct'),
+                    // channel.assertExchange('position-exchange', 'direct'),
                     channel.assertQueue('position-queue'),
-                    channel.bindQueue(
-                        'position-queue',
-                        'position-exchange',
-                        'position-routing-key',
-                    ),
+                    // channel.bindQueue(
+                    //     'position-queue',
+                    //     'position-exchange',
+                    //     'position-routing-key',
+                    // ),
                 ])
 
                 this.logger.debug('Exchange and Queue set up successfully')
@@ -68,7 +68,6 @@ export class RabbitmqConsumerService {
                         const wallet = await this.exchangeService.balance({
                             userId: content.userId,
                         })
-                        this.logger.debug('hello from usdt-queue', content)
 
                         // ส่งข้อความไปยัง exchange
                         channel.publish(
@@ -100,8 +99,6 @@ export class RabbitmqConsumerService {
                         const position = await this.exchangeService.position({
                             userId: content.userId,
                         })
-                        this.logger.debug('hello from position-queue', content)
-
                         if (position.status === 'success') {
                             channel.publish(
                                 'position-exchange',
@@ -132,8 +129,6 @@ export class RabbitmqConsumerService {
                             const content: OpenPosition = JSON.parse(
                                 msg.content.toString(),
                             )
-                            this.logger.debug('hello from open-position-queue', content)
-
                             if (content.status === 'Long') {
                                 await this.exchangeService.createLimitBuyOrder({
                                     userId: content.userId,
@@ -168,7 +163,6 @@ export class RabbitmqConsumerService {
                         const content: OpenPosition = JSON.parse(
                             msg.content.toString(),
                         )
-                        this.logger.debug('hello from close-position-queue', content)
 
                         await this.exchangeService.closePosition({
                             userId: content.userId,

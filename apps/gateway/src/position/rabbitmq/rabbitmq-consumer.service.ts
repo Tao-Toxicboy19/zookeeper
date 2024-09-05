@@ -76,7 +76,7 @@ export class RabbitmqConsumerService {
             channel.consume('position-queue', async (msg: ConsumeMessage) => {
                 if (msg) {
                     const content: Position = JSON.parse(msg.content.toString())
-                    if (content.status === 'success') {
+                     if (content.status === 'success') {
                         this.positionGateway.handleEmitEvent({
                             userId: content.userId,
                             msg: {
@@ -87,7 +87,7 @@ export class RabbitmqConsumerService {
                     } else {
                         this.positionGateway.handleEmitEvent({
                             userId: content.userId,
-                            msg: 'Not found position.',
+                            msg: 'load position.',
                             event: 'event-position',
                         })
                     }

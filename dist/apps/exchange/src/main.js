@@ -205,28 +205,45 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
     }
     async position({ userId }) {
         try {
-            const orders = await this.query(userId);
+            const [orders, apiKeys] = await Promise.all([
+                this.query(userId),
+                this.getApiKeys(userId),
+            ]);
             if (!orders || !orders.length) {
                 return {
-                    status: 'error',
+                    status: 'success',
                     message: 'Not found orders.',
                 };
             }
-            const { apiKey, secretKey } = await this.getApiKeys(userId);
+            const { apiKey, secretKey } = apiKeys;
             if (!apiKey || !secretKey) {
                 return {
                     status: 'error',
-                    message: 'Not fond API key or secret key.',
+                    message: 'Not found API key or secret key.',
                 };
             }
-            await this.createExchange({
-                apiKey,
-                secretKey,
-            });
-            const position = await this.exchange.fetchPositions(orders.map((item) => item.symbol));
+            await this.createExchange({ apiKey, secretKey });
+            const symbols = orders.map((item) => item.symbol);
+            const positions = await this.exchange.fetchPositions(symbols);
+            const ords = positions
+                .map((pos) => {
+                const result = orders.find((order) => order.symbol === pos.info.symbol);
+                if (!result)
+                    return null;
+                return {
+                    ...pos,
+                    orderId: result.id,
+                    type: result.type,
+                    ...(result.type === 'EMA' && {
+                        ema: result.ema,
+                        timeframe: result.timeframe,
+                    }),
+                };
+            })
+                .filter(Boolean);
             return {
                 status: 'success',
-                message: position,
+                message: ords,
             };
         }
         catch (error) {
@@ -322,7 +339,7 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
             this.logger.debug('start short Process open position');
             const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
             await this.createExchange({ apiKey, secretKey });
-            await this.exchange.setLeverage(75, dto.symbol);
+            await this.exchange.setLeverage(dto.leverage, dto.symbol);
             const price = await this.exchange.fetchTicker(dto.symbol);
             const quantity = (dto.quantity / price.last) * dto.leverage;
             await this.exchange.createLimitSellOrder(dto.symbol, quantity, price.last, {
@@ -440,12 +457,8 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                     channel.assertQueue('close-position', {
                         durable: true,
                     }),
-                    channel.assertExchange('usdt-exchange', 'direct'),
                     channel.assertQueue('usdt-queue'),
-                    channel.bindQueue('usdt-queue', 'usdt-exchange', 'usdt-routing-key'),
-                    channel.assertExchange('position-exchange', 'direct'),
                     channel.assertQueue('position-queue'),
-                    channel.bindQueue('position-queue', 'position-exchange', 'position-routing-key'),
                 ]);
                 this.logger.debug('Exchange and Queue set up successfully');
             },
@@ -466,7 +479,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                         const wallet = await this.exchangeService.balance({
                             userId: content.userId,
                         });
-                        this.logger.debug('hello from usdt-queue', content);
                         channel.publish('usdt-exchange', 'usdt-routing-key', Buffer.from(JSON.stringify({
                             userId: content.userId,
                             ...wallet,
@@ -485,7 +497,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                         const position = await this.exchangeService.position({
                             userId: content.userId,
                         });
-                        this.logger.debug('hello from position-queue', content);
                         if (position.status === 'success') {
                             channel.publish('position-exchange', 'position-routing-key', Buffer.from(JSON.stringify({
                                 userId: content.userId,
@@ -503,7 +514,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                 try {
                     if (msg) {
                         const content = JSON.parse(msg.content.toString());
-                        this.logger.debug('hello from open-position-queue', content);
                         if (content.status === 'Long') {
                             await this.exchangeService.createLimitBuyOrder({
                                 userId: content.userId,
@@ -531,7 +541,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                 try {
                     if (msg) {
                         const content = JSON.parse(msg.content.toString());
-                        this.logger.debug('hello from close-position-queue', content);
                         await this.exchangeService.closePosition({
                             userId: content.userId,
                             leverage: content.leverage,

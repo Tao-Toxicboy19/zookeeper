@@ -57,32 +57,54 @@ export class ExchangeService implements OnModuleInit {
 
     async position({ userId }: { userId: string }): Promise<State> {
         try {
-            const orders = await this.query(userId)
+            const [orders, apiKeys] = await Promise.all([
+                this.query(userId),
+                this.getApiKeys(userId),
+            ])
+
             if (!orders || !orders.length) {
                 return {
-                    status: 'error',
+                    status: 'success',
                     message: 'Not found orders.',
                 }
             }
 
-            const { apiKey, secretKey } = await this.getApiKeys(userId)
+            const { apiKey, secretKey } = apiKeys
             if (!apiKey || !secretKey) {
                 return {
                     status: 'error',
-                    message: 'Not fond API key or secret key.',
+                    message: 'Not found API key or secret key.',
                 }
             }
-            await this.createExchange({
-                apiKey,
-                secretKey,
-            })
-            const position = await this.exchange.fetchPositions(
-                orders.map((item) => item.symbol),
-            )
+
+            await this.createExchange({ apiKey, secretKey })
+
+            // Fetch positions พร้อมกับการ map symbol
+            const symbols = orders.map((item) => item.symbol)
+            const positions = await this.exchange.fetchPositions(symbols)
+
+            const ords = positions
+                .map((pos) => {
+                    const result = orders.find(
+                        (order) => order.symbol === pos.info.symbol,
+                    )
+                    if (!result) return null
+
+                    return {
+                        ...pos,
+                        orderId: result.id,
+                        type: result.type,
+                        ...(result.type === 'EMA' && {
+                            ema: result.ema,
+                            timeframe: result.timeframe,
+                        }),
+                    }
+                })
+                .filter(Boolean)
 
             return {
                 status: 'success',
-                message: position,
+                message: ords,
             }
         } catch (error) {
             throw error
@@ -188,7 +210,7 @@ export class ExchangeService implements OnModuleInit {
             this.logger.debug('start short Process open position')
             const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
             await this.createExchange({ apiKey, secretKey })
-            await this.exchange.setLeverage(75, dto.symbol)
+            await this.exchange.setLeverage(dto.leverage, dto.symbol)
             const price = await this.exchange.fetchTicker(dto.symbol)
             const quantity = (dto.quantity / price.last) * dto.leverage
             await this.exchange.createLimitSellOrder(

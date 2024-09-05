@@ -97,7 +97,6 @@ export class OrdersController {
     @Post('close-position')
     async closePosition(
         @Req() req: { user: JwtPayload },
-        @Req() request: Request,
         @Query('id') id: string,
     ) {
         try {

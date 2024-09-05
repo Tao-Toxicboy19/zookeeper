@@ -1768,7 +1768,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var OrdersController_1;
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrdersController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -1831,7 +1831,7 @@ let OrdersController = OrdersController_1 = class OrdersController {
             throw error;
         }
     }
-    async closePosition(req, request, id) {
+    async closePosition(req, id) {
         try {
             return await this.ordersService.closePosition({
                 userId: req.user.sub,
@@ -1867,10 +1867,9 @@ __decorate([
     (0, common_1.UseGuards)(common_2.JwtAuthGuard),
     (0, common_1.Post)('close-position'),
     __param(0, (0, common_1.Req)()),
-    __param(1, (0, common_1.Req)()),
-    __param(2, (0, common_1.Query)('id')),
+    __param(1, (0, common_1.Query)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, typeof (_f = typeof express_1.Request !== "undefined" && express_1.Request) === "function" ? _f : Object, String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "closePosition", null);
 exports.OrdersController = OrdersController = OrdersController_1 = __decorate([
@@ -2355,7 +2354,7 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                     else {
                         this.positionGateway.handleEmitEvent({
                             userId: content.userId,
-                            msg: 'Not found position.',
+                            msg: 'load position.',
                             event: 'event-position',
                         });
                     }

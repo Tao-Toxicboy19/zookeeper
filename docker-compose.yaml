@@ -14,7 +14,7 @@ services:
     #         KEY_SERVICE_URL: key-service:5005
     #         CLIENT_URL: http://localhost:3000
     #         EXCHANGE_SERVICE_URL: exchange:50052
-    #         KAFKA_URL: kafka:9092
+    #         KAFKA_URL: kafka:9092 
     #         WEB_SOCKET: 8031
     #         PREDICT_SERVICE_URL: predict-service:50055
     #         RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
