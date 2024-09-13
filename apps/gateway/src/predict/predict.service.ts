@@ -18,19 +18,29 @@ export class PredictService implements OnModuleInit {
             this.client.getService<PredictServiceClient>(PREDICT_SERVICE_NAME)
     }
 
-    async debug() {
-        this.predictServiceClient.predict({})
-    }
-
-    // @Cron('0 */5 * * * *', {
-    //     timeZone: 'Asia/Bangkok',
-    // })
+    @Cron('0 7 * * *', {
+        timeZone: 'Asia/Bangkok',
+    })
     async createPrddict(): Promise<void> {
+        console.log(`Hello world Predict 11 โมง ${new Date()}`)
         return new Promise<void>((resolve, reject) => {
             this.predictServiceClient.predict({}).subscribe({
                 next: () => resolve(),
                 error: (err) => reject(err),
             })
+        })
+    }
+
+    async findPredict(): Promise<any> {
+        const today = new Date()
+        const timestamp = Math.floor(today.getTime() / 1000)
+        return new Promise((resolve, reject) => {
+            this.predictServiceClient
+                .getData({ timeStamp: timestamp })
+                .subscribe({
+                    next: (response) => resolve(response),
+                    error: (err) => reject(err),
+                })
         })
     }
 

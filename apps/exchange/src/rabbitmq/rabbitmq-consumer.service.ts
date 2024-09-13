@@ -27,13 +27,6 @@ export class RabbitmqConsumerService {
                         durable: true,
                     }),
 
-                    // channel.assertExchange('usdt-exchange', 'direct'), // สร้าง exchange
-                    channel.assertQueue('usdt-queue'), // สร้างคิวและ bind กับ exchange ด้วย routing key
-                    // channel.bindQueue(
-                    //     'usdt-queue',
-                    //     'usdt-exchange',
-                    //     'usdt-routing-key',
-                    // ),
 
                     // channel.assertExchange('position-exchange', 'direct'),
                     channel.assertQueue('position-queue'),
@@ -59,37 +52,6 @@ export class RabbitmqConsumerService {
 
     async onModuleInit() {
         this.channelWrapper.addSetup((channel: ConfirmChannel) => {
-            channel.consume('usdt-queue', async (msg: ConsumeMessage) => {
-                try {
-                    if (msg) {
-                        const content: UserId = JSON.parse(
-                            msg.content.toString(),
-                        )
-                        const wallet = await this.exchangeService.balance({
-                            userId: content.userId,
-                        })
-
-                        // ส่งข้อความไปยัง exchange
-                        channel.publish(
-                            'usdt-exchange',
-                            'usdt-routing-key',
-                            Buffer.from(
-                                JSON.stringify({
-                                    userId: content.userId,
-                                    ...wallet,
-                                }),
-                            ),
-                        )
-                        channel.ack(msg)
-                    }
-                } catch (error) {
-                    this.logger.error(
-                        'Error consuming message from usdt-queue:',
-                        error,
-                    )
-                }
-            })
-
             channel.consume('position-queue', async (msg: ConsumeMessage) => {
                 try {
                     if (msg) {

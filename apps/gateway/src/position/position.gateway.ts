@@ -75,29 +75,6 @@ export class PositionGateway
         }
     }
 
-    @SubscribeMessage('event-usdt')
-    handleEvent(@ConnectedSocket() client: Socket): void {
-        const payload: JwtPayload = client['user']
-        if (payload) {
-            client.join(payload.sub)
-
-            if (!this.usdtIntervals.has(payload.sub)) {
-                const interval = setInterval(async () => {
-                    this.rabbitmqProducerService.publish(
-                        'usdt-queue',
-                        JSON.stringify({ userId: payload.sub }),
-                    )
-                }, 2000)
-
-                this.usdtIntervals.set(payload.sub, interval)
-            }
-        } else {
-            this.server
-                .to(payload.sub)
-                .emit('event-msg', { message: 'Not found user.' })
-        }
-    }
-
     handleEmitEvent({ userId, event, msg }: EmitEvent): void {
         this.server.to(userId).emit(event, msg)
     }

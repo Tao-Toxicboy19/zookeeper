@@ -227,47 +227,6 @@ export class ExchangeService implements OnModuleInit {
         }
     }
 
-    async newClosePostion(dto: createLimitOrderDto): Promise<State> {
-        try {
-            this.logger.debug('start Process close position')
-            if (!dto.userId) {
-                return {
-                    status: 'error',
-                    message: 'Not found user.',
-                }
-            }
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId)
-            if (!apiKey || !secretKey) {
-                return {
-                    status: 'error',
-                    message: 'Not found API key or secret key.',
-                }
-            }
-            console.log(apiKey, secretKey)
-            // await this.createExchange({ apiKey, secretKey })
-            // const price = await this.exchange.fetchTicker(dto.symbol)
-            // const quantity = (dto.quantity / price.last) * dto.leverage
-
-            // await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
-            //     positionSide: 'SHORT',
-            // })
-
-            // if (dto.position === this.long) {
-            //   // Close SHORT
-            //   await this.exchange.createMarketBuyOrder(dto.symbol, quantity, { positionSide: this.short })
-            // } else if (dto.position === this.short) {
-            //   // Close LONG
-            //   await this.exchange.createMarketSellOrder(dto.symbol, quantity, { positionSide: this.long })
-            // }
-            return {
-                message: 'OK',
-                status: 'success',
-            }
-        } catch (error) {
-            throw error
-        }
-    }
-
     async closePosition(dto: createLimitOrderDto): Promise<void> {
         try {
             this.logger.debug('start Process close position')
@@ -284,9 +243,6 @@ export class ExchangeService implements OnModuleInit {
             const price = await this.exchange.fetchTicker(dto.symbol)
             const quantity = (dto.quantity / price.last) * dto.leverage
 
-            // await this.exchange.createMarketBuyOrder(dto.symbol, quantity, {
-            //     positionSide: 'SHORT',
-            // })
 
             if (dto.position === 'Short') {
                 // Close SHORT

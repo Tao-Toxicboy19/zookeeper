@@ -351,32 +351,6 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
             throw error;
         }
     }
-    async newClosePostion(dto) {
-        try {
-            this.logger.debug('start Process close position');
-            if (!dto.userId) {
-                return {
-                    status: 'error',
-                    message: 'Not found user.',
-                };
-            }
-            const { apiKey, secretKey } = await this.getApiKeys(dto.userId);
-            if (!apiKey || !secretKey) {
-                return {
-                    status: 'error',
-                    message: 'Not found API key or secret key.',
-                };
-            }
-            console.log(apiKey, secretKey);
-            return {
-                message: 'OK',
-                status: 'success',
-            };
-        }
-        catch (error) {
-            throw error;
-        }
-    }
     async closePosition(dto) {
         try {
             this.logger.debug('start Process close position');

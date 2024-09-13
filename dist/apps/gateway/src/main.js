@@ -2298,9 +2298,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
         ]);
         this.channelWrapper = connection.createChannel({
             setup: async (channel) => {
-                await channel.assertExchange('usdt-exchange', 'direct');
-                await channel.assertQueue('usdt-queue');
-                await channel.bindQueue('usdt-queue', 'usdt-exchange', 'usdt-routing-key');
                 await channel.assertExchange('position-exchange', 'direct');
                 await channel.assertQueue('position-queue');
                 await channel.bindQueue('position-queue', 'position-exchange', 'position-routing-key');
@@ -2316,29 +2313,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
     }
     async onModuleInit() {
         this.channelWrapper.addSetup((channel) => {
-            channel.consume('usdt-queue', async (msg) => {
-                if (msg) {
-                    const content = JSON.parse(msg.content.toString());
-                    if (content.statusCode !== 400) {
-                        this.positionGateway.handleEmitEvent({
-                            userId: content.userId,
-                            msg: {
-                                message: 'OK',
-                                usdt: +content.usdt,
-                            },
-                            event: 'event-usdt',
-                        });
-                    }
-                    else {
-                        this.positionGateway.handleEmitEvent({
-                            userId: content.userId,
-                            msg: 'Not found API Key',
-                            event: 'event-usdt',
-                        });
-                    }
-                    channel.ack(msg);
-                }
-            });
             channel.consume('position-queue', async (msg) => {
                 if (msg) {
                     const content = JSON.parse(msg.content.toString());
@@ -2461,6 +2435,9 @@ let PredictController = class PredictController {
     async predict() {
         return this.predictService.createPrddict();
     }
+    async findPredict() {
+        return this.predictService.findPredict();
+    }
     async delete() {
         return this.predictService.deleteData();
     }
@@ -2472,6 +2449,12 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], PredictController.prototype, "predict", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PredictController.prototype, "findPredict", null);
 __decorate([
     (0, common_1.Delete)(),
     __metadata("design:type", Function),
@@ -2559,12 +2542,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PredictService = void 0;
 const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
 const common_2 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 let PredictService = class PredictService {
     constructor(client) {
         this.client = client;
@@ -2573,13 +2557,23 @@ let PredictService = class PredictService {
         this.predictServiceClient =
             this.client.getService(common_1.PREDICT_SERVICE_NAME);
     }
-    async debug() {
-        this.predictServiceClient.predict({});
-    }
     async createPrddict() {
+        console.log(`Hello world Predict 11 โมง ${new Date()}`);
         return new Promise((resolve, reject) => {
             this.predictServiceClient.predict({}).subscribe({
                 next: () => resolve(),
+                error: (err) => reject(err),
+            });
+        });
+    }
+    async findPredict() {
+        const today = new Date();
+        const timestamp = Math.floor(today.getTime() / 1000);
+        return new Promise((resolve, reject) => {
+            this.predictServiceClient
+                .getData({ timeStamp: timestamp })
+                .subscribe({
+                next: (response) => resolve(response),
                 error: (err) => reject(err),
             });
         });
@@ -2598,6 +2592,14 @@ let PredictService = class PredictService {
     }
 };
 exports.PredictService = PredictService;
+__decorate([
+    (0, schedule_1.Cron)('0 7 * * *', {
+        timeZone: 'Asia/Bangkok',
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
+], PredictService.prototype, "createPrddict", null);
 exports.PredictService = PredictService = __decorate([
     (0, common_2.Injectable)(),
     __param(0, (0, common_2.Inject)(common_1.PREDICT_PACKAGE_NAME)),

@@ -1,4 +1,4 @@
-import { Controller, Delete, Post } from '@nestjs/common'
+import { Controller, Delete, Get, Post } from '@nestjs/common'
 import { PredictService } from './predict.service'
 
 @Controller('predict')
@@ -8,7 +8,11 @@ export class PredictController {
     @Post()
     async predict() {
         return this.predictService.createPrddict()
-       
+    }
+
+    @Get()
+    async findPredict(){
+       return this.predictService.findPredict() 
     }
 
     @Delete()
