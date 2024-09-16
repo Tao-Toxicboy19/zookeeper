@@ -431,7 +431,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                     channel.assertQueue('close-position', {
                         durable: true,
                     }),
-                    channel.assertQueue('usdt-queue'),
                     channel.assertQueue('position-queue'),
                 ]);
                 this.logger.debug('Exchange and Queue set up successfully');
@@ -446,24 +445,6 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
     }
     async onModuleInit() {
         this.channelWrapper.addSetup((channel) => {
-            channel.consume('usdt-queue', async (msg) => {
-                try {
-                    if (msg) {
-                        const content = JSON.parse(msg.content.toString());
-                        const wallet = await this.exchangeService.balance({
-                            userId: content.userId,
-                        });
-                        channel.publish('usdt-exchange', 'usdt-routing-key', Buffer.from(JSON.stringify({
-                            userId: content.userId,
-                            ...wallet,
-                        })));
-                        channel.ack(msg);
-                    }
-                }
-                catch (error) {
-                    this.logger.error('Error consuming message from usdt-queue:', error);
-                }
-            });
             channel.consume('position-queue', async (msg) => {
                 try {
                     if (msg) {

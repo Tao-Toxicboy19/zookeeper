@@ -2037,7 +2037,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var PositionGateway_1;
-var _a, _b, _c, _d;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PositionGateway = void 0;
 const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
@@ -2084,23 +2084,6 @@ let PositionGateway = PositionGateway_1 = class PositionGateway {
             }
         }
     }
-    handleEvent(client) {
-        const payload = client['user'];
-        if (payload) {
-            client.join(payload.sub);
-            if (!this.usdtIntervals.has(payload.sub)) {
-                const interval = setInterval(async () => {
-                    this.rabbitmqProducerService.publish('usdt-queue', JSON.stringify({ userId: payload.sub }));
-                }, 2000);
-                this.usdtIntervals.set(payload.sub, interval);
-            }
-        }
-        else {
-            this.server
-                .to(payload.sub)
-                .emit('event-msg', { message: 'Not found user.' });
-        }
-    }
     handleEmitEvent({ userId, event, msg }) {
         this.server.to(userId).emit(event, msg);
     }
@@ -2117,13 +2100,6 @@ __decorate([
     __metadata("design:paramtypes", [typeof (_c = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _c : Object]),
     __metadata("design:returntype", void 0)
 ], PositionGateway.prototype, "handleMessage", null);
-__decorate([
-    (0, websockets_1.SubscribeMessage)('event-usdt'),
-    __param(0, (0, websockets_1.ConnectedSocket)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _d : Object]),
-    __metadata("design:returntype", void 0)
-], PositionGateway.prototype, "handleEvent", null);
 exports.PositionGateway = PositionGateway = PositionGateway_1 = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: '*',
