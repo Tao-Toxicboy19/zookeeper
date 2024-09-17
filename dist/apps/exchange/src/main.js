@@ -209,12 +209,6 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
                 this.query(userId),
                 this.getApiKeys(userId),
             ]);
-            if (!orders || !orders.length) {
-                return {
-                    status: 'success',
-                    message: 'Not found orders.',
-                };
-            }
             const { apiKey, secretKey } = apiKeys;
             if (!apiKey || !secretKey) {
                 return {
@@ -223,27 +217,10 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
                 };
             }
             await this.createExchange({ apiKey, secretKey });
-            const symbols = orders.map((item) => item.symbol);
-            const positions = await this.exchange.fetchPositions(symbols);
-            const ords = positions
-                .map((pos) => {
-                const result = orders.find((order) => order.symbol === pos.info.symbol);
-                if (!result)
-                    return null;
-                return {
-                    ...pos,
-                    orderId: result.id,
-                    type: result.type,
-                    ...(result.type === 'EMA' && {
-                        ema: result.ema,
-                        timeframe: result.timeframe,
-                    }),
-                };
-            })
-                .filter(Boolean);
+            const position = await this.exchange.fetchPositions();
             return {
                 status: 'success',
-                message: ords,
+                message: position,
             };
         }
         catch (error) {
