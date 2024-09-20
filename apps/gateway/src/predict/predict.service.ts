@@ -18,7 +18,7 @@ export class PredictService implements OnModuleInit {
             this.client.getService<PredictServiceClient>(PREDICT_SERVICE_NAME)
     }
 
-    @Cron('0 7 * * *', {
+    @Cron('38 12 * * *', {
         timeZone: 'Asia/Bangkok',
     })
     async createPrddict(): Promise<void> {
@@ -54,6 +54,19 @@ export class PredictService implements OnModuleInit {
                     next: () => resolve(),
                     error: (err) => reject(err),
                 })
+        })
+    }
+
+    // @Cron('*/1 * * * *', {
+    //     timeZone: 'Asia/Bangkok',
+    // })
+    async update(): Promise<void> {
+        console.log("Updating data...")
+        return new Promise<void>((resolve, reject) => {
+            this.predictServiceClient.update({}).subscribe({
+                next: () => resolve(),
+                error: (err) => reject(err),
+            })
         })
     }
 }

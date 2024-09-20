@@ -108,4 +108,9 @@ export class OrdersController {
             throw error
         }
     }
+
+    @Get("orders")
+    async getOrders(){
+        return this.ordersService.queryOrder()
+    }
 }

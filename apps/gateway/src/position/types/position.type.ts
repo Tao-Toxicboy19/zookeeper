@@ -2,8 +2,8 @@ import * as ccxt from 'ccxt'
 
 export type Position = {
     status: 'success'
-    // message: Positions[]
-    message: ccxt.Position[]
+    message: Positions[]
+    // message: ccxt.Position[]
     userId: string
 }
 

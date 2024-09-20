@@ -7,7 +7,7 @@ export class PredictController {
 
     @Post()
     async predict() {
-        return this.predictService.createPrddict()
+        return this.predictService.update()
     }
 
     @Get()

@@ -1842,6 +1842,9 @@ let OrdersController = OrdersController_1 = class OrdersController {
             throw error;
         }
     }
+    async getOrders() {
+        return this.ordersService.queryOrder();
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -1872,6 +1875,12 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "closePosition", null);
+__decorate([
+    (0, common_1.Get)("orders"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], OrdersController.prototype, "getOrders", null);
 exports.OrdersController = OrdersController = OrdersController_1 = __decorate([
     (0, common_1.Controller)('orders'),
     __param(1, (0, common_1.Inject)(common_1.Logger)),
@@ -1971,6 +1980,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrdersService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+const schedule_1 = __webpack_require__(/*! @nestjs/schedule */ "@nestjs/schedule");
 let OrdersService = class OrdersService {
     constructor(client) {
         this.client = client;
@@ -2006,8 +2016,34 @@ let OrdersService = class OrdersService {
             });
         });
     }
+    async queryOrder() {
+        return new Promise((resolve, reject) => {
+            this.client.send('query-order', { sub: '123' }).subscribe({
+                next: (response) => resolve(response),
+                error: (err) => reject(err),
+            });
+        });
+    }
+    async cronClosePosition() {
+        try {
+            const order = await this.queryOrder();
+            order.map(async (o) => await this.closePosition({ userId: o.user_id, orderId: o.id }));
+            console.log("OKAY");
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
 };
 exports.OrdersService = OrdersService;
+__decorate([
+    (0, schedule_1.Cron)('0 7 * * *', {
+        timeZone: 'Asia/Bangkok',
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], OrdersService.prototype, "cronClosePosition", null);
 exports.OrdersService = OrdersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, common_1.Inject)('ORDERS_SERVICE')),
@@ -2409,7 +2445,7 @@ let PredictController = class PredictController {
         this.predictService = predictService;
     }
     async predict() {
-        return this.predictService.createPrddict();
+        return this.predictService.update();
     }
     async findPredict() {
         return this.predictService.findPredict();
@@ -2566,10 +2602,19 @@ let PredictService = class PredictService {
             });
         });
     }
+    async update() {
+        console.log("Updating data...");
+        return new Promise((resolve, reject) => {
+            this.predictServiceClient.update({}).subscribe({
+                next: () => resolve(),
+                error: (err) => reject(err),
+            });
+        });
+    }
 };
 exports.PredictService = PredictService;
 __decorate([
-    (0, schedule_1.Cron)('0 7 * * *', {
+    (0, schedule_1.Cron)('38 12 * * *', {
         timeZone: 'Asia/Bangkok',
     }),
     __metadata("design:type", Function),

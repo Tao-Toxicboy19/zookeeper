@@ -209,6 +209,12 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
                 this.query(userId),
                 this.getApiKeys(userId),
             ]);
+            if (!orders || !orders.length) {
+                return {
+                    status: 'success',
+                    message: 'Not found orders.',
+                };
+            }
             const { apiKey, secretKey } = apiKeys;
             if (!apiKey || !secretKey) {
                 return {
@@ -217,10 +223,27 @@ let ExchangeService = ExchangeService_1 = class ExchangeService {
                 };
             }
             await this.createExchange({ apiKey, secretKey });
-            const position = await this.exchange.fetchPositions();
+            const symbols = orders.map((item) => item.symbol);
+            const positions = await this.exchange.fetchPositions(symbols);
+            const ords = positions
+                .map((pos) => {
+                const result = orders.find((order) => order.symbol === pos.info.symbol);
+                if (!result)
+                    return null;
+                return {
+                    ...pos,
+                    orderId: result.id,
+                    type: result.type,
+                    ...(result.type === 'EMA' && {
+                        ema: result.ema,
+                        timeframe: result.timeframe,
+                    }),
+                };
+            })
+                .filter(Boolean);
             return {
                 status: 'success',
-                message: position,
+                message: ords,
             };
         }
         catch (error) {
@@ -446,6 +469,7 @@ let RabbitmqConsumerService = RabbitmqConsumerService_1 = class RabbitmqConsumer
                 try {
                     if (msg) {
                         const content = JSON.parse(msg.content.toString());
+                        console.log(content);
                         if (content.status === 'Long') {
                             await this.exchangeService.createLimitBuyOrder({
                                 userId: content.userId,

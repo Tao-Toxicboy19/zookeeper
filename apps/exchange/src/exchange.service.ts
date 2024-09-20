@@ -62,12 +62,12 @@ export class ExchangeService implements OnModuleInit {
                 this.getApiKeys(userId),
             ])
 
-            // if (!orders || !orders.length) {
-            //     return {
-            //         status: 'success',
-            //         message: 'Not found orders.',
-            //     }
-            // }
+            if (!orders || !orders.length) {
+                return {
+                    status: 'success',
+                    message: 'Not found orders.',
+                }
+            }
 
             const { apiKey, secretKey } = apiKeys
             if (!apiKey || !secretKey) {
@@ -80,33 +80,34 @@ export class ExchangeService implements OnModuleInit {
             await this.createExchange({ apiKey, secretKey })
 
             // Fetch positions พร้อมกับการ map symbol
-            // const symbols = orders.map((item) => item.symbol)
-            // const positions = await this.exchange.fetchPositions(symbols)
+            const symbols = orders.map((item) => item.symbol)
+            const positions = await this.exchange.fetchPositions(symbols)
 
-            // const ords = positions
-            //     .map((pos) => {
-            //         const result = orders.find(
-            //             (order) => order.symbol === pos.info.symbol,
-            //         )
-            //         if (!result) return null
+            const ords = positions
+                .map((pos) => {
+                    const result = orders.find(
+                        (order) => order.symbol === pos.info.symbol,
+                    )
+                    if (!result) return null
 
-            //         return {
-            //             ...pos,
-            //             orderId: result.id,
-            //             type: result.type,
-            //             ...(result.type === 'EMA' && {
-            //                 ema: result.ema,
-            //                 timeframe: result.timeframe,
-            //             }),
-            //         }
-            //     })
-            //     .filter(Boolean)
-            const position = await this.exchange.fetchPositions()
+                    return {
+                        ...pos,
+                        orderId: result.id,
+                        type: result.type,
+                        ...(result.type === 'EMA' && {
+                            ema: result.ema,
+                            timeframe: result.timeframe,
+                        }),
+                    }
+                })
+                .filter(Boolean)
+            // const position = await this.exchange.fetchPositions()
             // console.log(position)
+            // console.log(ords)
             return {
                 status: 'success',
-                // message: ords,
-                message: position,
+                message: ords,
+                // message: position,
             }
         } catch (error) {
             throw error

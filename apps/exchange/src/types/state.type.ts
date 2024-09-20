@@ -3,8 +3,8 @@ import * as ccxt from 'ccxt'
 export type State =
     | {
           status: 'success'
-          message: ccxt.Position[] | string
-          //   message: Position[] | string
+        //   message: ccxt.Position[] | string
+            message: Position[] | string
       }
     | {
           status: 'error'

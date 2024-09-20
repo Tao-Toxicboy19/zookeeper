@@ -46,6 +46,7 @@ export class RabbitmqConsumerService {
             channel.consume('position-queue', async (msg: ConsumeMessage) => {
                 if (msg) {
                     const content: Position = JSON.parse(msg.content.toString())
+                    // console.log(content)
                      if (content.status === 'success') {
                         this.positionGateway.handleEmitEvent({
                             userId: content.userId,

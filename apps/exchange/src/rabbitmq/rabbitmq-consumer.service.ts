@@ -91,6 +91,7 @@ export class RabbitmqConsumerService {
                             const content: OpenPosition = JSON.parse(
                                 msg.content.toString(),
                             )
+                            console.log(content)
                             if (content.status === 'Long') {
                                 await this.exchangeService.createLimitBuyOrder({
                                     userId: content.userId,

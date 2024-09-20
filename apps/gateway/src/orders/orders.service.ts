@@ -1,6 +1,13 @@
+import { userId } from './../../../../libs/common/src/types/notifications/notification'
 import { Inject, Injectable } from '@nestjs/common'
 import { ClientProxy } from '@nestjs/microservices'
 import { OrderDto } from './dto'
+import { Cron } from '@nestjs/schedule'
+
+type Order = {
+    user_id: string
+    id: string
+}
 
 @Injectable()
 export class OrdersService {
@@ -46,5 +53,27 @@ export class OrdersService {
                     error: (err) => reject(err),
                 })
         })
+    }
+
+    async queryOrder() {
+        return new Promise<Order[]>((resolve, reject) => {
+            this.client.send<Order[]>('query-order', { sub: '123' }).subscribe({
+                next: (response) => resolve(response),
+                error: (err) => reject(err),
+            })
+        })
+    }
+
+    @Cron('0 7 * * *', {
+        timeZone: 'Asia/Bangkok',
+    })
+    async cronClosePosition() {
+        try {
+            const order = await this.queryOrder()
+            order.map(async (o) => await this.closePosition({userId:o.user_id,orderId:o.id}))
+            console.log("OKAY")
+        } catch (error) {
+            console.log(error)
+        }
     }
 }

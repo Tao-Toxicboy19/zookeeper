@@ -63,7 +63,6 @@ services:
             - '27017:27017'
     
     go-service-cronjob:
-        platform: linux/amd64
         image: taotoxicboy/go-order-cronjob-service:latest
         container_name: go-cronjob
         environment:
@@ -76,7 +75,6 @@ services:
         restart: always
         
     go-service-tx:
-        platform: linux/amd64
         image: taotoxicboy/go-order-consumer-tx-service:latest
         container_name: go-order-tx
         environment:
@@ -88,16 +86,17 @@ services:
             RABBITMQ_URL: amqp://mikelopster:password@rabbitmq:5672
         restart: always
     
-    # prediction-service:
-    #     container_name: prediction-service
-    #     image: lindermand/predict-service:1.5
-    #     command: python main.py
-    #     platform: linux/amd64
-    #     environment:
-    #         MONGO_URL: mongodb://hubKeeperAdmin:secure0984672855@82.112.231.165:40025/keeperhub?authSource=admin
-    #         HOST_REDIS: localhost
-    #         PORT_REDIS: 6379
-    #         PORT: 50057
-    #         API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
-    #         SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
-    #     restart: always
+    prediction-service:
+        container_name: prediction-service
+        image: lindermand/predict-service:1.7
+        command: python main.py
+        environment:
+            MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+            HOST_REDIS: localhost
+            PORT_REDIS: 6379
+            PORT: 50057
+            API_KEY: ZIIJYaRgR9WyJaKxq7zVehOtkfomjyX29NwNLWLlBgE3ikw5jtkMxVQD0IgewUxQ
+            SECRET_KEY: 7JmVNUuzOSyjzDnzGsewBIszScuj47sf1w7MRNDUaRj8pE49gAX4fsgP9RlDCi6S
+        ports:
+            - 50057:50057    
+        restart: always
