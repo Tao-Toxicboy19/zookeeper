@@ -18,7 +18,7 @@ export class PredictService implements OnModuleInit {
             this.client.getService<PredictServiceClient>(PREDICT_SERVICE_NAME)
     }
 
-    @Cron('38 12 * * *', {
+    @Cron('* 7 * * *', {
         timeZone: 'Asia/Bangkok',
     })
     async createPrddict(): Promise<void> {
