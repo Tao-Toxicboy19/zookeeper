@@ -57,9 +57,9 @@ export class PredictService implements OnModuleInit {
         })
     }
 
-    // @Cron('*/1 * * * *', {
-    //     timeZone: 'Asia/Bangkok',
-    // })
+    @Cron('* 7 * * *', {
+        timeZone: 'Asia/Bangkok',
+    })
     async update(): Promise<void> {
         console.log("Updating data...")
         return new Promise<void>((resolve, reject) => {

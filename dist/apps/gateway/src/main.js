@@ -2554,7 +2554,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PredictService = void 0;
 const common_1 = __webpack_require__(/*! @app/common */ "./libs/common/src/index.ts");
@@ -2621,6 +2621,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", typeof (_b = typeof Promise !== "undefined" && Promise) === "function" ? _b : Object)
 ], PredictService.prototype, "createPrddict", null);
+__decorate([
+    (0, schedule_1.Cron)('* 7 * * *', {
+        timeZone: 'Asia/Bangkok',
+    }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
+], PredictService.prototype, "update", null);
 exports.PredictService = PredictService = __decorate([
     (0, common_2.Injectable)(),
     __param(0, (0, common_2.Inject)(common_1.PREDICT_PACKAGE_NAME)),
