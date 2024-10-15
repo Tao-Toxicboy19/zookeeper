@@ -88,10 +88,10 @@ services:
     
     prediction-service:
         container_name: prediction-service
-        image: lindermand/predict-service:1.7
+        image: lindermand/predict-service:1.8
         command: python main.py
         environment:
-            MONGO_URL: mongodb://root:example@mongo:27017/zookeeper?authSource=admin
+            MONGO_URL: mongodb://hubKeeperAdmin:secure0984672855@82.112.231.165:40025/keeperhub?authSource=admin
             HOST_REDIS: localhost
             PORT_REDIS: 6379
             PORT: 50057

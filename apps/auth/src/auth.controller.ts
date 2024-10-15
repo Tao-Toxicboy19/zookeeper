@@ -49,7 +49,7 @@ export class AuthController implements AuthServiceController {
     }
 
     confirmOtp(request: ConfirmOTPDto): Promise<TokenResponse> {
-        return this.authService.confrimOTP(request)
+        return this.authService.confirmOTP(request)
     }
 
     async profile(request: ProfileDto): Promise<ProfileResponse> {

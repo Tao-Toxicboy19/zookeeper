@@ -47,7 +47,7 @@ let AuthController = class AuthController {
         });
     }
     confirmOtp(request) {
-        return this.authService.confrimOTP(request);
+        return this.authService.confirmOTP(request);
     }
     async profile(request) {
         const user = await this.userService.findOneByUsername(request.username);
@@ -177,9 +177,10 @@ let AuthService = AuthService_1 = class AuthService {
         this.userService = userService;
         this.logger = new common_2.Logger(AuthService_1.name);
         this.otpMailQueue = 'otp_mail_queue';
-        this.resetPassswordQueue = 'reset_password_queue';
+        this.resetPasswordQueue = 'reset_password_queue';
     }
-    onModuleInit() { }
+    onModuleInit() {
+    }
     async validateUser(dto) {
         const user = await this.userService.findOneByUsername(dto.username);
         if (user && (await bcrypt.compare(dto.password, user.password))) {
@@ -188,119 +189,85 @@ let AuthService = AuthService_1 = class AuthService {
                 sub: new mongodb_1.ObjectId(user._id).toHexString(),
             };
         }
+        throw new nestjs_grpc_exceptions_1.GrpcNotFoundException('Invalid username or password');
     }
     async signin(dto) {
-        try {
-            const user = await this.userService.findOneByUsername(dto.username);
-            await this.producerService.handleSendTask(this.otpMailQueue, JSON.stringify(user));
-            return {
-                email: user.email,
-            };
+        const user = await this.userService.findOneByUsername(dto.username);
+        if (!user) {
+            throw new nestjs_grpc_exceptions_1.GrpcNotFoundException('User not found');
         }
-        catch (error) {
-            throw error;
-        }
+        await this.producerService.handleSendTask(this.otpMailQueue, JSON.stringify(user));
+        return {
+            email: user.email,
+        };
     }
     async signup(dto) {
-        try {
-            const existUser = await this.userService.findOneByUsername(dto.username);
-            const userInRedis = await this.redisService.getValue(dto.name);
-            const existEmail = await this.userService.findOneByEmail(dto.email);
-            if (existEmail || userInRedis) {
-                throw new nestjs_grpc_exceptions_1.GrpcAlreadyExistsException('Email already exists.');
-            }
-            else if (existUser) {
-                throw new nestjs_grpc_exceptions_1.GrpcAlreadyExistsException('User already exists.');
-            }
-            if (dto.googleId) {
-                const user = await this.userService.createUser(dto);
-                return {
-                    email: dto.email,
-                    userId: new mongodb_1.ObjectId(user._id).toHexString(),
-                };
-            }
-            const _id = new mongoose_1.Types.ObjectId();
-            const userCache = JSON.stringify({
-                ...dto,
-                _id,
-                password: await bcrypt.hash(dto.password, 12),
-            });
-            await this.producerService.handleSendTask(this.otpMailQueue, userCache);
-            await this.redisService.setKey(dto.username, 600, userCache);
-            return {
-                email: dto.email,
-                userId: new mongodb_1.ObjectId(_id).toHexString(),
-            };
+        const existUser = await this.userService.findOneByUsername(dto.username);
+        const existEmail = await this.userService.findOneByEmail(dto.email);
+        if (existEmail) {
+            throw new nestjs_grpc_exceptions_1.GrpcAlreadyExistsException('Email already exists.');
         }
-        catch (error) {
-            throw error;
+        if (existUser) {
+            throw new nestjs_grpc_exceptions_1.GrpcAlreadyExistsException('User already exists.');
         }
-    }
-    async confrimOTP(dto) {
-        try {
-            const user = JSON.parse(await this.redisService.getValue(dto.userId));
-            if (!user) {
-                throw new nestjs_grpc_exceptions_1.GrpcNotFoundException('User not found.');
-            }
-            if (dto.otp !== user.otp) {
-                throw new nestjs_grpc_exceptions_1.GrpcInvalidArgumentException('OTP invalid.');
-            }
-            const userCache = JSON.parse(await this.redisService.getValue(user.user.username));
-            if (userCache) {
-                await this.userService.createUser({
-                    ...userCache,
-                    _id: new mongoose_1.Types.ObjectId(userCache._id),
-                });
-            }
-            const { accessToken, refreshToken } = await this.getTokens(dto.userId, user.user.username);
-            await Promise.all([
-                this.redisService.deleteKey(dto.userId),
-                this.redisService.deleteKey(user.user.username),
-            ]);
-            return {
-                accessToken,
-                refreshToken,
-            };
-        }
-        catch (error) {
-            throw error;
-        }
-    }
-    async googleLogin(dto) {
-        const user = await this.userService.findOneByEmail(dto.email);
-        if (user) {
-            const { accessToken, refreshToken } = await this.getTokens(new mongodb_1.ObjectId(user._id).toHexString(), user.email);
-            return {
-                accessToken,
-                refreshToken,
-            };
+        const userInRedis = await this.redisService.getValue(dto.username);
+        if (userInRedis) {
+            throw new nestjs_grpc_exceptions_1.GrpcAlreadyExistsException('Username already exists in cache.');
         }
         const _id = new mongoose_1.Types.ObjectId();
-        const { email, userId } = await this.signup({
-            _id,
+        const hashedPassword = await bcrypt.hash(dto.password, 12);
+        const userCache = JSON.stringify({ ...dto, _id, password: hashedPassword });
+        await this.producerService.handleSendTask(this.otpMailQueue, userCache);
+        await this.redisService.setKey(dto.username, 600, userCache);
+        return {
             email: dto.email,
-            name: dto.name,
-            picture: dto.picture,
-            username: dto.email,
-            googleId: dto.googleId,
-        });
-        const { accessToken, refreshToken } = await this.getTokens(userId, email);
+            userId: new mongodb_1.ObjectId(_id).toHexString(),
+        };
+    }
+    async confirmOTP(dto) {
+        const userCache = await this.redisService.getValue(dto.userId);
+        if (!userCache) {
+            throw new nestjs_grpc_exceptions_1.GrpcNotFoundException('User not found.');
+        }
+        const user = JSON.parse(userCache);
+        if (dto.otp !== user.otp) {
+            throw new nestjs_grpc_exceptions_1.GrpcInvalidArgumentException('OTP invalid.');
+        }
+        const { accessToken, refreshToken } = await this.getTokens(dto.userId, user.username);
+        await Promise.all([
+            this.redisService.deleteKey(dto.userId),
+            this.redisService.deleteKey(user.username),
+        ]);
+        return {
+            accessToken,
+            refreshToken,
+        };
+    }
+    async googleLogin(dto) {
+        let user = await this.userService.findOneByEmail(dto.email);
+        if (!user) {
+            const _id = new mongoose_1.Types.ObjectId();
+            user = await this.userService.createUser({
+                _id,
+                email: dto.email,
+                name: dto.name,
+                picture: dto.picture,
+                username: dto.email,
+                googleId: dto.googleId,
+            });
+        }
+        const { accessToken, refreshToken } = await this.getTokens(new mongodb_1.ObjectId(user._id).toHexString(), user.email);
         return {
             accessToken,
             refreshToken,
         };
     }
     async refreshToken(user) {
-        try {
-            const tokens = await this.getTokens(user.sub, user.username);
-            return {
-                accessToken: tokens.accessToken,
-                refreshToken: tokens.refreshToken,
-            };
-        }
-        catch (error) {
-            throw error;
-        }
+        const tokens = await this.getTokens(user.sub, user.username);
+        return {
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+        };
     }
     async getTokens(userId, username) {
         const jwtPayload = {
@@ -335,7 +302,7 @@ let AuthService = AuthService_1 = class AuthService {
             token,
             email: user.email,
         };
-        await this.producerService.handleSendTask(this.resetPassswordQueue, JSON.stringify(payload));
+        await this.producerService.handleSendTask(this.resetPasswordQueue, JSON.stringify(payload));
     }
     async resetPassword(token, newPassword) {
         const user = await this.userService.findOneByResetPasswordToken(token);
